@@ -1,0 +1,34 @@
+
+.button{
+    -fx-font-weight: bold;
+    -fx-background-color:  #757575;
+    -fx-font-family: Ubuntu Light;
+}
+.button:hover{
+    -fx-background-color: #FFFFFF;
+    -fx-font-weight: bold;
+    -fx-text-fill: #1D272C;
+    -fx-font-size: 15;
+    -fx-font-family: Ubuntu Light;
+}
+.text-field,.combo-box{
+    -fx-font-weight: bold;
+    -fx-background-color:  #FFFFFF;
+    -fx-text-fill: #1D272C;
+    -fx-font-family: Ubuntu Light;
+}
+.text-field:hover,.combo-box:hover,.text-field:focused,.combo-box:focused{
+    -fx-effect: dropshadow( three-pass-box , #000000,10.0, 0.0 , 1.0 , 0); 
+    -fx-text-fill: #1D272C;
+    -fx-font-family: Ubuntu Light;
+}
+.list-cell,.text-area{
+    -fx-background-color:  #FFFFFF;
+    -fx-font-weight:bold;
+    -fx-text-fill: #757575;
+    -fx-font-family: Ubuntu Light;
+}
+.tab-pane{
+    -fx-background-color: #FFFFFF;
+    -fx-font-weight: bold;
+}
