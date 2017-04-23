@@ -22,7 +22,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
  */
 
 public class ActiveIpChecker extends Thread implements Runnable{
-   Transporter TRANS = Transporter.getInstance(); 
+    
    private Thread inside = null;
    private CopyOnWriteArrayList<String> out = new CopyOnWriteArrayList<>();
    private boolean IS_CONNECTED = false;
@@ -50,7 +50,7 @@ public class ActiveIpChecker extends Thread implements Runnable{
        try {
            this.out = net.prepareActiveIpsList(updateIpInformation());
            //System.out.println(out.size());
-           this.TRANS.prepareConnection(out);
+       
            System.out.println("Ips checked!");
            IS_CONNECTED = true;
            
