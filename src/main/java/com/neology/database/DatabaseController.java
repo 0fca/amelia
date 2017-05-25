@@ -7,6 +7,8 @@ package com.neology.database;
 
 import com.neology.interfaces.Connectable;
 import com.neology.net.Transport;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -19,6 +21,7 @@ import java.util.logging.Logger;
 /**
  *
  * @author Obsidiam
+ * @deprecated
  */
 public class DatabaseController implements Connectable{
     private boolean IS_CONNECTED = false;
@@ -125,11 +128,6 @@ public class DatabaseController implements Connectable{
     }
 
     @Override
-    public void openConnection(Transport t) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
     public void closeConnection(Transport t) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
@@ -141,6 +139,11 @@ public class DatabaseController implements Connectable{
 
     @Override
     public void sendPacket(Transport t, byte[] buffer) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void openConnection(InputStream in, OutputStream out) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 }    

@@ -5,14 +5,21 @@ import com.neology.database.DatabaseController;
 import com.neology.exceptions.TransportException;
 import com.neology.interfaces.Viewable;
 import com.neology.net.BaudrateMeter;
+import com.neology.net.Connection;
 import com.neology.net.NetController;
+import com.neology.net.Opened;
 import com.neology.net.Transport;
 import com.neology.xml.XMLController;
 import java.awt.AWTException;
 import javafx.scene.image.Image;
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.Socket;
 import java.net.SocketException;
 import java.net.URL;
@@ -70,7 +77,7 @@ public class FXMLController extends LocalEnvironment implements Initializable,Vi
     protected boolean IS_CONNECTED = false;
     //final Connector connector = new Connector();
     private ArrayList<Image> IMG_BUFFER = new ArrayList<>();
-    static ConcurrentHashMap<Transport,BaudrateMeter>  TRANSPORTERS = new ConcurrentHashMap<>();
+    static ConcurrentHashMap<Connection,BaudrateMeter>  TRANSPORTERS = new ConcurrentHashMap<>();
     
     final Executor EXEC = Executors.newSingleThreadExecutor();            
     ObservableList<Label> list = FXCollections.observableArrayList();
@@ -204,18 +211,17 @@ public class FXMLController extends LocalEnvironment implements Initializable,Vi
             protected String call() throws AWTException, IOException, SocketException, Exception {
                 while(IS_CONNECTED){
                    TRANSPORTERS.forEach((x,y) ->{
+                       Connection c = (Connection)x;
+                       Transport t = c.getTranportInstance();
+                       byte[] buffer = new byte[8192];
                        try {
-                           byte[] data = x.readBytes(8192);
-                           System.out.println("Starting to process data...");
-                           Image get = processData(data);
-                           System.out.println("Data processed.");
-
-                           VIEWER_PANEL.add(new ImageView(get), 0, 0);
-                           System.out.println(VIEWER_PANEL.getChildren().size());
+                           c.read(t, buffer);
+                           processData(buffer);
                        } catch (TransportException | IOException ex) {
                            Logger.getLogger(FXMLController.class.getName()).log(Level.SEVERE, null, ex);
                        }
-                   }); 
+                       
+                   });
                 }
                return "";
             }
@@ -260,10 +266,18 @@ public class FXMLController extends LocalEnvironment implements Initializable,Vi
                     
                     s.setTcpNoDelay(true);
                     Transport tr = new Transport(s);
+                    InputStream in = null;
+                    OutputStream out = null;
+                    Opened o = new Opened();
+                    Connection c = new Connection();
+                    c.changeState(o);
+                    c.open(in, out);
+
                     BaudrateMeter bd = new BaudrateMeter();
 
                     tr.setBaudrateMeter(bd);
-                    TRANSPORTERS.put(tr,bd);
+                    
+                    TRANSPORTERS.put(c,bd);
                     System.out.println("Transporter added.");
                 }
             }catch(Exception e){

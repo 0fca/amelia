@@ -18,16 +18,14 @@ public class Connection {
 
     private Transport T;
     
-    public Connection(InputStream in, OutputStream out){
-        T = new Transport(in,out);
-    }
     
-    protected void changeState(TransportState state){
+    public void changeState(TransportState state){
         ACTUAL = state;
     }
     
-    public void open(){
-        ACTUAL.openConnection(T);
+    public void open(InputStream in, OutputStream out){
+        ACTUAL.openConnection(in,out);
+        T = ACTUAL.getTransportInstance();
     }
     
     public void close(){
@@ -45,5 +43,9 @@ public class Connection {
     
     public boolean isConnected(){
         return T.isConnected();
+    }
+    
+    public Transport getTranportInstance(){
+        return T;
     }
 }

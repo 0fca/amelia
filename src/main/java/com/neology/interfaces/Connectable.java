@@ -6,6 +6,8 @@
 package com.neology.interfaces;
 
 import com.neology.net.Transport;
+import java.io.InputStream;
+import java.io.OutputStream;
 
 
 /**
@@ -15,7 +17,7 @@ import com.neology.net.Transport;
 public interface Connectable {
     public boolean isConnected(Transport t);
     public boolean wasConnected(Transport t);
-    public void openConnection(Transport t);
+    public void openConnection(InputStream in, OutputStream out);
     public void closeConnection(Transport t);
     public void haltConnection(Transport t);
     public void sendPacket(Transport t, byte[] buffer);

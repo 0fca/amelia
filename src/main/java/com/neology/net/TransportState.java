@@ -7,16 +7,20 @@ package com.neology.net;
 
 import com.neology.exceptions.TransportException;
 import com.neology.interfaces.Connectable;
+import java.io.InputStream;
+import java.io.OutputStream;
 
 /**
  *
  * @author obsidiam
  */
 public class TransportState implements Connectable{
-    
+    private Transport T;
     @Override
-    public  void openConnection(Transport t){
-        new Opened().openConnection(t);
+    public  void openConnection(InputStream in, OutputStream out){
+        Opened o = new Opened();
+        o.openConnection(in,out);
+        T = o.getTransportInstance();
     }
     @Override
     public void closeConnection(Transport t){
@@ -43,5 +47,9 @@ public class TransportState implements Connectable{
     
     public byte[] readPacket(Transport t, byte[] buffer) throws TransportException{
         return new Established().readPacket(t, buffer);
+    }
+    
+    public Transport getTransportInstance(){
+        return T;
     }
 }
