@@ -5,6 +5,10 @@
  */
 package com.neology.net;
 
+import com.neology.exceptions.TransportException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 /**
  *
  * @author obsidiam
@@ -12,17 +16,25 @@ package com.neology.net;
 public class Established extends TransportState{
     @Override
     public boolean wasConnected(Transport t) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return t.wasConnected();
     }
 
     @Override
     public boolean isConnected(Transport t) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return t.isConnected();
     }
 
     @Override
     public void sendPacket(Transport t, byte[] buffer) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        try {
+            t.write(buffer);
+        } catch (TransportException ex) {
+            Logger.getLogger(Established.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
-    
+    @Override
+    public byte[] readPacket(Transport t, byte[] buffer) throws TransportException{
+        t.readBytes(buffer, 0, 8192);
+        return buffer;
+    }
 }

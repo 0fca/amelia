@@ -5,6 +5,7 @@
  */
 package com.neology.net;
 
+import com.neology.exceptions.TransportException;
 import com.neology.interfaces.Connectable;
 
 /**
@@ -38,5 +39,9 @@ public class TransportState implements Connectable{
     @Override
     public void sendPacket(Transport t, byte[] buffer) {
         new Established().sendPacket(t, buffer);
+    }
+    
+    public byte[] readPacket(Transport t, byte[] buffer) throws TransportException{
+        return new Established().readPacket(t, buffer);
     }
 }

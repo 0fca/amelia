@@ -5,6 +5,7 @@
  */
 package com.neology.net;
 
+import com.neology.exceptions.TransportException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
@@ -25,16 +26,21 @@ public class Connection {
         ACTUAL = state;
     }
     
-    public void open(TransportState state){
-        state.openConnection(T);
+    public void open(){
+        ACTUAL.openConnection(T);
     }
     
-    public void close(TransportState state){
-        state.closeConnection(new Transport());
+    public void close(){
+        ACTUAL.closeConnection(new Transport());
     }
     
     public void send(TransportState state,byte[] buffer){
-        state.sendPacket(T, buffer);
+        ACTUAL.sendPacket(T, buffer);
+    }
+    
+    public byte[] read(Transport t, byte[] buffer) throws TransportException{
+        buffer = ACTUAL.readPacket(t, buffer);
+        return buffer;
     }
     
     public boolean isConnected(){
