@@ -6,6 +6,7 @@
 package com.neology.database;
 
 import com.neology.interfaces.Connectable;
+import com.neology.net.Transport;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -41,17 +42,14 @@ public class DatabaseController implements Connectable{
         }        
     }
     
-    @Override
     public boolean isConnected() {
         return IS_CONNECTED;
     }
 
-    @Override
     public boolean wasConnected() {
         return WAS_CONNECTED;
     }
 
-    @Override
     public boolean tableExists(String name) {
         try {
             RESULT = STMT.executeQuery("SHOW TABLES LIKE '"+name+"'");
@@ -105,14 +103,45 @@ public class DatabaseController implements Connectable{
                  PREP_STMT.execute();
              }
     } 
-    
-    @Override
+
     public boolean tablesExist() throws SQLException{
             RESULT = STMT.executeQuery("SHOW TABLES");
             if(RESULT.wasNull()){
                 return false;
             }
        return true;
+    }
+
+
+
+    @Override
+    public boolean isConnected(Transport t) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public boolean wasConnected(Transport t) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void openConnection(Transport t) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void closeConnection(Transport t) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void haltConnection(Transport t) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void sendPacket(Transport t, byte[] buffer) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 }    
     

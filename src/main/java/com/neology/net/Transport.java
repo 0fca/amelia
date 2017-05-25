@@ -25,28 +25,29 @@ package com.neology.net;
 
 import com.neology.exceptions.ClosedConnectionException;
 import com.neology.exceptions.TransportException;
-import com.neology.interfaces.Reachable;
 
 import java.io.*;
-import java.net.InetAddress;
 import java.net.Socket;
 import java.nio.charset.Charset;
 
 /**
  * @author dime
  */
-public class Transport implements Reachable{
-    public final static Charset ISO_8859_1 = Charset.forName("ISO-8859-1");
+public class Transport {
+    public final static Charset ISO_8859_2 = Charset.forName("ISO-8859-2");
     public final static Charset UTF8 = Charset.forName("UTF-8");
     DataInputStream is;
     DataOutputStream os;
     InputStream origIs;
     OutputStream origOs;
+    Socket s;
+    private boolean WAS_CONNECTED ,IS_CONNECTED = false;
     private BaudrateMeter baudrateMeter;
     private String IP;
     
     public Transport(Socket socket) throws IOException {
         this(socket.getInputStream(), socket.getOutputStream());
+        this.s = socket;
         IP = socket.getInetAddress().getHostAddress();
     }
 
@@ -76,6 +77,7 @@ public class Transport implements Reachable{
     void release() {
         origIs = is = null;
         origOs = os = null;
+        WAS_CONNECTED = true;
     }
 
     public byte readByte() throws TransportException {
@@ -327,10 +329,10 @@ public class Transport implements Reachable{
   private String stringWithBytesAndCharset(byte[] bytes) {
     String result;
     try {
-      result = new String(bytes, ISO_8859_1);
+      result = new String(bytes, ISO_8859_2);
     } catch (NoSuchMethodError error) {
       try {
-        result = new String(bytes, ISO_8859_1.name());
+        result = new String(bytes, ISO_8859_2.name());
       } catch (UnsupportedEncodingException e) {
         result = null;
       }
@@ -338,17 +340,15 @@ public class Transport implements Reachable{
     return result;
   }
   
-  public String getIp(){
-      return IP;
-  }
-
-    @Override
-    public boolean isReachable(String ip) throws Exception {
-        return InetAddress.getByName(ip).isReachable(100);
+    public String getIp(){
+          return IP;
     }
-
-    @Override
-    public boolean isConnected(String ip) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    
+    public boolean isConnected() {
+         return s.isConnected();
+    }
+    
+    public boolean wasConnected() {
+         return WAS_CONNECTED;
     }
 }

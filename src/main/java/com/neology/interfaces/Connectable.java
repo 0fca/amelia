@@ -5,15 +5,18 @@
  */
 package com.neology.interfaces;
 
-import java.sql.SQLException;
+import com.neology.net.Transport;
+
 
 /**
  *
  * @author Obsidiam
  */
 public interface Connectable {
-    public boolean isConnected();
-    public boolean wasConnected();
-    public boolean tableExists(String name);
-    public boolean tablesExist() throws SQLException;
+    public boolean isConnected(Transport t);
+    public boolean wasConnected(Transport t);
+    public void openConnection(Transport t);
+    public void closeConnection(Transport t);
+    public void haltConnection(Transport t);
+    public void sendPacket(Transport t, byte[] buffer);
 }

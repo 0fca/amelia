@@ -13,11 +13,9 @@ import javafx.scene.image.Image;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.net.Socket;
 import java.net.SocketException;
 import java.net.URL;
-import java.nio.file.Paths;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -77,16 +75,26 @@ public class FXMLController extends LocalEnvironment implements Initializable,Vi
     final Executor EXEC = Executors.newSingleThreadExecutor();            
     ObservableList<Label> list = FXCollections.observableArrayList();
     
+    {
+        if(checkIfInitExists()){
+            try {
+                setUpConfiguration();
+                initTransporters("192.168.0.0/24",7999);
+            } catch (SocketException ex) {
+                Logger.getLogger(FXMLController.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (SAXException | ParserConfigurationException | ClassNotFoundException | SQLException | IOException ex) {
+                Logger.getLogger(FXMLController.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+    }
+    
+    
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         LOGIN_BUTTON.setOnAction(event ->{
             try {
-                if(checkIfInitExists()){
-                    setUpConfiguration();
-                    initTransporters("192.168.0.0/24",7999);
-                }
                 loginUser();
-            } catch (Exception ex) {
+            } catch (SQLException | ClassNotFoundException ex) {
                 Logger.getLogger(FXMLController.class.getName()).log(Level.SEVERE, null, ex);
             }
         });
@@ -115,8 +123,8 @@ public class FXMLController extends LocalEnvironment implements Initializable,Vi
         });
         
         CONNECT.setOnAction(event ->{
-            NetController net = new NetController();
-                if(!IS_CONNECTED){ 
+            System.out.println(IS_CONNECTED);
+                if(IS_CONNECTED){ 
                     try {
                         downloadAndSetToModel();
                     } catch (InterruptedException ex) {
@@ -126,7 +134,7 @@ public class FXMLController extends LocalEnvironment implements Initializable,Vi
         });
         
         DISCONNECT.setOnAction(event ->{
-                IS_CONNECTED = false;
+            IS_CONNECTED = false;
         });
         
     }   
@@ -194,20 +202,25 @@ public class FXMLController extends LocalEnvironment implements Initializable,Vi
         Task<String> list_controller = new Task<String>(){
             @Override
             protected String call() throws AWTException, IOException, SocketException, Exception {
-               TRANSPORTERS.forEach((x,y) ->{
-                   try {
-                       byte[] data = x.readBytes(8192);
-                       Image get = processData(data);
-                       VIEWER_PANEL.add(new ImageView(get), 0, 0);
-                   } catch (TransportException ex) {
-                       Logger.getLogger(FXMLController.class.getName()).log(Level.SEVERE, null, ex);
-                   }
-               }); 
+                while(IS_CONNECTED){
+                   TRANSPORTERS.forEach((x,y) ->{
+                       try {
+                           byte[] data = x.readBytes(8192);
+                           System.out.println("Starting to process data...");
+                           Image get = processData(data);
+                           System.out.println("Data processed.");
+
+                           VIEWER_PANEL.add(new ImageView(get), 0, 0);
+                           System.out.println(VIEWER_PANEL.getChildren().size());
+                       } catch (TransportException | IOException ex) {
+                           Logger.getLogger(FXMLController.class.getName()).log(Level.SEVERE, null, ex);
+                       }
+                   }); 
+                }
                return "";
             }
 
-            private Image processData(byte[] buffer) {
-                    OutputStream ou;
+            private Image processData(byte[] buffer) throws IOException {
                     Image out = null;
                     ByteArrayInputStream is = null;
                     byte[] result;
@@ -221,34 +234,14 @@ public class FXMLController extends LocalEnvironment implements Initializable,Vi
 
                     String name = String.valueOf(c);
                     System.out.println("Name received: "+name);
-                    System.out.println("OutputStream directed to: "+Paths.get(".").toAbsolutePath().normalize().toString()+File.separatorChar+name+".jpg");
-                    //ou = new FileOutputStream(new File(getLocalVar(Local.LOCAL)+getLocalVar(Local.SEPARATOR)+name.trim()+".jpg"));
                     result = Arrays.copyOf(buffer, 8192-len);
-                    try {
-                        is = new ByteArrayInputStream(buffer);
-                        is.read(result);
-                        out = new Image(is);
-                       
-                    } catch (IOException e) {
-                        Logger.getLogger(FXMLController.class.getName()).log(Level.SEVERE, e.getLocalizedMessage());
-                    } finally {
-                        try{
-                            if(is != null) is.close();
-                        } catch (IOException ex){
-                            System.err.print("No kurwa null.");
-                        }
-                    }
-
-//                    try{
-//                        ou.write(buffer,len,8192-len);
-//                    }finally{
-//                        ou.flush();
-//                        ou.close();
-//                        new File(Paths.get(".").toAbsolutePath().normalize().toString()+File.separatorChar+ACTUAL_NAME+".jpg").delete();
-//                        System.gc();
-//                        System.out.println("Downloaded.");
-//                    }
-            return out;
+                    is = new ByteArrayInputStream(result);
+                    System.out.println(is.available());
+                    out = new Image(is,100,50,true,true);
+                    
+                    System.out.println(out.getWidth());
+                    is.close();
+                    return out;
             }
         };
         Thread list_task = new Thread(list_controller,"ListUpdater");
@@ -257,20 +250,28 @@ public class FXMLController extends LocalEnvironment implements Initializable,Vi
       
     }
 
-    private void initTransporters(String subnet ,int port) throws Exception {
+    private void initTransporters(String subnet, int port) throws SocketException  {
         NetController net = new NetController();
         String[] pool = net.getIpPool(subnet);
         for(String ip : pool){
-            System.out.println(ip);
-            if(net.isReachable(ip)){
-                Socket s = new Socket(ip,port);
-                s.setTcpNoDelay(true);
-                Transport tr = new Transport(s);
-                BaudrateMeter bd = new BaudrateMeter();
+            try{
+                if(net.isReachable(ip)){
+                    Socket s = new Socket(ip,port);
+                    
+                    s.setTcpNoDelay(true);
+                    Transport tr = new Transport(s);
+                    BaudrateMeter bd = new BaudrateMeter();
 
-                tr.setBaudrateMeter(bd);
-                TRANSPORTERS.put(tr,bd);
+                    tr.setBaudrateMeter(bd);
+                    TRANSPORTERS.put(tr,bd);
+                    System.out.println("Transporter added.");
+                }
+            }catch(Exception e){
+                System.err.println("IP address unreachable!");
             }
+        }  
+        if(TRANSPORTERS.size() > 0){
+            IS_CONNECTED = true;
         }
     }
 }
