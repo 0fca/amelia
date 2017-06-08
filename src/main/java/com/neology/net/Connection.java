@@ -37,7 +37,7 @@ public class Connection {
     }
     
     public byte[] read(Transport t) throws TransportException{
-        System.out.println("Connection read() "+t.getIp());
+        System.out.println("Connection read()::"+t.getIp());
         return ACTUAL.readPacket(t);
     }
     

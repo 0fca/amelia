@@ -10,7 +10,6 @@ import com.neology.xml.XMLController;
 import enums.Local;
 import java.io.File;
 import java.io.IOException;
-import java.net.UnknownHostException;
 import java.nio.file.Paths;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -65,7 +64,13 @@ public abstract class LocalEnvironment {
                     Logger.getLogger(LocalEnvironment.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
-            break;
+            case TMP:
+                if(System.getProperty("os.name").contains("Linux")){
+                    var = "/tmp/amelia";
+                }else if(System.getProperty("os.name").contains("Windows")){
+                    var = "C:\\Users\\"+System.getProperty("user.name")+"\\AppData\\Local\\Temp\\Amelia";
+                }
+                break;
         }
        return var;
     }

@@ -17,5 +17,6 @@ public enum Local {
     SUBNET,
     USER_HOME,
     XML_PATH,
-    PATH
+    PATH,
+    TMP
 }

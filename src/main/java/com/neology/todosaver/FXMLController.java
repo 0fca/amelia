@@ -10,6 +10,7 @@ import com.neology.net.NetController;
 import com.neology.net.Opened;
 import com.neology.net.Transport;
 import com.neology.xml.XMLController;
+import enums.Local;
 import java.awt.image.BufferedImage;
 import javafx.scene.image.Image;
 import java.io.ByteArrayInputStream;
@@ -42,6 +43,7 @@ import javafx.scene.control.ListView;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
 import javax.imageio.ImageIO;
@@ -65,6 +67,13 @@ public class FXMLController extends LocalEnvironment implements Initializable,Vi
     @FXML
     private GridPane VIEWER_PANEL;
     String ACTUAL_NAME;
+    private LocalEnvironment TMP_DIR = new LocalEnvironment() {
+        @Override
+        public String preparePath(String path) {
+            return path.replace(path.contains("\\") == true ? "/" : "\\"  , File.separator);
+        }
+    };
+    
     
     protected ArrayList<String> INIT;
     protected ArrayList<String> POOL = new ArrayList<>();
@@ -81,6 +90,7 @@ public class FXMLController extends LocalEnvironment implements Initializable,Vi
     {
         if(checkIfInitExists()){
             try {
+                System.out.println("CHCK_DIRS: "+checkFolders());
                 setUpConfiguration();
                 initTransporters("192.168.0.0/24",7999);
             } catch (SocketException ex) {
@@ -133,7 +143,6 @@ public class FXMLController extends LocalEnvironment implements Initializable,Vi
             System.out.println(IS_CONNECTED);
                 if(IS_CONNECTED){ 
                     try {
-                        System.out.println("Referring to downloader method");
                         downloadAndSetToModel();
                     } catch (InterruptedException ex) {
                         Logger.getLogger(FXMLController.class.getName()).log(Level.SEVERE, null, ex);
@@ -207,33 +216,33 @@ public class FXMLController extends LocalEnvironment implements Initializable,Vi
     } 
 
     private void downloadAndSetToModel() throws InterruptedException {
-        
           Service<String> transport_ctrl = new Service<String>() {
           @Override 
           protected Task<String> createTask() {
               return new Task<String>() {
-                  @Override protected String call() throws InterruptedException {
-                       System.out.println(IS_CONNECTED);
+                  @Override 
+                  protected String call() throws InterruptedException {
+                       System.out.println("IS_CONNECTED: "+IS_CONNECTED);
                         while(IS_CONNECTED){
-                           System.out.println("Task is processing... using count of: "+TRANSPORTERS.size());
+                           System.out.println("TRANSPORTERS_COUNT: "+TRANSPORTERS.size());
                            TRANSPORTERS.forEach((x,y) ->{
                                Connection c = (Connection)x;
                                Established e = new Established();
                                c.changeState(e);
                                
                                Transport t = c.getTranportInstance();
-                               System.out.println(t.getIp());
+                               System.out.println("TRANSPORTER_IP: "+t.getIp());
                               
                                byte[] buffer;
                                 //System.out.println(buffer.length);
                                try {
                                    buffer = c.read(t);
-                                  
-                                   System.out.println("Data has been read from input stream...");
-                                   processData(buffer);
+
+                                   VIEWER_PANEL.add(new ImageView(processData(buffer)), 0, 0);
+                                   System.out.println("MAIN_VIEW_UPDATE: success");
                                } catch (TransportException | IOException ex) {
                                    Logger.getLogger(FXMLController.class.getName()).log(Level.ALL, null, ex);
-                                   System.err.println("Error reading buffer.");
+                                   System.err.println("LOCALIZED_ERR_MSG:"+ex.getLocalizedMessage());
                                }
                            });
                         }   
@@ -243,10 +252,8 @@ public class FXMLController extends LocalEnvironment implements Initializable,Vi
           }
           
           private Image processData(byte[] buffer) throws IOException {
-                    Image out = null;
-                    ByteArrayInputStream is = null;
-                    byte[] result = null;
-                    System.out.println("Reading stream to buffer...");
+                    ByteArrayInputStream is;
+                    byte[] result;
                     int len = (int)buffer[0]+1;
                     char[] c = new char[len];
 
@@ -255,24 +262,25 @@ public class FXMLController extends LocalEnvironment implements Initializable,Vi
                     }
 
                     String name = String.valueOf(c);
-                    System.out.println("Name received: "+name);
-                    result = Arrays.copyOf(buffer, 8192-len);
+                    System.out.println("FILE_NAME_RECEIVED: "+name);
+                    result = Arrays.copyOfRange(buffer,len,8192);
                     is = new ByteArrayInputStream(result);
-                   // out = new Image(is,100,50,true,true);
-                    
+    
                     BufferedImage bf = ImageIO.read(is);
-                    System.out.println(is.available());
-                    System.out.println("Y: "+bf.getHeight());
-                    ImageIO.write(bf, name, new FileOutputStream("/home/lukas/Desktop"));
-                    System.out.println(out.getWidth());
-                    
+                    //System.out.println(bf.toString());
+                    System.out.println("AVAILABLE_BYTE_COUNT: "+is.available());
+                    //System.out.println("Y: "+bf.getHeight());
+                    ImageIO.write(bf, "JPG", new FileOutputStream(TMP_DIR.getLocalVar(Local.TMP)+File.separator+"tmp.jpg"));
+                    Image out = new Image("file:///"+TMP_DIR.getLocalVar(Local.TMP)+File.separator+"tmp.jpg",150,100,true,true);
+                    System.err.println("ERROR: "+out.isError());
+                    System.out.println("LDR_STATE: "+out.getProgress());
                     return out;
             }
     };
     
  
         transport_ctrl.start();
-        System.out.println("Thread started.");
+        System.out.println("Transporting service has been started.");
     }
 
     private void initTransporters(String subnet, int port) throws SocketException  {
@@ -304,5 +312,10 @@ public class FXMLController extends LocalEnvironment implements Initializable,Vi
         if(TRANSPORTERS.size() > 0){
             IS_CONNECTED = true;
         }
+    }
+
+    private boolean checkFolders() {
+       String tmp = TMP_DIR.getLocalVar(Local.TMP);
+       return new File(tmp).mkdir();  
     }
 }
