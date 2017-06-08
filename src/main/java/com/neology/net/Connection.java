@@ -36,9 +36,9 @@ public class Connection {
         ACTUAL.sendPacket(T, buffer);
     }
     
-    public byte[] read(Transport t, byte[] buffer) throws TransportException{
-        buffer = ACTUAL.readPacket(t, buffer);
-        return buffer;
+    public byte[] read(Transport t) throws TransportException{
+        System.out.println("Connection read() "+t.getIp());
+        return ACTUAL.readPacket(t);
     }
     
     public boolean isConnected(){
@@ -47,5 +47,9 @@ public class Connection {
     
     public Transport getTranportInstance(){
         return T;
+    }
+
+    public void setIp(String ip) {
+        T.setIp(ip);
     }
 }

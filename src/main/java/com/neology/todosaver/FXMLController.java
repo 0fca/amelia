@@ -1,25 +1,21 @@
 package com.neology.todosaver;
 
 import abstracts.LocalEnvironment;
-import com.neology.database.DatabaseController;
 import com.neology.exceptions.TransportException;
 import com.neology.interfaces.Viewable;
 import com.neology.net.BaudrateMeter;
 import com.neology.net.Connection;
+import com.neology.net.Established;
 import com.neology.net.NetController;
 import com.neology.net.Opened;
 import com.neology.net.Transport;
 import com.neology.xml.XMLController;
-import java.awt.AWTException;
+import java.awt.image.BufferedImage;
 import javafx.scene.image.Image;
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.net.Socket;
 import java.net.SocketException;
 import java.net.URL;
@@ -34,6 +30,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.concurrent.Service;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -45,9 +42,9 @@ import javafx.scene.control.ListView;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
-import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
+import javax.imageio.ImageIO;
 import javax.xml.parsers.ParserConfigurationException;
 import org.xml.sax.SAXException;
 
@@ -69,14 +66,13 @@ public class FXMLController extends LocalEnvironment implements Initializable,Vi
     private GridPane VIEWER_PANEL;
     String ACTUAL_NAME;
     
-    protected DatabaseController DB;
     protected ArrayList<String> INIT;
     protected ArrayList<String> POOL = new ArrayList<>();
     protected boolean IS_LOGGED_IN = false;
     protected String LOGGED_IN = "";
     protected boolean IS_CONNECTED = false;
     //final Connector connector = new Connector();
-    private ArrayList<Image> IMG_BUFFER = new ArrayList<>();
+    //private ArrayList<Image> IMG_BUFFER = new ArrayList<>();
     static ConcurrentHashMap<Connection,BaudrateMeter>  TRANSPORTERS = new ConcurrentHashMap<>();
     
     final Executor EXEC = Executors.newSingleThreadExecutor();            
@@ -107,7 +103,11 @@ public class FXMLController extends LocalEnvironment implements Initializable,Vi
         });
         
         REFRESH.setOnAction(event ->{
-            
+            try {
+                initTransporters("192.168.0.0/24",7999);
+            } catch (SocketException ex) {
+                Logger.getLogger(FXMLController.class.getName()).log(Level.SEVERE, null, ex);
+            }
         });
         
         LOG_OUT_BUTTON.setOnAction(event ->{
@@ -133,6 +133,7 @@ public class FXMLController extends LocalEnvironment implements Initializable,Vi
             System.out.println(IS_CONNECTED);
                 if(IS_CONNECTED){ 
                     try {
+                        System.out.println("Referring to downloader method");
                         downloadAndSetToModel();
                     } catch (InterruptedException ex) {
                         Logger.getLogger(FXMLController.class.getName()).log(Level.SEVERE, null, ex);
@@ -206,30 +207,45 @@ public class FXMLController extends LocalEnvironment implements Initializable,Vi
     } 
 
     private void downloadAndSetToModel() throws InterruptedException {
-        Task<String> list_controller = new Task<String>(){
-            @Override
-            protected String call() throws AWTException, IOException, SocketException, Exception {
-                while(IS_CONNECTED){
-                   TRANSPORTERS.forEach((x,y) ->{
-                       Connection c = (Connection)x;
-                       Transport t = c.getTranportInstance();
-                       byte[] buffer = new byte[8192];
-                       try {
-                           c.read(t, buffer);
-                           processData(buffer);
-                       } catch (TransportException | IOException ex) {
-                           Logger.getLogger(FXMLController.class.getName()).log(Level.SEVERE, null, ex);
-                       }
-                       
-                   });
-                }
-               return "";
-            }
-
-            private Image processData(byte[] buffer) throws IOException {
+        
+          Service<String> transport_ctrl = new Service<String>() {
+          @Override 
+          protected Task<String> createTask() {
+              return new Task<String>() {
+                  @Override protected String call() throws InterruptedException {
+                       System.out.println(IS_CONNECTED);
+                        while(IS_CONNECTED){
+                           System.out.println("Task is processing... using count of: "+TRANSPORTERS.size());
+                           TRANSPORTERS.forEach((x,y) ->{
+                               Connection c = (Connection)x;
+                               Established e = new Established();
+                               c.changeState(e);
+                               
+                               Transport t = c.getTranportInstance();
+                               System.out.println(t.getIp());
+                              
+                               byte[] buffer;
+                                //System.out.println(buffer.length);
+                               try {
+                                   buffer = c.read(t);
+                                  
+                                   System.out.println("Data has been read from input stream...");
+                                   processData(buffer);
+                               } catch (TransportException | IOException ex) {
+                                   Logger.getLogger(FXMLController.class.getName()).log(Level.ALL, null, ex);
+                                   System.err.println("Error reading buffer.");
+                               }
+                           });
+                        }   
+                      return "";
+                  }
+              };
+          }
+          
+          private Image processData(byte[] buffer) throws IOException {
                     Image out = null;
                     ByteArrayInputStream is = null;
-                    byte[] result;
+                    byte[] result = null;
                     System.out.println("Reading stream to buffer...");
                     int len = (int)buffer[0]+1;
                     char[] c = new char[len];
@@ -242,18 +258,21 @@ public class FXMLController extends LocalEnvironment implements Initializable,Vi
                     System.out.println("Name received: "+name);
                     result = Arrays.copyOf(buffer, 8192-len);
                     is = new ByteArrayInputStream(result);
-                    System.out.println(is.available());
-                    out = new Image(is,100,50,true,true);
+                   // out = new Image(is,100,50,true,true);
                     
+                    BufferedImage bf = ImageIO.read(is);
+                    System.out.println(is.available());
+                    System.out.println("Y: "+bf.getHeight());
+                    ImageIO.write(bf, name, new FileOutputStream("/home/lukas/Desktop"));
                     System.out.println(out.getWidth());
-                    is.close();
+                    
                     return out;
             }
-        };
-        Thread list_task = new Thread(list_controller,"ListUpdater");
-        list_task.setDaemon(true);
-        list_task.start();
-      
+    };
+    
+ 
+        transport_ctrl.start();
+        System.out.println("Thread started.");
     }
 
     private void initTransporters(String subnet, int port) throws SocketException  {
@@ -263,25 +282,23 @@ public class FXMLController extends LocalEnvironment implements Initializable,Vi
             try{
                 if(net.isReachable(ip)){
                     Socket s = new Socket(ip,port);
-                    
                     s.setTcpNoDelay(true);
-                    Transport tr = new Transport(s);
-                    InputStream in = null;
-                    OutputStream out = null;
                     Opened o = new Opened();
                     Connection c = new Connection();
                     c.changeState(o);
-                    c.open(in, out);
-
+                    c.open(s.getInputStream(), s.getOutputStream());
+                    c.setIp(ip);
+                    Transport tr  = c.getTranportInstance();
                     BaudrateMeter bd = new BaudrateMeter();
 
                     tr.setBaudrateMeter(bd);
                     
                     TRANSPORTERS.put(c,bd);
-                    System.out.println("Transporter added.");
+                    System.out.println("Transporter at "+ip+" added.");
                 }
             }catch(Exception e){
-                System.err.println("IP address unreachable!");
+                //e.printStackTrace();
+                System.err.println(ip+" unreachable!");
             }
         }  
         if(TRANSPORTERS.size() > 0){

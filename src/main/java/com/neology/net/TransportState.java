@@ -24,11 +24,11 @@ public class TransportState implements Connectable{
     }
     @Override
     public void closeConnection(Transport t){
-        new Closed().closeConnection(t);
+        this.closeConnection(t);
     }
     @Override
     public void haltConnection(Transport t){
-        new Closed().haltConnection(t);
+        this.haltConnection(t);
     }
     @Override
     public boolean wasConnected(Transport t){
@@ -42,11 +42,12 @@ public class TransportState implements Connectable{
 
     @Override
     public void sendPacket(Transport t, byte[] buffer) {
-        new Established().sendPacket(t, buffer);
+        this.sendPacket(t, buffer);
     }
     
-    public byte[] readPacket(Transport t, byte[] buffer) throws TransportException{
-        return new Established().readPacket(t, buffer);
+    public byte[] readPacket(Transport t) throws TransportException{
+        System.out.println("TransportState readPacket()");
+        return this.readPacket(t);
     }
     
     public Transport getTransportInstance(){

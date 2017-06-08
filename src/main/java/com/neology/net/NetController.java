@@ -69,8 +69,9 @@ public class NetController implements Reachable{
         return false;
     }
 
+
     @Override
     public boolean isConnected(String ip) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
+    }  
 }

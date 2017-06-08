@@ -344,6 +344,10 @@ public class Transport {
           return IP;
     }
     
+    public void setIp(String ip){
+        this.IP = ip;
+    }
+    
     public boolean isConnected() {
          return s.isConnected();
     }
