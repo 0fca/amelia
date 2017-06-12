@@ -49,7 +49,6 @@ import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
 import javafx.util.Callback;
 import javax.imageio.ImageIO;
@@ -214,44 +213,6 @@ public class FXMLController extends LocalEnvironment implements Initializable,Vi
         a.showAndWait();
     } 
 
-    /**
-     * Keept because of compatibility reasons.
-     * @param subnet
-     * @param port
-     * @throws SocketException 
-     * @deprecated 
-     */
-    private void initTransporter(String subnet, int port) throws SocketException  {
-        NetController net = new NetController();
-        String[] pool = net.getIpPool(subnet);
-        for(String ip : pool){
-            try{
-                if(net.isReachable(ip)){
-                    Socket s = new Socket(ip,port);
-                    s.setTcpNoDelay(true);
-                    Opened o = new Opened();
-                    Connection c = new Connection();
-                    c.changeState(o);
-                    c.open(s.getInputStream(), s.getOutputStream());
-                    c.setIp(ip);
-                    Transport tr  = c.getTranportInstance();
-                    BaudrateMeter bd = new BaudrateMeter();
-
-                    tr.setBaudrateMeter(bd);
-                    
-                    TRANSPORTERS.put(c,bd);
-                    System.out.println("Transporter at "+ip+" added.");
-                }
-            }catch(Exception e){
-                //e.printStackTrace();
-                System.err.println(ip+" unreachable!");
-            }
-        }  
-        if(TRANSPORTERS.size() > 0){
-            IS_CONNECTED = true;
-        }
-    }
-
     private boolean checkFolders() {
        String tmp = TMP_DIR.getLocalVar(Local.TMP);
        return new File(tmp).mkdir();  
@@ -285,7 +246,7 @@ public class FXMLController extends LocalEnvironment implements Initializable,Vi
                 IS_CONNECTED = true;
                 System.out.println("Accepted.");
                 Connection c = initConnection();
-                TCPThread t = new TCPThread(c,INDEX);
+                TCPService t = new TCPService(c,INDEX);
                 t.start();
                 INDEX++;
             } catch (IOException ex) {
@@ -303,7 +264,7 @@ public class FXMLController extends LocalEnvironment implements Initializable,Vi
       }
   }
     
-    public class TCPThread extends Service{
+    public class TCPService extends Service{
       DataInputStream din;
       DataOutputStream dout;
       //private Socket s;
@@ -311,7 +272,7 @@ public class FXMLController extends LocalEnvironment implements Initializable,Vi
       private String NAME;
       private int INDEX = 0;
       
-      public TCPThread(Connection c,int index){
+      public TCPService(Connection c,int index){
           this.CON = c;
           this.INDEX = index;
       }
