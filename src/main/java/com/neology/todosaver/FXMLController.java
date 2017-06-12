@@ -26,6 +26,7 @@ import java.net.URL;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.ResourceBundle;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
@@ -42,6 +43,7 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextArea;
@@ -49,6 +51,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
+import javafx.util.Callback;
 import javax.imageio.ImageIO;
 import javax.xml.parsers.ParserConfigurationException;
 import org.xml.sax.SAXException;
@@ -68,7 +71,7 @@ public class FXMLController extends LocalEnvironment implements Initializable,Vi
     @FXML
     private Button LOGIN_BUTTON,SETTINGS,ABOUT,CONNECT,DISCONNECT,LOG_OUT_BUTTON,REFRESH;
     @FXML
-    private GridPane VIEWER_PANEL;
+    private volatile ListView VIEWER_PANEL;
     String ACTUAL_NAME;
     private LocalEnvironment TMP_DIR = new LocalEnvironment() {
         @Override
@@ -83,14 +86,14 @@ public class FXMLController extends LocalEnvironment implements Initializable,Vi
     static String msgout;
     private static volatile int PORT;
     protected ArrayList<String> INIT;
-    //protected ArrayList<String> POOL = new ArrayList<>();
     protected boolean IS_LOGGED_IN = false;
     protected String LOGGED_IN = "";
     protected boolean IS_CONNECTED = false;
-    //final Connector connector = new Connector();
-    //private ArrayList<Image> IMG_BUFFER = new ArrayList<>();
+    private int INDEX = 0;
     static ConcurrentHashMap<Connection,BaudrateMeter>  TRANSPORTERS = new ConcurrentHashMap<>();
-    ArrayList<Image> IMAGES = new ArrayList<>();
+    private HashMap<String,Image> IMAGES = new HashMap<>();
+    
+    private ArrayList<Service> THREADS = new ArrayList<>();
     final Executor EXEC = Executors.newSingleThreadExecutor();            
     ObservableList<Label> list = FXCollections.observableArrayList();
     
@@ -113,13 +116,13 @@ public class FXMLController extends LocalEnvironment implements Initializable,Vi
         LOGIN_BUTTON.setOnAction(event ->{
             try {
                 loginUser();
-            } catch (SQLException | ClassNotFoundException ex) {
+            } catch (ClassNotFoundException ex) {
                 Logger.getLogger(FXMLController.class.getName()).log(Level.SEVERE, null, ex);
             }
         });
 
         LOG_OUT_BUTTON.setOnAction(event ->{
-            LOGGED_IN = "root";
+            LOGGED_IN = null;
             DISCONNECT.fire();
             IS_LOGGED_IN = false;
             CONNECT.setDisable(true);
@@ -138,13 +141,17 @@ public class FXMLController extends LocalEnvironment implements Initializable,Vi
         });
         
         CONNECT.setOnAction(event ->{
-                initConnectionManager();
+            initConnectionManager();
         });
         
         DISCONNECT.setOnAction(event ->{
-            IS_CONNECTED = false;
+            IMAGES.clear();
+            THREADS.stream().filter((t) -> t.isRunning()).forEachOrdered((t) -> {
+                t.cancel();
+            });
+            THREADS.clear();
         });
-        
+        VIEWER_PANEL.setCellFactory(new CallbackImpl());
     }   
 
     
@@ -158,9 +165,9 @@ public class FXMLController extends LocalEnvironment implements Initializable,Vi
             PORT = 7999;
     }
 
-    private void loginUser() throws SQLException, ClassNotFoundException {
+    private void loginUser() throws ClassNotFoundException {
         if(LOGIN.getText() != null&PASS.getText() != null){
-            if(LOGIN.getText().equals("root")&PASS.getText().equals("q@wertyuiop")){
+            if(LOGIN.getText().equals("root")&PASS.getText().equals("q@wertyuiop")){//read from XML/JSON(?)
                 viewAlert("Login","Logging in","Logged in as root.",AlertType.INFORMATION);
                 IS_LOGGED_IN = true;
                 CONNECT.setDisable(false);
@@ -207,27 +214,8 @@ public class FXMLController extends LocalEnvironment implements Initializable,Vi
         a.showAndWait();
     } 
 
-    private void downloadAndSetToModel() throws InterruptedException {
-          Service<String> transport_ctrl = new Service<String>() {
-          @Override 
-          protected Task<String> createTask() {
-              return new Task<String>() {
-                  @Override 
-                  protected String call() throws InterruptedException {
-                    IMAGES.forEach(image ->{
-                        VIEWER_PANEL.add(new ImageView(image), 0, 0);
-                    });
-                    return "";
-                  }
-              };
-          }
-    };
-
-        transport_ctrl.start();
-        System.out.println("Transporting service has been started.");
-    }
     /**
-     * 
+     * Keept because of compatibility reasons.
      * @param subnet
      * @param port
      * @throws SocketException 
@@ -272,16 +260,12 @@ public class FXMLController extends LocalEnvironment implements Initializable,Vi
     private void initConnectionManager() {
         ConnectionManager c = new ConnectionManager();
         c.start();
-        try {
-            downloadAndSetToModel();
-        } catch (InterruptedException ex) {
-            Logger.getLogger(FXMLController.class.getName()).log(Level.SEVERE, null, ex);
-        }
     }
     
     
     public class ConnectionManager extends Thread implements Runnable{
       private Thread T;
+      
       @Override
       public void start(){
           if(T == null){
@@ -298,10 +282,12 @@ public class FXMLController extends LocalEnvironment implements Initializable,Vi
                   ss = new ServerSocket(PORT);
                 }
                 s = ss.accept();
+                IS_CONNECTED = true;
                 System.out.println("Accepted.");
                 Connection c = initConnection();
-                TCPThread t = new TCPThread(c);
+                TCPThread t = new TCPThread(c,INDEX);
                 t.start();
+                INDEX++;
             } catch (IOException ex) {
                   Logger.getLogger(FXMLController.class.getName()).log(Level.SEVERE, null, ex);
              }
@@ -317,76 +303,97 @@ public class FXMLController extends LocalEnvironment implements Initializable,Vi
       }
   }
     
-    public class TCPThread extends Thread implements Runnable{
+    public class TCPThread extends Service{
       DataInputStream din;
       DataOutputStream dout;
-      private Thread T;
       //private Socket s;
       private Connection CON;
+      private String NAME;
+      private int INDEX = 0;
       
-      public TCPThread(Connection c){
+      public TCPThread(Connection c,int index){
           this.CON = c;
-      }
-      
-      @Override
-      public void start(){
-          if(T == null){
-              T = new Thread(this,"TCPThread");
-              T.setDaemon(true);
-              T.start();
-          }
-      }
-      
-      @Override
-      public void run(){
-           System.out.println("IS_CONNECTED: "+IS_CONNECTED);
-           IS_CONNECTED = true;
-            while(IS_CONNECTED){
-               //System.out.println("TRANSPORTERS_COUNT: "+TRANSPORTERS.size());
-                   
-                   Established e = new Established();
-                   CON.changeState(e);
-
-                   Transport t = CON.getTranportInstance();
-                   System.out.println("TRANSPORTER_IP: "+t.getIp());
-
-                   byte[] buffer;
-                    //System.out.println(buffer.length);
-                   try {
-                       buffer = CON.read(t);
-                       Image im = processData(buffer);
-                       IMAGES.add(im);
-                   } catch (TransportException | IOException ex) {
-                       Logger.getLogger(FXMLController.class.getName()).log(Level.ALL, null, ex);
-                       System.err.println("LOCALIZED_ERR_MSG:"+ex.getLocalizedMessage());
-                   }
-            } 
+          this.INDEX = index;
       }
       
       private Image processData(byte[] buffer) throws IOException {
-                    ByteArrayInputStream is;
-                    byte[] result;
-                    int len = (int)buffer[0]+1;
-                    char[] c = new char[len];
+                ByteArrayInputStream is;
+                byte[] result;
+                int len = (int)buffer[0]+1;
+                char[] c = new char[len];
 
-                    for(int i = 1; i<len; i++){
-                        c[i] = (char)((int)buffer[i]);
+                for(int i = 1; i<len; i++){
+                    c[i] = (char)((int)buffer[i]);
+                }
+
+                String name = String.valueOf(c).trim();
+                NAME = name;
+                System.out.println("FILE_NAME_RECEIVED: "+name);
+                result = Arrays.copyOfRange(buffer,len,8192);
+                is = new ByteArrayInputStream(result);
+
+                BufferedImage bf = ImageIO.read(is);
+                //System.out.println(bf.toString());
+                System.out.println("AVAILABLE_BYTE_COUNT: "+is.available());
+                //System.out.println("Y: "+bf.getHeight());
+                ImageIO.write(bf, "JPG", new FileOutputStream(TMP_DIR.getLocalVar(Local.TMP)+File.separator+name+".jpg"));
+                Image out = new Image("file:///"+TMP_DIR.getLocalVar(Local.TMP)+File.separator+NAME+".jpg",150,100,true,true);
+                System.err.println("ERROR: "+out.isError());
+                System.out.println("LDR_STATE: "+out.getProgress());
+                return out;
+        }
+
+        @Override
+        protected Task createTask() {
+            return new Task<Void>(){
+                @Override
+                protected Void call() throws Exception {
+                    while(!this.isCancelled()){
+                       Established e = new Established();
+                       CON.changeState(e);
+
+                       Transport t = CON.getTranportInstance();
+                       System.out.println("TRANSPORTER_IP: "+t.getIp());
+
+                       byte[] buffer;
+                       try {
+                           buffer = CON.read(t);
+                           Image im = processData(buffer);
+                           IMAGES.put("file:///"+TMP_DIR.getLocalVar(Local.TMP)+File.separator+NAME+".jpg", im);
+                           VIEWER_PANEL.getItems().clear();
+                           VIEWER_PANEL.getItems().add(INDEX,"file:///"+TMP_DIR.getLocalVar(Local.TMP)+File.separator+NAME+".jpg");
+                       } catch (TransportException | IOException ex) {
+                           System.err.println("LOCALIZED_ERR_MSG:"+ex.getLocalizedMessage());
+                       }
                     }
-
-                    String name = String.valueOf(c);
-                    System.out.println("FILE_NAME_RECEIVED: "+name);
-                    result = Arrays.copyOfRange(buffer,len,8192);
-                    is = new ByteArrayInputStream(result);
+                    return null;
+                }
+            };
+        }
+    }
     
-                    BufferedImage bf = ImageIO.read(is);
-                    //System.out.println(bf.toString());
-                    System.out.println("AVAILABLE_BYTE_COUNT: "+is.available());
-                    //System.out.println("Y: "+bf.getHeight());
-                    ImageIO.write(bf, "JPG", new FileOutputStream(TMP_DIR.getLocalVar(Local.TMP)+File.separator+"tmp.jpg"));
-                    Image out = new Image("file:///"+TMP_DIR.getLocalVar(Local.TMP)+File.separator+"tmp.jpg",150,100,true,true);
-                    System.err.println("ERROR: "+out.isError());
-                    System.out.println("LDR_STATE: "+out.getProgress());
-                    return out;
+    private class CallbackImpl implements Callback<ListView<String>, ListCell<String>> {
+        @Override
+        public ListCell<String> call(ListView<String> list) {
+            return new DefaultListCell();
+        }
+    }
+    
+    public class DefaultListCell<T> extends ListCell<T> {
+        @Override 
+        public void updateItem(T item, boolean empty) {
+            super.updateItem(item, empty);
+
+            if (empty) {
+                setText(null);
+                setGraphic(null);
+            } else {
+                setText(null);
+                Image out = IMAGES.get(item.toString());
+                System.err.println("ERROR: "+out.isError());
+                System.out.println("LDR_STATE: "+out.getProgress());
+                setGraphic(new ImageView(out));
             }
-  }
+        }
+    }
 }
