@@ -33,6 +33,7 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Service;
@@ -89,10 +90,10 @@ public class FXMLController extends LocalEnvironment implements Initializable,Vi
     protected String LOGGED_IN = "";
     protected boolean IS_CONNECTED = false;
     private int INDEX = 0;
-    static ConcurrentHashMap<Connection,BaudrateMeter>  TRANSPORTERS = new ConcurrentHashMap<>();
+    //static ConcurrentHashMap<Connection,BaudrateMeter>  TRANSPORTERS = new ConcurrentHashMap<>();
     private HashMap<String,Image> IMAGES = new HashMap<>();
     
-    private ArrayList<Service> THREADS = new ArrayList<>();
+    private HashMap<String,Service> THREADS = new HashMap<>();
     final Executor EXEC = Executors.newSingleThreadExecutor();            
     ObservableList<Label> list = FXCollections.observableArrayList();
     
@@ -145,11 +146,13 @@ public class FXMLController extends LocalEnvironment implements Initializable,Vi
         
         DISCONNECT.setOnAction(event ->{
             IMAGES.clear();
-            THREADS.stream().filter((t) -> t.isRunning()).forEachOrdered((t) -> {
-                t.cancel();
+            THREADS.forEach((desc,serv) ->{
+                serv.cancel();
             });
+
             THREADS.clear();
         });
+
         VIEWER_PANEL.setCellFactory(new CallbackImpl());
     }   
 
@@ -166,7 +169,7 @@ public class FXMLController extends LocalEnvironment implements Initializable,Vi
 
     private void loginUser() throws ClassNotFoundException {
         if(LOGIN.getText() != null&PASS.getText() != null){
-            if(LOGIN.getText().equals("root")&PASS.getText().equals("q@wertyuiop")){//read from XML/JSON(?)
+            if(LOGIN.getText().equals("root")&PASS.getText().equals("q@wertyuiop")){//read from JSON(?)
                 viewAlert("Login","Logging in","Logged in as root.",AlertType.INFORMATION);
                 IS_LOGGED_IN = true;
                 CONNECT.setDisable(false);
@@ -245,9 +248,16 @@ public class FXMLController extends LocalEnvironment implements Initializable,Vi
                 s = ss.accept();
                 IS_CONNECTED = true;
                 System.out.println("Accepted.");
-                Connection c = initConnection();
-                TCPService t = new TCPService(c,INDEX);
-                t.start();
+                    Connection c;
+                    try {
+                        c = initConnection();
+                        TCPService t = new TCPService(c,INDEX);
+                        t.start();
+                        THREADS.put(c.getTranportInstance().getIp(), t);
+                    } catch (IOException ex) {
+                        Logger.getLogger(FXMLController.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+     
                 INDEX++;
             } catch (IOException ex) {
                   Logger.getLogger(FXMLController.class.getName()).log(Level.SEVERE, null, ex);
@@ -267,7 +277,6 @@ public class FXMLController extends LocalEnvironment implements Initializable,Vi
     public class TCPService extends Service{
       DataInputStream din;
       DataOutputStream dout;
-      //private Socket s;
       private Connection CON;
       private String NAME;
       private int INDEX = 0;
@@ -321,10 +330,18 @@ public class FXMLController extends LocalEnvironment implements Initializable,Vi
                            buffer = CON.read(t);
                            Image im = processData(buffer);
                            IMAGES.put("file:///"+TMP_DIR.getLocalVar(Local.TMP)+File.separator+NAME+".jpg", im);
-                           VIEWER_PANEL.getItems().clear();
-                           VIEWER_PANEL.getItems().add(INDEX,"file:///"+TMP_DIR.getLocalVar(Local.TMP)+File.separator+NAME+".jpg");
+                           Platform.runLater(() ->{
+                               VIEWER_PANEL.getItems().clear();
+                               VIEWER_PANEL.getItems().add(INDEX,"file:///"+TMP_DIR.getLocalVar(Local.TMP)+File.separator+NAME+".jpg");
+                           });
                        } catch (TransportException | IOException ex) {
                            System.err.println("LOCALIZED_ERR_MSG:"+ex.getLocalizedMessage());
+                           THREADS.forEach((desc,serv) ->{
+                               if(desc.equals(t.getIp())){
+                                   serv.cancel();
+                               }
+                           });
+                           INDEX = 0;
                        }
                     }
                     return null;
@@ -347,13 +364,18 @@ public class FXMLController extends LocalEnvironment implements Initializable,Vi
 
             if (empty) {
                 setText(null);
+       
                 setGraphic(null);
+                
             } else {
                 setText(null);
+                
                 Image out = IMAGES.get(item.toString());
                 System.err.println("ERROR: "+out.isError());
                 System.out.println("LDR_STATE: "+out.getProgress());
+      
                 setGraphic(new ImageView(out));
+               
             }
         }
     }
