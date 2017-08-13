@@ -10,6 +10,7 @@ import com.neology.xml.XMLController;
 import enums.Local;
 import java.io.File;
 import java.io.IOException;
+import java.net.Socket;
 import java.nio.file.Paths;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -21,9 +22,6 @@ import org.xml.sax.SAXException;
  * @author Obsidiam
  */
 public abstract class LocalEnvironment {
-    private NetController NET = new NetController();
-   
-    
     public String getLocalVar(Local l) throws NullPointerException{
         String var = null;
         XMLController xml = new XMLController();

@@ -7,13 +7,19 @@ package com.neology.net;
 
 import com.neology.interfaces.Reachable;
 import com.neology.xml.XMLController;
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.InetAddress;
+import java.net.Socket;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 import javax.xml.parsers.ParserConfigurationException;
 import org.apache.commons.net.util.SubnetUtils;
 import org.xml.sax.SAXException;
@@ -23,6 +29,11 @@ import org.xml.sax.SAXException;
  * @author Obsidiam
  */
 public class NetController implements Reachable{
+    private volatile Socket S;
+    
+    public NetController(Socket s){
+        this.S = s;
+    }
     
     public String[] getIpPool(String subnet) throws SocketException{
          SubnetUtils utils = new SubnetUtils(subnet);
@@ -30,6 +41,12 @@ public class NetController implements Reachable{
          return utils.getInfo().getAllAddresses();
     }
     
+    public String getIp() throws UnknownHostException, IOException{
+         
+         return S.getLocalAddress().getHostAddress();
+    }
+    
+    @Deprecated
     public String[] prepareIpsPool() throws NullPointerException, UnknownHostException, ParserConfigurationException, SAXException, IOException{
         XMLController xml = new XMLController();
         String subnet = xml.parseInitFile().get(0).toString();
@@ -40,7 +57,7 @@ public class NetController implements Reachable{
         System.arraycopy(pool, 0, actual, 0, pool.length);
         return actual;
     }  
-    
+    @Deprecated
     public CopyOnWriteArrayList prepareActiveIpsList(CopyOnWriteArrayList<String> pool){
         CopyOnWriteArrayList<String> actv_pool = new CopyOnWriteArrayList<>();
         
@@ -60,7 +77,7 @@ public class NetController implements Reachable{
     @Override
     public boolean isReachable(String ip) throws Exception {
         try {
-            if(InetAddress.getByName(ip).isReachable(10)){
+            if(InetAddress.getByName(ip).isReachable(500)){
                 return true;
             }
         } catch (IOException ex) {

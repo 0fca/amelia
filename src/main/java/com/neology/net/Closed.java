@@ -5,6 +5,11 @@
  */
 package com.neology.net;
 
+import com.neology.exceptions.TransportException;
+import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 /**
  *
  * @author obsidiam
@@ -12,21 +17,32 @@ package com.neology.net;
 public class Closed extends TransportState{
     @Override
     public void closeConnection(Transport t) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        try {
+            if(t.isConnected()){
+                t.close();
+            }
+        } catch (IOException ex) {
+            Logger.getLogger(Closed.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
     }
 
     @Override
     public void haltConnection(Transport t) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        try {
+            t.close();
+        } catch (IOException ex) {
+            Logger.getLogger(Closed.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
     @Override
     public boolean wasConnected(Transport t) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return t.wasConnected();
     }
 
     @Override
     public boolean isConnected(Transport t) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return t.isConnected();
     }
 }

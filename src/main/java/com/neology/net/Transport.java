@@ -31,7 +31,7 @@ import java.net.Socket;
 import java.nio.charset.Charset;
 
 /**
- * @author dime
+ * @author dime,obsidiam
  */
 public class Transport {
     public final static Charset ISO_8859_2 = Charset.forName("ISO-8859-2");
@@ -41,7 +41,7 @@ public class Transport {
     InputStream origIs;
     OutputStream origOs;
     Socket s;
-    private boolean WAS_CONNECTED ,IS_CONNECTED = false;
+    private boolean WAS_CONNECTED = false;
     private BaudrateMeter baudrateMeter;
     private String IP;
     
@@ -80,6 +80,12 @@ public class Transport {
         WAS_CONNECTED = true;
     }
 
+    public void close() throws IOException{
+        release();
+        s.close();
+        IP = "";
+    }
+    
     public byte readByte() throws TransportException {
         try {
             if (baudrateMeter != null) baudrateMeter.count(1);

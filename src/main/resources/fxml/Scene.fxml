@@ -4,12 +4,10 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ListView?>
 <?import javafx.scene.control.PasswordField?>
-<?import javafx.scene.control.ScrollPane?>
-<?import javafx.scene.control.Tab?>
-<?import javafx.scene.control.TabPane?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.effect.DropShadow?>
 <?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Pane?>
 <?import javafx.scene.text.Font?>
@@ -58,34 +56,22 @@
                </font></Label>
          </children>
       </Pane>
-    <AnchorPane layoutY="119.0" minHeight="0.0" minWidth="0.0" prefHeight="494.0" prefWidth="710.0">
-         <children>
-            <ScrollPane prefHeight="494.0" prefWidth="739.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="-29.0" AnchorPane.topAnchor="0.0">
-               <content>
-                  <ListView fx:id="VIEWER_PANEL" prefHeight="492.0" prefWidth="736.0" />
-               </content>
-            </ScrollPane>
-         </children>
-      </AnchorPane>
-      <TabPane layoutX="679.0" layoutY="86.0" prefHeight="527.0" prefWidth="255.0" style="-fx-background-color: #FFFFFF;" tabClosingPolicy="UNAVAILABLE" AnchorPane.bottomAnchor="46.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="86.0">
-        <tabs>
-          <Tab closable="false" style="-fx-background-color: #757575;" text="Connection info">
-            <content>
-              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
-            </content>
-          </Tab>
-            <Tab style="-fx-background-color: #757575;" text="Notes">
-              <content>
-                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
-              </content>
-            </Tab>
-        </tabs>
-      </TabPane>
+      <BorderPane layoutY="119.0" prefHeight="494.0" prefWidth="996.0" AnchorPane.bottomAnchor="46.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="119.0">
+         <center>
+          <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="494.0" prefWidth="735.0">
+               <children>
+                  <ListView fx:id="VIEWER_PANEL" cache="true" cacheHint="QUALITY" prefHeight="492.0" prefWidth="996.0" />
+               </children>
+            </AnchorPane>
+         </center>
+         <right>
+            <ListView fx:id="INFO_VIEW" prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER" />
+         </right>
+      </BorderPane>
       <HBox alignment="CENTER" layoutY="79.0" prefHeight="37.0" prefWidth="679.0" spacing="20.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="317.0" AnchorPane.topAnchor="79.0">
          <children>
             <Button fx:id="CONNECT" disable="true" mnemonicParsing="false" text="Connect" />
             <Button fx:id="DISCONNECT" disable="true" mnemonicParsing="false" text="Disconnect" />
-            <Button fx:id="REFRESH" disable="true" mnemonicParsing="false" text="Refresh" />
          </children>
       </HBox>
     </children>

@@ -4,6 +4,7 @@ import abstracts.LocalEnvironment;
 import com.neology.exceptions.TransportException;
 import com.neology.interfaces.Viewable;
 import com.neology.net.BaudrateMeter;
+import com.neology.net.Closed;
 import com.neology.net.Connection;
 import com.neology.net.Established;
 import com.neology.net.NetController;
@@ -19,6 +20,8 @@ import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
@@ -28,7 +31,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.ResourceBundle;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.logging.Level;
@@ -38,8 +40,10 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.geometry.Pos;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
@@ -50,6 +54,7 @@ import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.image.ImageView;
+import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
 import javafx.util.Callback;
 import javax.imageio.ImageIO;
@@ -57,21 +62,14 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.xml.sax.SAXException;
 
 public class FXMLController extends LocalEnvironment implements Initializable,Viewable {
-    
-    @FXML
-    private Label VER;
-    @FXML
-    private ListView MAIN_VIEW;
-    @FXML
-    private TextArea NOTE_VIEW;
     @FXML
     private TextField LOGIN;
     @FXML
     private PasswordField PASS;
     @FXML
-    private Button LOGIN_BUTTON,SETTINGS,ABOUT,CONNECT,DISCONNECT,LOG_OUT_BUTTON,REFRESH;
+    private Button LOGIN_BUTTON,SETTINGS,ABOUT,CONNECT,DISCONNECT,LOG_OUT_BUTTON;
     @FXML
-    private volatile ListView VIEWER_PANEL;
+    private volatile ListView VIEWER_PANEL,INFO_VIEW;
     String ACTUAL_NAME;
     private LocalEnvironment TMP_DIR = new LocalEnvironment() {
         @Override
@@ -81,16 +79,15 @@ public class FXMLController extends LocalEnvironment implements Initializable,Vi
     };
     
     
-    static ServerSocket ss;
-    static Socket s;
-    static String msgout;
+    static ServerSocket ss = null;
+    static Socket s = null;
+    NetController n = null;
     private static volatile int PORT;
     protected ArrayList<String> INIT;
     protected boolean IS_LOGGED_IN = false;
     protected String LOGGED_IN = "";
     protected boolean IS_CONNECTED = false;
     private int INDEX = 0;
-    //static ConcurrentHashMap<Connection,BaudrateMeter>  TRANSPORTERS = new ConcurrentHashMap<>();
     private HashMap<String,Image> IMAGES = new HashMap<>();
     
     private HashMap<String,Service> THREADS = new HashMap<>();
@@ -98,6 +95,8 @@ public class FXMLController extends LocalEnvironment implements Initializable,Vi
     ObservableList<Label> list = FXCollections.observableArrayList();
     
     {
+        s = new Socket();
+        n = new NetController(s);
         if(checkIfInitExists()){
             try {
                 System.out.println("CHCK_DIRS: "+checkFolders());
@@ -128,7 +127,7 @@ public class FXMLController extends LocalEnvironment implements Initializable,Vi
             CONNECT.setDisable(true);
             DISCONNECT.setDisable(true);
             SETTINGS.setDisable(true);
-            REFRESH.setDisable(true);
+   
         });
         
         SETTINGS.setOnAction(event ->{
@@ -149,8 +148,10 @@ public class FXMLController extends LocalEnvironment implements Initializable,Vi
             THREADS.forEach((desc,serv) ->{
                 serv.cancel();
             });
-
             THREADS.clear();
+            Platform.runLater(() ->{
+                VIEWER_PANEL.getItems().clear(); 
+           });
         });
 
         VIEWER_PANEL.setCellFactory(new CallbackImpl());
@@ -175,15 +176,13 @@ public class FXMLController extends LocalEnvironment implements Initializable,Vi
                 CONNECT.setDisable(false);
                 DISCONNECT.setDisable(false);
                 SETTINGS.setDisable(false);
-                REFRESH.setDisable(false);
+
             }else{
-               //XML parser here
                 if(!LOGGED_IN.isEmpty()){
                     viewAlert("Login","Logging in","Logged in as "+LOGGED_IN,AlertType.INFORMATION);
                     CONNECT.setDisable(false);
                     DISCONNECT.setDisable(false);
                     SETTINGS.setDisable(false);
-                    REFRESH.setDisable(false);
                 }else{
                     viewError("Error. This user hasn't been registered yet.");
                 }
@@ -243,22 +242,28 @@ public class FXMLController extends LocalEnvironment implements Initializable,Vi
       public void run(){
             try {
                 if(ss == null){
-                  ss = new ServerSocket(PORT);
+                  System.out.println(new InetSocketAddress("192.168.0.104",7998).getAddress().isReachable(500));
+                  
+                  ss = new ServerSocket(PORT,16,new InetSocketAddress(n.getIp(),7999).getAddress());
+                  System.out.println("ServerSocket prepared.");
                 }
-                s = ss.accept();
-                IS_CONNECTED = true;
-                System.out.println("Accepted.");
-                    Connection c;
-                    try {
-                        c = initConnection();
-                        TCPService t = new TCPService(c,INDEX);
-                        t.start();
-                        THREADS.put(c.getTranportInstance().getIp(), t);
-                    } catch (IOException ex) {
-                        Logger.getLogger(FXMLController.class.getName()).log(Level.SEVERE, null, ex);
-                    }
-     
-                INDEX++;
+                while(!isInterrupted()){
+                    s = ss.accept();
+                    IS_CONNECTED = true;
+                    System.out.println("Accepted.");
+                        Connection c;
+                        try {
+                            c = initConnection();
+                            TCPService t = new TCPService(c,INDEX);
+                            t.start();
+                            
+                            THREADS.put(c.getTranportInstance().getIp(), t);
+                            INDEX++;
+                        } catch (IOException ex) {
+                            Logger.getLogger(FXMLController.class.getName()).log(Level.SEVERE, null, ex);
+                        }
+                    
+                }
             } catch (IOException ex) {
                   Logger.getLogger(FXMLController.class.getName()).log(Level.SEVERE, null, ex);
              }
@@ -303,9 +308,7 @@ public class FXMLController extends LocalEnvironment implements Initializable,Vi
                 is = new ByteArrayInputStream(result);
 
                 BufferedImage bf = ImageIO.read(is);
-                //System.out.println(bf.toString());
                 System.out.println("AVAILABLE_BYTE_COUNT: "+is.available());
-                //System.out.println("Y: "+bf.getHeight());
                 ImageIO.write(bf, "JPG", new FileOutputStream(TMP_DIR.getLocalVar(Local.TMP)+File.separator+name+".jpg"));
                 Image out = new Image("file:///"+TMP_DIR.getLocalVar(Local.TMP)+File.separator+NAME+".jpg",150,100,true,true);
                 System.err.println("ERROR: "+out.isError());
@@ -331,8 +334,11 @@ public class FXMLController extends LocalEnvironment implements Initializable,Vi
                            Image im = processData(buffer);
                            IMAGES.put("file:///"+TMP_DIR.getLocalVar(Local.TMP)+File.separator+NAME+".jpg", im);
                            Platform.runLater(() ->{
-                               VIEWER_PANEL.getItems().clear();
-                               VIEWER_PANEL.getItems().add(INDEX,"file:///"+TMP_DIR.getLocalVar(Local.TMP)+File.separator+NAME+".jpg");
+                               if(VIEWER_PANEL.getItems().size() == INDEX || VIEWER_PANEL.getItems().size() == 0){
+                                    VIEWER_PANEL.getItems().add("file:///"+TMP_DIR.getLocalVar(Local.TMP)+File.separator+NAME+".jpg");
+                               }else{
+                                    VIEWER_PANEL.getItems().set(INDEX,"file:///"+TMP_DIR.getLocalVar(Local.TMP)+File.separator+NAME+".jpg");
+                               }
                            });
                        } catch (TransportException | IOException ex) {
                            System.err.println("LOCALIZED_ERR_MSG:"+ex.getLocalizedMessage());
@@ -341,9 +347,12 @@ public class FXMLController extends LocalEnvironment implements Initializable,Vi
                                    serv.cancel();
                                }
                            });
-                           INDEX = 0;
+                           THREADS.remove(t.getIp());
                        }
                     }
+                    Closed c = new Closed();
+                    CON.changeState(c);
+                    CON.close();
                     return null;
                 }
             };
@@ -368,14 +377,16 @@ public class FXMLController extends LocalEnvironment implements Initializable,Vi
                 setGraphic(null);
                 
             } else {
-                setText(null);
+                setText(new File(item.toString()).getName().split("\\.")[0]);
                 
                 Image out = IMAGES.get(item.toString());
                 System.err.println("ERROR: "+out.isError());
                 System.out.println("LDR_STATE: "+out.getProgress());
-      
                 setGraphic(new ImageView(out));
-               
+                this.setOnMouseClicked(evt ->{
+                   
+                });
+                this.setTextAlignment(TextAlignment.CENTER);
             }
         }
     }
