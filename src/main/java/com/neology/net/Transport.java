@@ -40,16 +40,11 @@ public class Transport {
     DataOutputStream os;
     InputStream origIs;
     OutputStream origOs;
-    Socket s;
+    //Socket s;
     private boolean WAS_CONNECTED = false;
     private BaudrateMeter baudrateMeter;
     private String IP;
-    
-    public Transport(Socket socket) throws IOException {
-        this(socket.getInputStream(), socket.getOutputStream());
-        this.s = socket;
-        IP = socket.getInetAddress().getHostAddress();
-    }
+   
 
     public Transport(InputStream is) {
         this(is, null);
@@ -82,7 +77,6 @@ public class Transport {
 
     public void close() throws IOException{
         release();
-        s.close();
         IP = "";
     }
     
@@ -102,6 +96,10 @@ public class Transport {
         this.baudrateMeter = baudrateMeter;
     }
 
+    public BaudrateMeter getBaudrateMeter(){
+        return this.baudrateMeter;
+    }
+    
     public int readUInt8() throws TransportException {
         return readByte() & 0x0ff;
     }
@@ -355,7 +353,7 @@ public class Transport {
     }
     
     public boolean isConnected() {
-         return s.isConnected();
+        return true ? origIs != null && origOs != null : false; 
     }
     
     public boolean wasConnected() {

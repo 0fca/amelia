@@ -45,6 +45,10 @@ public class Connection {
         return T.isConnected();
     }
     
+    public boolean wasConnected(){
+        return T.wasConnected();
+    }
+    
     public Transport getTranportInstance(){
         return T;
     }

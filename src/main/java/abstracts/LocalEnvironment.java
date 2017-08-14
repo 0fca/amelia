@@ -5,12 +5,10 @@
  */
 package abstracts;
 
-import com.neology.net.NetController;
 import com.neology.xml.XMLController;
 import enums.Local;
 import java.io.File;
 import java.io.IOException;
-import java.net.Socket;
 import java.nio.file.Paths;
 import java.util.logging.Level;
 import java.util.logging.Logger;

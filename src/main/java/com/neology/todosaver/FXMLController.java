@@ -20,7 +20,6 @@ import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -40,10 +39,9 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
-import javafx.event.EventHandler;
+import javafx.event.EventType;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.geometry.Pos;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
@@ -51,7 +49,6 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.PasswordField;
-import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.image.ImageView;
 import javafx.scene.text.TextAlignment;
@@ -89,10 +86,11 @@ public class FXMLController extends LocalEnvironment implements Initializable,Vi
     protected boolean IS_CONNECTED = false;
     private int INDEX = 0;
     private HashMap<String,Image> IMAGES = new HashMap<>();
-    
+    private ArrayList<String> DATA = new ArrayList<>();
     private HashMap<String,Service> THREADS = new HashMap<>();
     final Executor EXEC = Executors.newSingleThreadExecutor();            
     ObservableList<Label> list = FXCollections.observableArrayList();
+    private ConnectionManager c = new ConnectionManager();
     
     {
         s = new Socket();
@@ -127,7 +125,7 @@ public class FXMLController extends LocalEnvironment implements Initializable,Vi
             CONNECT.setDisable(true);
             DISCONNECT.setDisable(true);
             SETTINGS.setDisable(true);
-   
+            
         });
         
         SETTINGS.setOnAction(event ->{
@@ -140,18 +138,41 @@ public class FXMLController extends LocalEnvironment implements Initializable,Vi
         });
         
         CONNECT.setOnAction(event ->{
-            initConnectionManager();
+            if(c.getState() == Service.State.CANCELLED){
+                Platform.runLater(() ->{
+                   c.restart();
+                });
+                s = new Socket();
+                if(c.getState() == Service.State.READY){
+                    initConnectionManager();
+                }
+            }else{
+                initConnectionManager();
+            }
         });
         
         DISCONNECT.setOnAction(event ->{
             IMAGES.clear();
-            THREADS.forEach((desc,serv) ->{
-                serv.cancel();
-            });
+            for(Service t : THREADS.values()){
+                t.cancel();
+                t = null;
+            }
             THREADS.clear();
             Platform.runLater(() ->{
                 VIEWER_PANEL.getItems().clear(); 
-           });
+            });
+            c.setOnCancelled(canc_evt ->{
+                try {
+                    ss.close();
+                    s.close();
+                    ss = null;
+                    s = null;
+                } catch (IOException ex) {
+                    Logger.getLogger(FXMLController.class.getName()).log(Level.SEVERE, null, ex);
+                }
+                
+            });
+            c.cancel();
         });
 
         VIEWER_PANEL.setCellFactory(new CallbackImpl());
@@ -221,54 +242,12 @@ public class FXMLController extends LocalEnvironment implements Initializable,Vi
     }
 
     private void initConnectionManager() {
-        ConnectionManager c = new ConnectionManager();
         c.start();
     }
     
     
-    public class ConnectionManager extends Thread implements Runnable{
-      private Thread T;
-      
-      @Override
-      public void start(){
-          if(T == null){
-              T = new Thread(this,"ConnectionManager");
-              T.setDaemon(true);
-              T.start();
-          }
-      }
-      
-      @Override
-      public void run(){
-            try {
-                if(ss == null){
-                  System.out.println(new InetSocketAddress("192.168.0.104",7998).getAddress().isReachable(500));
-                  
-                  ss = new ServerSocket(PORT,16,new InetSocketAddress(n.getIp(),7999).getAddress());
-                  System.out.println("ServerSocket prepared.");
-                }
-                while(!isInterrupted()){
-                    s = ss.accept();
-                    IS_CONNECTED = true;
-                    System.out.println("Accepted.");
-                        Connection c;
-                        try {
-                            c = initConnection();
-                            TCPService t = new TCPService(c,INDEX);
-                            t.start();
-                            
-                            THREADS.put(c.getTranportInstance().getIp(), t);
-                            INDEX++;
-                        } catch (IOException ex) {
-                            Logger.getLogger(FXMLController.class.getName()).log(Level.SEVERE, null, ex);
-                        }
-                    
-                }
-            } catch (IOException ex) {
-                  Logger.getLogger(FXMLController.class.getName()).log(Level.SEVERE, null, ex);
-             }
-      }
-      
+    public class ConnectionManager extends Service {
+
       private Connection initConnection() throws IOException{
             Opened o = new Opened();
             Connection c = new Connection();
@@ -277,6 +256,44 @@ public class FXMLController extends LocalEnvironment implements Initializable,Vi
             c.setIp(s.getRemoteSocketAddress().toString());
             return c;
       }
+
+        @Override
+        protected Task createTask() {
+            return new Task<Void>(){
+                @Override
+                public Void call(){
+                    try {
+                        if(ss == null){
+                          ss = new ServerSocket(PORT,16,new InetSocketAddress(n.getIp(),7999).getAddress());
+                          System.out.println("ServerSocket prepared.");
+                        }
+                        while(!this.isCancelled()){
+                            s = ss.accept();
+                            IS_CONNECTED = true;
+                            System.out.println("Accepted.");
+                                Connection c;
+                                try {
+                                    c = initConnection();
+                                    BaudrateMeter meter = new BaudrateMeter();
+                                    c.getTranportInstance().setBaudrateMeter(meter);
+                                    TCPService t = new TCPService(c,INDEX);
+                                    t.start();
+
+                                    THREADS.put(c.getTranportInstance().getIp(), t);
+                                    INDEX++;
+                                } catch (IOException ex) {
+                                    Logger.getLogger(FXMLController.class.getName()).log(Level.SEVERE, null, ex);
+                                }
+
+                        }
+                        System.out.println("ConnectionManager stop.");
+                    } catch (IOException ex) {
+                          Logger.getLogger(FXMLController.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                return null;
+                }
+            };
+        }
   }
     
     public class TCPService extends Service{
@@ -285,10 +302,12 @@ public class FXMLController extends LocalEnvironment implements Initializable,Vi
       private Connection CON;
       private String NAME;
       private int INDEX = 0;
+      private BaudrateMeter MTR;
       
       public TCPService(Connection c,int index){
           this.CON = c;
           this.INDEX = index;
+          this.MTR = CON.getTranportInstance().getBaudrateMeter();
       }
       
       private Image processData(byte[] buffer) throws IOException {
@@ -306,13 +325,18 @@ public class FXMLController extends LocalEnvironment implements Initializable,Vi
                 System.out.println("FILE_NAME_RECEIVED: "+name);
                 result = Arrays.copyOfRange(buffer,len,8192);
                 is = new ByteArrayInputStream(result);
-
+                
                 BufferedImage bf = ImageIO.read(is);
                 System.out.println("AVAILABLE_BYTE_COUNT: "+is.available());
                 ImageIO.write(bf, "JPG", new FileOutputStream(TMP_DIR.getLocalVar(Local.TMP)+File.separator+name+".jpg"));
                 Image out = new Image("file:///"+TMP_DIR.getLocalVar(Local.TMP)+File.separator+NAME+".jpg",150,100,true,true);
                 System.err.println("ERROR: "+out.isError());
                 System.out.println("LDR_STATE: "+out.getProgress());
+                
+                
+                System.out.println("Buffer: "+buffer.length);
+                MTR.count(buffer.length);
+                MTR.stopMeasuringCycle();
                 return out;
         }
 
@@ -322,6 +346,7 @@ public class FXMLController extends LocalEnvironment implements Initializable,Vi
                 @Override
                 protected Void call() throws Exception {
                     while(!this.isCancelled()){
+                       MTR.startMeasuringCycle();
                        Established e = new Established();
                        CON.changeState(e);
 
@@ -333,13 +358,23 @@ public class FXMLController extends LocalEnvironment implements Initializable,Vi
                            buffer = CON.read(t);
                            Image im = processData(buffer);
                            IMAGES.put("file:///"+TMP_DIR.getLocalVar(Local.TMP)+File.separator+NAME+".jpg", im);
+                           
+                           String data = "";
+                           data += "IP: "+t.getIp().substring(1)+",";
+                           data += "Speed: "+t.getBaudrateMeter().kBPS()+"kB/s,";
+                           data += "Is connected: "+t.isConnected()+",";
+                           data += "Was connected earlier: "+t.wasConnected();
+                           //System.out.println(data);
+                           DATA.add(data);
+                           
                            Platform.runLater(() ->{
-                               if(VIEWER_PANEL.getItems().size() == INDEX || VIEWER_PANEL.getItems().size() == 0){
+                               if(VIEWER_PANEL.getItems().isEmpty() || VIEWER_PANEL.getItems().size() == INDEX){
                                     VIEWER_PANEL.getItems().add("file:///"+TMP_DIR.getLocalVar(Local.TMP)+File.separator+NAME+".jpg");
                                }else{
                                     VIEWER_PANEL.getItems().set(INDEX,"file:///"+TMP_DIR.getLocalVar(Local.TMP)+File.separator+NAME+".jpg");
                                }
                            });
+                          
                        } catch (TransportException | IOException ex) {
                            System.err.println("LOCALIZED_ERR_MSG:"+ex.getLocalizedMessage());
                            THREADS.forEach((desc,serv) ->{
@@ -384,6 +419,12 @@ public class FXMLController extends LocalEnvironment implements Initializable,Vi
                 System.out.println("LDR_STATE: "+out.getProgress());
                 setGraphic(new ImageView(out));
                 this.setOnMouseClicked(evt ->{
+                   int index = VIEWER_PANEL.getSelectionModel().getSelectedIndex();
+                   String data = DATA.get(index);
+                   
+                   String[] splitted = data.split(",");
+                   INFO_VIEW.getItems().clear();
+                   INFO_VIEW.getItems().addAll(Arrays.asList(splitted));
                    
                 });
                 this.setTextAlignment(TextAlignment.CENTER);
