@@ -4,11 +4,11 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.ContextMenu?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.MenuItem?>
 <?import javafx.scene.control.PasswordField?>
-<?import javafx.scene.control.Spinner?>
 <?import javafx.scene.control.Tab?>
 <?import javafx.scene.control.TabPane?>
 <?import javafx.scene.control.TableColumn?>
@@ -17,50 +17,43 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.text.Font?>
 
-<AnchorPane id="AnchorPane" prefHeight="433.0" prefWidth="651.0" styleClass="mainFxmlClass" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.neology.todosaver.SettingsFormsController">
+<AnchorPane id="AnchorPane" prefHeight="400.0" prefWidth="651.0" styleClass="mainFxmlClass" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.neology.todosaver.SettingsFormsController">
     <stylesheets>
         <URL value="@/styles/Styles.css" />
     </stylesheets>
    <children>
-      <Label fx:id="NAV_BAR_LABEL" alignment="CENTER" layoutX="14.0" layoutY="36.0" prefHeight="44.0" prefWidth="54.0" text="Open" />
-      <Label fx:id="TIPS_LBL" alignment="CENTER_RIGHT" layoutX="84.0" layoutY="45.0" prefHeight="26.0" prefWidth="567.0" text="Here you will see tips." />
-      <Pane fx:id="NAV_BAR" layoutY="-4.0" prefHeight="120.0" prefWidth="651.0" style="-fx-background-color: #1D272C;" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="-4.0">
-         <children>
-            <Button fx:id="CLOSE_NAV_BUTTON" layoutX="589.0" layoutY="83.0" mnemonicParsing="false" text="Hide" />
-            <HBox alignment="CENTER" prefHeight="79.0" prefWidth="651.0" spacing="40.0">
-               <children>
-                  <Button fx:id="SAVE_BUTTON" mnemonicParsing="false" prefHeight="26.0" prefWidth="64.0" text="SAVE" />
-                  <Button fx:id="BACKUP_BUTTON" mnemonicParsing="false" prefHeight="26.0" prefWidth="83.0" text="BACKUP" />
-               </children>
-               <padding>
-                  <Insets top="20.0" />
-               </padding>
-            </HBox>
-         </children>
-      </Pane>
-      <TabPane fx:id="TAB_PANE" layoutY="115.0" prefHeight="319.0" prefWidth="651.0" tabClosingPolicy="UNAVAILABLE" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="115.0">
+      <TabPane fx:id="TAB_PANE" layoutY="83.0" prefHeight="350.0" prefWidth="651.0" tabClosingPolicy="UNAVAILABLE" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="83.0">
         <tabs>
           <Tab closable="false" text="Connection settings">
             <content>
-              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="254.0" prefWidth="651.0">
                      <children>
                         <BorderPane layoutY="3.0" prefHeight="217.0" prefWidth="651.0">
-                           <bottom>
-                              <TextField fx:id="XML_PATH_TXT" promptText="XMLs path..." BorderPane.alignment="CENTER" />
-                           </bottom>
                            <top>
-                              <TextField fx:id="SUBNET_TXT" promptText="Subnet address or first address" BorderPane.alignment="CENTER" />
+                              <ComboBox fx:id="OPTION_CHOOSER" prefHeight="29.0" prefWidth="215.0" promptText="Choose an option..." BorderPane.alignment="CENTER">
+                                 <BorderPane.margin>
+                                    <Insets top="25.0" />
+                                 </BorderPane.margin>
+                              </ComboBox>
                            </top>
                            <center>
-                              <Button fx:id="BROWSE_DIR_BUTTON" mnemonicParsing="false" text="Browse" BorderPane.alignment="CENTER">
-                                 <padding>
-                                    <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
-                                 </padding></Button>
+                              <TextField fx:id="VALUE_FIELD" alignment="CENTER" prefHeight="29.0" prefWidth="568.0" BorderPane.alignment="CENTER">
+                                 <BorderPane.margin>
+                                    <Insets left="50.0" right="50.0" />
+                                 </BorderPane.margin>
+                              </TextField>
                            </center>
+                           <bottom>
+                              <HBox alignment="CENTER" spacing="40.0" BorderPane.alignment="CENTER">
+                                 <children>
+                                    <Button fx:id="SAVE_BUTTON" mnemonicParsing="false" prefHeight="26.0" prefWidth="83.0" text="SAVE" />
+                                    <Button fx:id="BACKUP_BUTTON" mnemonicParsing="false" prefHeight="26.0" prefWidth="83.0" text="BACKUP" />
+                                 </children>
+                              </HBox>
+                           </bottom>
                         </BorderPane>
-                        <Spinner fx:id="PORT_SPINNER" disable="true" editable="true" layoutX="472.0" layoutY="233.0" />
                      </children>
                   </AnchorPane>
             </content>
@@ -102,5 +95,10 @@
             </Tab>
         </tabs>
       </TabPane>
+      <Label layoutX="14.0" layoutY="14.0" prefHeight="60.0" prefWidth="308.0" text="Amelia server settings" AnchorPane.leftAnchor="14.0" AnchorPane.topAnchor="14.0">
+         <font>
+            <Font size="24.0" />
+         </font>
+      </Label>
    </children>
 </AnchorPane>

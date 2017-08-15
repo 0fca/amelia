@@ -39,7 +39,6 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
-import javafx.event.EventType;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Alert;
@@ -146,9 +145,12 @@ public class FXMLController extends LocalEnvironment implements Initializable,Vi
                 if(c.getState() == Service.State.READY){
                     initConnectionManager();
                 }
-            }else{
+            }
+            if(c.getState() == Service.State.READY){
                 initConnectionManager();
             }
+            CONNECT.setDisable(true);
+            DISCONNECT.setDisable(false);
         });
         
         DISCONNECT.setOnAction(event ->{
@@ -158,11 +160,14 @@ public class FXMLController extends LocalEnvironment implements Initializable,Vi
                 t = null;
             }
             THREADS.clear();
+            DATA.clear();
+            
             Platform.runLater(() ->{
                 VIEWER_PANEL.getItems().clear(); 
             });
             c.setOnCancelled(canc_evt ->{
                 try {
+                    INDEX = 0;
                     ss.close();
                     s.close();
                     ss = null;
@@ -170,9 +175,11 @@ public class FXMLController extends LocalEnvironment implements Initializable,Vi
                 } catch (IOException ex) {
                     Logger.getLogger(FXMLController.class.getName()).log(Level.SEVERE, null, ex);
                 }
-                
             });
             c.cancel();
+            System.gc();
+            
+            DISCONNECT.setDisable(true);
         });
 
         VIEWER_PANEL.setCellFactory(new CallbackImpl());
@@ -195,7 +202,6 @@ public class FXMLController extends LocalEnvironment implements Initializable,Vi
                 viewAlert("Login","Logging in","Logged in as root.",AlertType.INFORMATION);
                 IS_LOGGED_IN = true;
                 CONNECT.setDisable(false);
-                DISCONNECT.setDisable(false);
                 SETTINGS.setDisable(false);
 
             }else{
@@ -269,26 +275,32 @@ public class FXMLController extends LocalEnvironment implements Initializable,Vi
                         }
                         while(!this.isCancelled()){
                             s = ss.accept();
-                            IS_CONNECTED = true;
-                            System.out.println("Accepted.");
-                                Connection c;
-                                try {
-                                    c = initConnection();
-                                    BaudrateMeter meter = new BaudrateMeter();
-                                    c.getTranportInstance().setBaudrateMeter(meter);
-                                    TCPService t = new TCPService(c,INDEX);
-                                    t.start();
+                            if(!s.isClosed() && !ss.isClosed()){
+                                IS_CONNECTED = true;
+                                System.out.println("Accepted.");
+                                    Connection c;
+                                    try {
+                                        c = initConnection();
+                                        BaudrateMeter meter = new BaudrateMeter();
+                                        c.getTranportInstance().setBaudrateMeter(meter);
+                                        TCPService t = new TCPService(c,INDEX);
+                                        t.start();
 
-                                    THREADS.put(c.getTranportInstance().getIp(), t);
-                                    INDEX++;
-                                } catch (IOException ex) {
-                                    Logger.getLogger(FXMLController.class.getName()).log(Level.SEVERE, null, ex);
-                                }
-
+                                        THREADS.put(c.getTranportInstance().getIp(), t);
+                                        INDEX++;
+                                    } catch (IOException ex) {
+                                        Logger.getLogger(FXMLController.class.getName()).log(Level.SEVERE, null, ex);
+                                    }
+                            }
                         }
-                        System.out.println("ConnectionManager stop.");
+                        
+                        
                     } catch (IOException ex) {
-                          Logger.getLogger(FXMLController.class.getName()).log(Level.SEVERE, null, ex);
+                          //Logger.getLogger(FXMLController.class.getName()).log(Level.SEVERE, null, ex);
+                          s = null;
+                          ss = null;
+                          System.out.println("ConnectionManager stop.");
+                          CONNECT.setDisable(false);
                     }
                 return null;
                 }
