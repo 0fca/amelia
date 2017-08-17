@@ -4,13 +4,15 @@ Amelia is a simple monitoring system.
 # Structure
 Amelia has classical server-client scheme. It uses java.net API to transfer data via TCP.
 Amelia system is built from 2 parts: Amelia Server GUI app and Amelia Client CLI app.
-Server app is uses multithreading. 
+Server app uses multithreading. 
 
 App transfers images in JFIF format, resolution is 150x100. App loads all data(image and metadata) to an array which
 length is 8192.
 
 Integer value of first byte in data packet sent by server tells how many bytes counting from index 1 contains 
 bytes of client's machhine name.
+
+Server app is built using State pattern.
 
 # Features done
 Amelia has following features:
