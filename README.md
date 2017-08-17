@@ -29,7 +29,7 @@ I want to add following features:
 * improve design.
 
 # Quick glance
-![W10 VM](https://github.com/Obsidiam/amelia/blob/master/46e073183a721aabe4809f72afe561c0.0.png)
+![W10 connection](https://github.com/Obsidiam/amelia/blob/master/dc29778fac0b65148a91dea3b26e728a.0.png)
 
 Amelia is receiving screen state from VM on which Windows 10 x64 is installed. 
 
