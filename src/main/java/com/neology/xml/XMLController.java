@@ -115,11 +115,4 @@ public class XMLController extends LocalEnvironment{
         xtw.flush();
         xtw.close();
     }
-
-    
-
-    @Override
-    public String preparePath(String path) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
 }

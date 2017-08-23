@@ -16,7 +16,6 @@ public enum Local {
     SEPARATOR,
     SUBNET,
     USER_HOME,
-    XML_PATH,
     PATH,
     TMP
 }

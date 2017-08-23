@@ -6,27 +6,37 @@
 package com.neology.todosaver;
 
 import abstracts.LocalEnvironment;
-import com.neology.xml.XMLController;
+import com.neology.net.Connection;
+import com.neology.net.NetController;
+import com.neology.net.Opened;
 import enums.Local;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.net.InetSocketAddress;
+import java.net.ServerSocket;
 import java.net.URL;
 import java.net.UnknownHostException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.Properties;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javafx.animation.TranslateTransition;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.Spinner;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.TabPane;
-import javafx.scene.layout.Pane;
-import javafx.util.Duration;
+import javafx.scene.control.TextField;
+import javafx.scene.input.KeyCode;
 import javax.xml.stream.XMLStreamException;
 /**
  * FXML Controller class
@@ -39,18 +49,22 @@ public class SettingsFormsController extends LocalEnvironment implements Initial
      * Initializes the controller class.
      */
     @FXML
-    private Pane NAV_BAR;
-    @FXML
-    private Label NAV_BAR_LABEL;
-    @FXML
-    private Button SAVE_BUTTON,BACKUP_BUTTON,DATA_BUTTON;
+    private Button SAVE_BUTTON,BACKUP_BUTTON,DATA_BUTTON,DO_TRANSMISSION_BUTTON;
     @FXML
     private TabPane TAB_PANE;
+    @FXML
+    private ComboBox OPTION_CHOOSER;
+    @FXML
+    private TextField VALUE_FIELD;
+    
     
     private boolean CHANGED = false;
     private boolean SAVED = false;
+    private int PORT = 7999;
+    //private NetController n = new NetController(s);
     
     protected HashMap<String,String> SETTINGS = new HashMap<>();
+
     
     @Override
     public void initialize(URL url, ResourceBundle rb) {
@@ -60,9 +74,7 @@ public class SettingsFormsController extends LocalEnvironment implements Initial
         
         SAVE_BUTTON.setOnAction(event ->{
             SAVED = true;
-            SettingsForm s = new SettingsForm();
-            s.SAVED = true;
-            
+          
             try {
                 saveSettings();
             } catch (NullPointerException | UnknownHostException ex) {
@@ -72,31 +84,58 @@ public class SettingsFormsController extends LocalEnvironment implements Initial
             }
         });
         
+        OPTION_CHOOSER.setOnAction(evt ->{
+            if(SETTINGS.size() > 0){
+                String s = SETTINGS.get(OPTION_CHOOSER.getSelectionModel().getSelectedItem().toString());
+                if(s != null){
+                    VALUE_FIELD.setText(s);
+                }else{
+                    VALUE_FIELD.setText("No value set.");
+                }
+            }
+        });
         
+        ObservableList<String> items = FXCollections.observableArrayList();
+        items.add("IP");
+        items.add("Port");
+        items.add("Buffer size");
+        OPTION_CHOOSER.getItems().addAll(items);
+        
+        VALUE_FIELD.setOnKeyPressed(evt ->{
+            if(evt.getCode() == KeyCode.ENTER){
+                String item = OPTION_CHOOSER.getSelectionModel().getSelectedItem().toString();
+                SETTINGS.put(item, VALUE_FIELD.getText());
+                setToChanged();
+            }
+        });
+        
+        DO_TRANSMISSION_BUTTON.setOnAction(evt ->{
+            
+        });
     }    
 
-    @Override
-    public String preparePath(String path) {
-        return "";
-    }
-
     private void setToChanged() {
-        SettingsForm s = new SettingsForm();
-        s.CHANGED = true;
         CHANGED = true;
     }
 
     private void saveSettings() throws NullPointerException, UnknownHostException, IOException, XMLStreamException {
-        String local_xml = getLocalVar(Local.XML_PATH);
-    
-        XMLController xml_controller = new XMLController();
-        
         TAB_PANE.getTabs().forEach(action ->{
             if(action.isSelected()){
                 switch(action.getText()){
                     case "Connection settings":
                     {
-                        
+                        Properties p = new Properties();
+                        try {
+                            OutputStream o = new FileOutputStream(new File(getLocalVar(Local.TMP)));
+                            SETTINGS.forEach((x,y) ->{
+                                p.setProperty(x, y);
+                            });
+                            p.storeToXML(o, new SimpleDateFormat("dd/MM/yyyy").format(new Date()));
+                        } catch (FileNotFoundException ex) {
+                            Logger.getLogger(SettingsFormsController.class.getName()).log(Level.SEVERE, null, ex);
+                        } catch (IOException ex) {
+                            Logger.getLogger(SettingsFormsController.class.getName()).log(Level.SEVERE, null, ex);
+                        }
                     }
                         break;
                     case "Users settings":
@@ -106,6 +145,7 @@ public class SettingsFormsController extends LocalEnvironment implements Initial
                 }
             }
         });
+        SAVED = true;
     }
     
     private class Listener implements ChangeListener{

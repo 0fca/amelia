@@ -27,7 +27,6 @@ import com.neology.exceptions.ClosedConnectionException;
 import com.neology.exceptions.TransportException;
 
 import java.io.*;
-import java.net.Socket;
 import java.nio.charset.Charset;
 
 /**

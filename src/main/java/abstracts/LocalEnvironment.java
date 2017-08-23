@@ -48,18 +48,7 @@ public abstract class LocalEnvironment {
             case USER_HOME:
                 var = System.getProperty("user.home");
                 break;
-            case XML_PATH:{
-                try {
-                    if(new File("init.xml").exists()){
-                        var = xml.parseInitFile().get(1).toString();
-                    }else{
-                        var = Paths.get(".").toAbsolutePath().normalize().toString(); 
-                    }
-                    
-                } catch (SAXException | IOException | ParserConfigurationException ex) {
-                    Logger.getLogger(LocalEnvironment.class.getName()).log(Level.SEVERE, null, ex);
-                }
-            }
+            
             case TMP:
                 if(System.getProperty("os.name").contains("Linux")){
                     var = "/tmp/amelia";
@@ -70,7 +59,4 @@ public abstract class LocalEnvironment {
         }
        return var;
     }
-    
-    public abstract String preparePath(String path);
-    
 }

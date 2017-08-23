@@ -50,6 +50,7 @@
                                  <children>
                                     <Button fx:id="SAVE_BUTTON" mnemonicParsing="false" prefHeight="26.0" prefWidth="83.0" text="SAVE" />
                                     <Button fx:id="BACKUP_BUTTON" mnemonicParsing="false" prefHeight="26.0" prefWidth="83.0" text="BACKUP" />
+                                    <Button fx:id="DO_TRANSMISSION_BUUTON" mnemonicParsing="false" prefHeight="29.0" prefWidth="143.0" text="SEND TO CLIENTS" />
                                  </children>
                               </HBox>
                            </bottom>
