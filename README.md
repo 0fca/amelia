@@ -12,6 +12,8 @@ length is 8192.
 Integer value of first byte in data packet sent by server tells how many bytes counting from index 1 contains 
 bytes of client's machhine name.
 
+![AmeliaFrame structure](https://github.com/Obsidiam/amelia/blob/master/AmeliaFrame.png)
+
 Server app is built using State pattern.
 
 # Features done
