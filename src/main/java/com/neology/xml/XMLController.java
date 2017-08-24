@@ -79,12 +79,10 @@ public class XMLController extends LocalEnvironment{
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
         DocumentBuilder db = dbf.newDocumentBuilder(); 
         Document doc = db.parse(new File("init.xml"));
-        String store = doc.getElementsByTagName("SUBNET").item(0).getTextContent();
+        String store = doc.getElementsByTagName("PORT").item(0).getTextContent();
         String xml_path = doc.getElementsByTagName("XML_PATH").item(0).getTextContent();
-        String count = doc.getElementsByTagName("count").item(0).getTextContent();
         list.add(store);
         list.add(xml_path);
-        list.add(count);
         return list;
     }
     

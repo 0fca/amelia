@@ -1,26 +1,25 @@
 
 .button{
-    -fx-background-color:  #9E9E9E;
+    -fx-background-color:  #616161;
+    -fx-text-fill:  #212121;
     -fx-font-family: Ubuntu Light;
 }
 .button:hover{
-    -fx-background-color: #F5F5F5;
-    -fx-text-fill:  #000000;
+    -fx-background-color: #9E9E9E;
     -fx-font-family: Ubuntu Light;
 }
 .text-field,.combo-box{
-    -fx-background-color:  #9E9E9E;
-    -fx-text-fill:  #000000;
+    -fx-background-color:  #616161;
+    -fx-text-fill:  #212121;
     -fx-font-family: Ubuntu Light;
 }
 .text-field:hover,.combo-box:hover,.text-field:focused,.combo-box:focused{
-    -fx-effect: dropshadow( three-pass-box , #000000,10.0, 0.0 , 1.0 , 0); 
-    -fx-text-fill:  #757575;
+    -fx-text-fill:  #212121;
     -fx-font-family: Ubuntu Light;
 }
 .list-cell,.text-area{
-    -fx-background-color:  #F5F5F5;
-    -fx-text-fill:  #757575;
+    -fx-background-color:  #FFFFFF;
+    -fx-text-fill:  #212121;
     -fx-font-family: Ubuntu Light;
 }
 .tab-pane{
@@ -29,3 +28,8 @@
 .anchor-pane{
     -fx-background-color: #616161;
 }
+.list-view{
+    -fx-border-color: #FFFFFF;
+    -fx-background-color: #FFFFFF;
+}
+

@@ -15,8 +15,7 @@ import javafx.concurrent.Service;
  */
 public class ConnectionDataHandler {
      private volatile HashMap<String,Service> THREADS = new HashMap<>();   
-     private volatile ArrayList<String> DATA = new ArrayList<>();
-     private volatile ArrayList<String> NAME = new ArrayList<>();
+     private volatile HashMap<String,String> DATA = new HashMap<>();
      
      private static volatile ConnectionDataHandler INSTANCE = new ConnectionDataHandler();
      
@@ -40,7 +39,7 @@ public class ConnectionDataHandler {
          return PORT;
      }
      
-     public synchronized ArrayList<String> getData(){
+     public synchronized HashMap<String,String> getData(){
          return DATA;
      }
     

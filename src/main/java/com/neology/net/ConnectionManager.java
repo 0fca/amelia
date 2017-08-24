@@ -6,7 +6,6 @@
 package com.neology.net;
 
 import com.neology.data.ConnectionDataHandler;
-import com.neology.todosaver.FXMLController;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
@@ -22,15 +21,12 @@ import javafx.concurrent.Task;
  * @author obsidiam
  */
 public class ConnectionManager extends Service {
-
-    private int INDEX = 0;
     private boolean IS_CONNECTED = false;
     private ServerSocket ss = null;
     private Socket s = null;
     private NetController n = null;
     private HashMap<String,Service> THREADS = null;
     private ConnectionDataHandler CDH = ConnectionDataHandler.getInstance();
-    
     
     {
         s = new Socket();
@@ -67,17 +63,15 @@ public class ConnectionManager extends Service {
                                         c = initConnection();
                                         BaudrateMeter meter = new BaudrateMeter();
                                         c.getTranportInstance().setBaudrateMeter(meter);
-                                        TCPService t = new TCPService(c,INDEX);
+                                        TCPService t = new TCPService(c);
                                         t.start();
                                         THREADS.put(c.getTranportInstance().getIp(), t);
-                                        INDEX++;
+                                       
                                     } catch (IOException ex) {
                                         Logger.getLogger(ConnectionManager.class.getName()).log(Level.SEVERE, null, ex);
                                     }
                             }
                         }
-                        
-                        
                     } catch (IOException ex) {
                           //Logger.getLogger(FXMLController.class.getName()).log(Level.SEVERE, null, ex);
                           s = null;
@@ -89,11 +83,20 @@ public class ConnectionManager extends Service {
             };
         }
         
-        public void closeConnection() throws IOException{
+        public void closeAllConnections() throws IOException{
             s.close();
             s = null;
             ss.close();
             ss = null;
+            this.cancel();
             
+        }
+        
+        public void closeConnection(TCPService t){
+            t.cancel();
+        }
+        
+        public boolean isAnyConnected(){
+            return IS_CONNECTED;
         }
   }

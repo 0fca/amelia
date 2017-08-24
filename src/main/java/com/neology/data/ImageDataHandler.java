@@ -16,7 +16,6 @@ public class ImageDataHandler {
     private volatile HashMap<String,Image> IMAGES = new HashMap<>();
     
     private volatile static ImageDataHandler IMG = new ImageDataHandler();
-    private int INDEX = 0;
     
     private ImageDataHandler(){}
     
@@ -27,13 +26,5 @@ public class ImageDataHandler {
     
     public synchronized HashMap<String,Image> getImagesMap(){
         return IMAGES;
-    }
-    
-    public synchronized int getIndex(){
-        return INDEX;
-    }
-    
-    public synchronized void setIndex(int index){
-        this.INDEX = index;
     }
 }

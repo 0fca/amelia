@@ -4,10 +4,8 @@ import abstracts.LocalEnvironment;
 import com.neology.data.ConnectionDataHandler;
 import com.neology.data.ImageDataHandler;
 import com.neology.interfaces.Viewable;
-import com.neology.net.Connection;
 import com.neology.net.ConnectionManager;
 import com.neology.net.NetController;
-import com.neology.net.TCPService;
 import com.neology.xml.XMLController;
 import enums.Local;
 import javafx.scene.image.Image;
@@ -15,9 +13,6 @@ import java.io.File;
 import java.io.IOException;
 import java.net.SocketException;
 import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -27,7 +22,6 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.stream.Stream;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -37,13 +31,13 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
+import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.scene.image.ImageView;
-import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
 import javafx.util.Callback;
 import javax.xml.parsers.ParserConfigurationException;
@@ -69,13 +63,13 @@ public class FXMLController extends LocalEnvironment implements Initializable,Vi
     final Executor EXEC = Executors.newSingleThreadExecutor();            
     ObservableList<Label> list = FXCollections.observableArrayList();
     private ConnectionManager c = new ConnectionManager();
-    
+    private  ViewUpdater v = new ViewUpdater();
     private ImageDataHandler IDH = ImageDataHandler.getInstance();
     private ConnectionDataHandler CDH = ConnectionDataHandler.getInstance();
-    private int INDEX;
+    private int SELECTED = -1;
+    
     
     {
-        INDEX = IDH.getIndex();
         if(checkIfInitExists()){
             try {
                 System.out.println("CHCK_DIRS: "+checkFolders());
@@ -137,30 +131,38 @@ public class FXMLController extends LocalEnvironment implements Initializable,Vi
         });
         
         DISCONNECT.setOnAction(event ->{
-            IDH.getImagesMap().clear();
-            for(Service t : CDH.getThreadsMap().values()){
-                t.cancel();
-                t = null;
-            }
-            CDH.getThreadsMap().clear();
-            CDH.getData().clear();
+            int selected_index = VIEWER_PANEL.getSelectionModel().getSelectedIndex();
             
-            Platform.runLater(() ->{
-                VIEWER_PANEL.getItems().clear(); 
-            });
-            c.setOnCancelled(canc_evt ->{
-                try {
-                    INDEX = 0;
-                    c.closeConnection();
-                } catch (IOException ex) {
-                    Logger.getLogger(FXMLController.class.getName()).log(Level.SEVERE, null, ex);
+            if(selected_index < 0){
+                c.cancel();
+                IDH.getImagesMap().clear();
+                for(Service t : CDH.getThreadsMap().values()){
+                    t.cancel();
+                    t = null;
                 }
-            });
-            c.cancel();
-            System.gc();
-            
-            DISCONNECT.setDisable(true);
-            CONNECT.setDisable(false);
+                CDH.getThreadsMap().clear();
+                CDH.getData().clear();
+
+                Platform.runLater(() ->{
+                    VIEWER_PANEL.getItems().clear(); 
+                });
+                c.setOnCancelled(canc_evt ->{
+                    try {
+                        
+                        v.interrupt();
+                        c.closeAllConnections();
+                    } catch (IOException ex) {
+                        Logger.getLogger(FXMLController.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                });
+                
+                System.gc();
+
+                DISCONNECT.setDisable(true);
+                CONNECT.setDisable(false);
+            }else{
+                CDH.getThreadsMap().get(VIEWER_PANEL.getSelectionModel().getSelectedItem().toString());
+            }
         });
         VIEWER_PANEL.setCellFactory(new CallbackImpl());
     }  
@@ -172,7 +174,7 @@ public class FXMLController extends LocalEnvironment implements Initializable,Vi
     private void setUpConfiguration() throws SAXException, IOException, ParserConfigurationException, ClassNotFoundException, SQLException{
             XMLController xml = new XMLController();
             INIT = xml.parseInitFile();
-            PORT = 7999;
+            PORT = Integer.parseInt(INIT.get(0));
     }
 
     private void loginUser() throws ClassNotFoundException {
@@ -223,7 +225,7 @@ public class FXMLController extends LocalEnvironment implements Initializable,Vi
 
     private void initConnectionManager() {
         c.start();
-        ViewUpdater v = new ViewUpdater();
+       
         v.start();
     }
     
@@ -239,31 +241,32 @@ public class FXMLController extends LocalEnvironment implements Initializable,Vi
         @Override 
         public void updateItem(T item, boolean empty) {
             super.updateItem(item, empty);
+            if(!v.isInterrupted()){
+                if (empty) {
+                    setText(null);
 
-            if (empty) {
-                setText(null);
-       
-                setGraphic(null);
-                
-            } else {
-                setText(new File(item.toString()).getName().split("\\.")[0]);
-               
-                Image out = IDH.getImagesMap().get(new File(item.toString()).getName().split("\\.")[0]);
-               
-                if(out != null){
-                    System.err.println("ERROR: "+out.isError());
-                    System.out.println("LDR_STATE: "+out.getProgress());
-                    setGraphic(new ImageView(out));
-                    this.setOnMouseClicked(evt ->{
-                       int index = VIEWER_PANEL.getSelectionModel().getSelectedIndex();
-                       String data = CDH.getData().get(index);
+                    setGraphic(null);
 
-                       String[] splitted = data.split(",");
-                       INFO_VIEW.getItems().clear();
-                       INFO_VIEW.getItems().addAll(Arrays.asList(splitted));
+                } else {
+                    setText(new File(item.toString()).getName().split("\\.")[0]);
 
-                    });
-                    this.setTextAlignment(TextAlignment.CENTER);
+                    Image out = IDH.getImagesMap().get(new File(item.toString()).getName().split("\\.")[0]);
+
+                    if(out != null){
+                        setGraphic(new ImageView(out));
+                        this.setOnMouseClicked(evt ->{
+                           int index = VIEWER_PANEL.getSelectionModel().getSelectedIndex();
+                           String item2 = item.toString();
+                           HashMap<String,String> data = CDH.getData();
+
+                           String line = data.get(item2.split(":")[2]);
+                           INFO_VIEW.getItems().clear();
+                           INFO_VIEW.getItems().addAll(Arrays.asList(line.split(",")));
+                           SELECTED = index;
+                        });
+                        setPrefHeight(150);
+                        setContentDisplay(ContentDisplay.TOP);
+                    }
                 }
             }
         }
@@ -271,6 +274,7 @@ public class FXMLController extends LocalEnvironment implements Initializable,Vi
     
     public class ViewUpdater extends Thread implements Runnable{
         private Thread T = null;
+        private boolean WAS_INTERRUPTED = false;
         
         @Override
         public void start(){
@@ -284,23 +288,50 @@ public class FXMLController extends LocalEnvironment implements Initializable,Vi
         public void run(){
             while(!T.isInterrupted()){
                     HashMap<String, Image> map = IDH.getImagesMap();
+                    HashMap<String,String> data = CDH.getData();
+                    
                     if(map.size() > 0){
                         Platform.runLater(() ->{
-                            map.forEach((x,y) ->{
-                                //System.out.println("file:///"+getLocalVar(Local.TMP)+File.separator+x+".jpg");
-                                if(VIEWER_PANEL.getItems().isEmpty() || VIEWER_PANEL.getItems().size() == INDEX){
-                                    VIEWER_PANEL.getItems().add("file://"+getLocalVar(Local.TMP)+File.separator+x+".jpg");
-                                }else{
-                                    VIEWER_PANEL.getItems().set(INDEX,"file://"+getLocalVar(Local.TMP)+File.separator+x+".jpg");
+                            if(c.getState() == javafx.concurrent.ScheduledService.State.RUNNING){
+                                if(VIEWER_PANEL.getItems().size() > 0){
+                                    VIEWER_PANEL.getItems().clear();
                                 }
-                            });
+
+                                map.forEach((x,y) ->{
+                                    VIEWER_PANEL.getItems().add("file://"+getLocalVar(Local.TMP)+File.separator+x+".jpg:"+x);
+                                });
+
+                                data.forEach((x,y) ->{
+                                    if(SELECTED > -1){
+                                        Object item = VIEWER_PANEL.getItems().get(SELECTED);
+                                        //System.out.println(item);
+                                        if(item != null){
+                                            if(item.toString().split(":")[2].equals(x)){
+                                                INFO_VIEW.getItems().clear();
+                                                INFO_VIEW.getItems().addAll(Arrays.asList(y.split(",")));
+                                            }
+                                        }
+                                    }
+                                });
+                            }
                         });
                    }
                 try {
-                    Thread.sleep(500);
+                    Thread.sleep(250);
                 } catch (InterruptedException ex) {
                     Logger.getLogger(FXMLController.class.getName()).log(Level.SEVERE, null, ex);
                 }
+                
+                if(WAS_INTERRUPTED){
+                    this.T.interrupt();
+                }
+            }
+        }
+        
+        @Override
+        public void interrupt(){
+            if(!T.getState().equals(State.TIMED_WAITING)){
+                this.T.interrupt();
             }
         }
     }

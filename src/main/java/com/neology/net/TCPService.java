@@ -18,7 +18,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.HashMap;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
 import javafx.scene.image.Image;
@@ -33,16 +32,13 @@ import javax.imageio.ImageIO;
       DataOutputStream dout;
       private Connection CON;
       private String NAME;
-      private int INDEX = 0;
-      private HashMap<String,Image> IMAGES = new HashMap<>();
       private BaudrateMeter MTR;
       private ImageDataHandler IDH = ImageDataHandler.getInstance();
       private ConnectionDataHandler CDH = ConnectionDataHandler.getInstance();
       private LocalEnvironment LOCAL = new LocalEnvironment() {};
       
-      protected TCPService(Connection c,int index){
+      protected TCPService(Connection c){
           this.CON = c;
-          this.INDEX = index;
           this.MTR = CON.getTranportInstance().getBaudrateMeter();
       }
       
@@ -94,13 +90,13 @@ import javax.imageio.ImageIO;
                            IDH.getImagesMap().put(NAME, im);
                            
                            String data = "";
+                           data += "Client name: "+NAME+",";
                            data += "IP: "+t.getIp().substring(1)+",";
                            data += "Speed: "+t.getBaudrateMeter().kBPS()+"kB/s,";
                            data += "Is connected: "+t.isConnected()+",";
                            data += "Was connected earlier: "+t.wasConnected();
                            //System.out.println(data);
-                           CDH.getData().add(data);
-                           //IDH.setImagesMap(IMAGES);
+                           CDH.getData().put(NAME, data);
                           
                        } catch (TransportException | IOException ex) {
                            System.err.println("LOCALIZED_ERR_MSG:"+ex.getLocalizedMessage());

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <SETTINGS>
 <XML_PATH>/home/lukas/Desktop</XML_PATH>
-<SUBNET>192.168.0.0/24</SUBNET>
+<PORT>7999</PORT>
 <count>3</count>
 </SETTINGS>
