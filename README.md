@@ -12,7 +12,7 @@ length is 8192.
 Integer value of first byte in data packet sent by server tells how many bytes counting from index 1 contains 
 bytes of client's machhine name.
 
-![AmeliaFrame structure](https://github.com/Obsidiam/amelia/blob/master/AmeliaFrame.png)
+![AmeliaFrame structure](https://imgur.com/a/WpcdF)
 
 Server app is built using State pattern.
 
@@ -31,10 +31,10 @@ I want to add following features:
 * improve design.
 
 # Quick glance
-![W10 connection](https://github.com/Obsidiam/amelia/blob/master/dc29778fac0b65148a91dea3b26e728a.0.png)
+![W10&WinXP connection](http://i.imgur.com/CcHi7FV.png)
 
 Amelia is receiving screen state from VM on which Windows 10 x64 is installed. 
 
-![settings](https://github.com/Obsidiam/amelia/blob/master/46e073183a721aabe4809f72afe561c0.0.png)
+![settings](http://i.imgur.com/ZCJGvvv.png)
 
 Amelia's server settings window. (In progress)
