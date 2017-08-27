@@ -22,9 +22,6 @@
     -fx-text-fill:  #212121;
     -fx-font-family: Ubuntu Light;
 }
-.tab-pane{
-    -fx-background-color: #F5F5F5;
-}
 .anchor-pane{
     -fx-background-color: #616161;
 }

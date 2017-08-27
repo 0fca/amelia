@@ -14,20 +14,25 @@ import java.io.IOException;
 import java.net.SocketException;
 import java.net.URL;
 import java.sql.SQLException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.ResourceBundle;
+import java.util.Timer;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.application.Platform;
+import javafx.beans.binding.Bindings;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Service;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.geometry.Insets;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
@@ -38,6 +43,10 @@ import javafx.scene.control.ListView;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundFill;
+import javafx.scene.layout.CornerRadii;
+import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import javafx.util.Callback;
 import javax.xml.parsers.ParserConfigurationException;
@@ -52,8 +61,12 @@ public class FXMLController extends LocalEnvironment implements Initializable,Vi
     private Button LOGIN_BUTTON,SETTINGS,ABOUT,CONNECT,DISCONNECT,LOG_OUT_BUTTON;
     @FXML
     private volatile ListView VIEWER_PANEL,INFO_VIEW;
+    @FXML
+    private Label TIME_STARTED_LABEL,TIME_STOPPED_LABEL,TIME_PASSAGE_LABEL;
     String ACTUAL_NAME;
-
+    private long start;
+    
+    
     NetController n = null;
     volatile int PORT;
     protected ArrayList<String> INIT;
@@ -117,38 +130,22 @@ public class FXMLController extends LocalEnvironment implements Initializable,Vi
                 Platform.runLater(() ->{
                    c.restart();
                 });
-
-                if(c.getState() == Service.State.READY){
-                    initConnectionManager();
-                }
             }
             if(c.getState() == Service.State.READY){
                 initConnectionManager();
             }
-            CONNECT.setDisable(true);
-            DISCONNECT.setDisable(false);
-           
+                TIME_STARTED_LABEL.setText("Time started: "+new SimpleDateFormat("HH:mm:ss").format(new Date()));
+                CONNECT.setDisable(true);
+                DISCONNECT.setDisable(false);
+                start = System.currentTimeMillis();
         });
         
         DISCONNECT.setOnAction(event ->{
             int selected_index = VIEWER_PANEL.getSelectionModel().getSelectedIndex();
             
             if(selected_index < 0){
-                c.cancel();
-                IDH.getImagesMap().clear();
-                for(Service t : CDH.getThreadsMap().values()){
-                    t.cancel();
-                    t = null;
-                }
-                CDH.getThreadsMap().clear();
-                CDH.getData().clear();
-
-                Platform.runLater(() ->{
-                    VIEWER_PANEL.getItems().clear(); 
-                });
                 c.setOnCancelled(canc_evt ->{
                     try {
-                        
                         v.interrupt();
                         c.closeAllConnections();
                     } catch (IOException ex) {
@@ -156,12 +153,25 @@ public class FXMLController extends LocalEnvironment implements Initializable,Vi
                     }
                 });
                 
-                System.gc();
+                c.cancel();
+                IDH.getImagesMap().clear();
+                CDH.getThreadsMap().values().stream().map((t) -> {
+                    t.cancel();
+                    return t;
+                }).forEachOrdered((t) -> {
+                    t = null;
+                });
+                CDH.getThreadsMap().clear();
+                CDH.getData().clear();
 
+                Platform.runLater(() ->{
+                    VIEWER_PANEL.getItems().clear(); 
+                    INFO_VIEW.getItems().clear();
+                });
+                System.gc();
+                TIME_STOPPED_LABEL.setText("Time stopped: "+new SimpleDateFormat("HH:mm:ss").format(new Date()));
                 DISCONNECT.setDisable(true);
                 CONNECT.setDisable(false);
-            }else{
-                CDH.getThreadsMap().get(VIEWER_PANEL.getSelectionModel().getSelectedItem().toString());
             }
         });
         VIEWER_PANEL.setCellFactory(new CallbackImpl());
@@ -225,7 +235,6 @@ public class FXMLController extends LocalEnvironment implements Initializable,Vi
 
     private void initConnectionManager() {
         c.start();
-       
         v.start();
     }
     
@@ -257,14 +266,24 @@ public class FXMLController extends LocalEnvironment implements Initializable,Vi
                         this.setOnMouseClicked(evt ->{
                            int index = VIEWER_PANEL.getSelectionModel().getSelectedIndex();
                            String item2 = item.toString();
+                           
                            HashMap<String,String> data = CDH.getData();
-
-                           String line = data.get(item2.split(":")[2]);
-                           INFO_VIEW.getItems().clear();
-                           INFO_VIEW.getItems().addAll(Arrays.asList(line.split(",")));
-                           SELECTED = index;
+                           String line;
+                           if(System.getProperty("os.name").contains("Windows")){
+                                line = data.get(item2.split(":")[3]);
+                           }else{
+                                line = data.get(item2.split(":")[2]);
+                           }
+                           if(line != null){
+                               INFO_VIEW.getItems().clear();
+                               INFO_VIEW.getItems().addAll(Arrays.asList(line.split(",")));
+                               SELECTED = index;
+                           }
                         });
                         setPrefHeight(150);
+                        backgroundProperty().bind(Bindings.when(this.hoverProperty())
+                        .then(new Background(new BackgroundFill(Color.valueOf("#9E9E9E"), CornerRadii.EMPTY, Insets.EMPTY)))
+                        .otherwise(new Background(new BackgroundFill(Color.WHITE, CornerRadii.EMPTY, Insets.EMPTY))));
                         setContentDisplay(ContentDisplay.TOP);
                     }
                 }
@@ -274,8 +293,8 @@ public class FXMLController extends LocalEnvironment implements Initializable,Vi
     
     public class ViewUpdater extends Thread implements Runnable{
         private Thread T = null;
-        private boolean WAS_INTERRUPTED = false;
-        
+        private long time = 0000000000000L;
+        private Timer TIMER = new Timer();
         @Override
         public void start(){
             if(T == null){
@@ -293,6 +312,7 @@ public class FXMLController extends LocalEnvironment implements Initializable,Vi
                     if(map.size() > 0){
                         Platform.runLater(() ->{
                             if(c.getState() == javafx.concurrent.ScheduledService.State.RUNNING){
+                                
                                 if(VIEWER_PANEL.getItems().size() > 0){
                                     VIEWER_PANEL.getItems().clear();
                                 }
@@ -306,24 +326,32 @@ public class FXMLController extends LocalEnvironment implements Initializable,Vi
                                         Object item = VIEWER_PANEL.getItems().get(SELECTED);
                                         //System.out.println(item);
                                         if(item != null){
-                                            if(item.toString().split(":")[2].equals(x)){
-                                                INFO_VIEW.getItems().clear();
-                                                INFO_VIEW.getItems().addAll(Arrays.asList(y.split(",")));
+                                            if(item.toString().contains(x)){
+                                                String line;
+                                                if(System.getProperty("os.name").contains("Windows")){
+                                                   line = item.toString().split(":")[3];
+                                                }else{
+                                                   line = item.toString().split(":")[2];
+                                                }
+                                                if(line.equals(x)){
+                                                    //System.out.println("Updating info view");
+                                                    INFO_VIEW.getItems().clear();
+                                                    INFO_VIEW.getItems().addAll(Arrays.asList(y.split(",")));
+                                                }
                                             }
                                         }
                                     }
                                 });
                             }
+                            
+                            TIME_PASSAGE_LABEL.setText(new SimpleDateFormat("HH:mm:ss").format(new Date(time)));
                         });
                    }
+                    
                 try {
-                    Thread.sleep(250);
+                    Thread.sleep(1000);
                 } catch (InterruptedException ex) {
                     Logger.getLogger(FXMLController.class.getName()).log(Level.SEVERE, null, ex);
-                }
-                
-                if(WAS_INTERRUPTED){
-                    this.T.interrupt();
                 }
             }
         }

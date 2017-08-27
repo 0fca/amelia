@@ -30,12 +30,12 @@ import javax.imageio.ImageIO;
    public class TCPService extends Service{
       DataInputStream din;
       DataOutputStream dout;
-      private Connection CON;
+      private final Connection CON;
       private String NAME;
-      private BaudrateMeter MTR;
-      private ImageDataHandler IDH = ImageDataHandler.getInstance();
-      private ConnectionDataHandler CDH = ConnectionDataHandler.getInstance();
-      private LocalEnvironment LOCAL = new LocalEnvironment() {};
+      private final BaudrateMeter MTR;
+      private final ImageDataHandler IDH = ImageDataHandler.getInstance();
+      private final ConnectionDataHandler CDH = ConnectionDataHandler.getInstance();
+      private final LocalEnvironment LOCAL = new LocalEnvironment() {};
       
       protected TCPService(Connection c){
           this.CON = c;
@@ -95,7 +95,7 @@ import javax.imageio.ImageIO;
                            data += "Speed: "+t.getBaudrateMeter().kBPS()+"kB/s,";
                            data += "Is connected: "+t.isConnected()+",";
                            data += "Was connected earlier: "+t.wasConnected();
-                           //System.out.println(data);
+                           //System.out.println(NAME);
                            CDH.getData().put(NAME, data);
                           
                        } catch (TransportException | IOException ex) {

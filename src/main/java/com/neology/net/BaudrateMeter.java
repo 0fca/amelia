@@ -52,7 +52,7 @@ public class BaudrateMeter {
     public void stopMeasuringCycle() {
         measure = false;
         long ms = System.currentTimeMillis() - start;
-        System.out.println("MS: "+ms);
+        //System.out.println("MS: "+ms);
         if (0 == ms || bytes < 100) return; // skip with too small portion of data
         double bps = bytes * 8. / (ms / 1000.);
 //        double bpms = bytes * 8. / ms;
