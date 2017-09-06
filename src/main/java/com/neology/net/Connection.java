@@ -6,8 +6,12 @@
 package com.neology.net;
 
 import com.neology.exceptions.TransportException;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.Socket;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -17,19 +21,28 @@ public class Connection {
     private TransportState ACTUAL;
 
     private Transport T;
-    
+    private Socket s;
     
     public void changeState(TransportState state){
         ACTUAL = state;
     }
     
-    public void open(InputStream in, OutputStream out){
-        ACTUAL.openConnection(in,out);
+    public void open(Socket s){
+        this.s = s;
+        try {
+            ACTUAL.openConnection(s.getInputStream(),s.getOutputStream());
+        } catch (IOException ex) {
+            Logger.getLogger(Connection.class.getName()).log(Level.SEVERE, null, ex);
+        }
         T = ACTUAL.getTransportInstance();
     }
     
     public void close(){
-        ACTUAL.closeConnection(new Transport());
+        ACTUAL.closeConnection(T, s);
+    }
+    
+    public void halt(){
+        ACTUAL.haltConnection(T, s);
     }
     
     public void send(TransportState state,byte[] buffer){

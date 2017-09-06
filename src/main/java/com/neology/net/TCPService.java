@@ -70,47 +70,44 @@ import javax.imageio.ImageIO;
                 return out;
         }
 
+      
         @Override
         protected Task createTask() {
             return new Task<Void>(){
                 @Override
                 protected Void call() throws Exception {
-                    while(!this.isCancelled()){
-                       MTR.startMeasuringCycle();
-                       Established e = new Established();
-                       CON.changeState(e);
+                    Transport t = null;
+                    try{
+                        while(!this.isCancelled()){
+                           MTR.startMeasuringCycle();
+                           Established e = new Established();
+                           CON.changeState(e);
+                           t = CON.getTranportInstance();
 
-                       Transport t = CON.getTranportInstance();
-                       System.out.println("TRANSPORTER_IP: "+t.getIp());
+                           System.out.println("TRANSPORTER_IP: "+t.getIp());
 
-                       byte[] buffer;
-                       try {
-                           buffer = CON.read(t);
-                           Image im = processData(buffer);
-                           IDH.getImagesMap().put(NAME, im);
-                           
-                           String data = "";
-                           data += "Client name: "+NAME+",";
-                           data += "IP: "+t.getIp().substring(1)+",";
-                           data += "Speed: "+t.getBaudrateMeter().kBPS()+"kB/s,";
-                           data += "Is connected: "+t.isConnected()+",";
-                           data += "Was connected earlier: "+t.wasConnected();
-                           //System.out.println(NAME);
-                           CDH.getData().put(NAME, data);
-                          
-                       } catch (TransportException | IOException ex) {
+                           byte[] buffer;
+
+                               buffer = CON.read(t);
+                               Image im = processData(buffer);
+                               IDH.getImagesMap().put(NAME, im);
+
+                               String data = "";
+                               data += "Client name: "+NAME+",";
+                               data += "IP: "+t.getIp().substring(1)+",";
+                               data += "Speed: "+t.getBaudrateMeter().kBPS()+"kB/s,";
+                               data += "Is connected: "+t.isConnected()+",";
+                               data += "Was connected earlier: "+t.wasConnected();
+                               //System.out.println(NAME);
+                               CDH.getData().put(NAME, data);
+                        }
+                        System.out.println("TCPService{"+CON.getTranportInstance().getIp()+"} cancelled.");
+                        Closed c = new Closed();
+                        CON.changeState(c);
+                        CON.close();               
+                    } catch (TransportException | IOException ex) {
                            System.err.println("LOCALIZED_ERR_MSG:"+ex.getLocalizedMessage());
-                           CDH.getThreadsMap().forEach((desc,serv) ->{
-                               if(desc.equals(t.getIp())){
-                                   serv.cancel();
-                               }
-                           });
-                           CDH.getThreadsMap().remove(t.getIp());
-                       }
                     }
-                    Closed c = new Closed();
-                    CON.changeState(c);
-                    CON.close();
                     return null;
                 }
             };

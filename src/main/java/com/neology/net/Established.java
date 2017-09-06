@@ -15,16 +15,6 @@ import java.util.logging.Logger;
  */
 public class Established extends TransportState{
     @Override
-    public boolean wasConnected(Transport t) {
-        return t.wasConnected();
-    }
-
-    @Override
-    public boolean isConnected(Transport t) {
-        return t.isConnected();
-    }
-
-    @Override
     public void sendPacket(Transport t, byte[] buffer) {
         try {
             t.write(buffer);

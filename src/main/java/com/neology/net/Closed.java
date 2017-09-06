@@ -5,8 +5,8 @@
  */
 package com.neology.net;
 
-import com.neology.exceptions.TransportException;
 import java.io.IOException;
+import java.net.Socket;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -16,10 +16,13 @@ import java.util.logging.Logger;
  */
 public class Closed extends TransportState{
     @Override
-    public void closeConnection(Transport t) {
+    public void closeConnection(Transport t, Socket s) {
         try {
+            System.out.println("Closed::closeConnection() -> attempting to close...");
             if(t.isConnected()){
                 t.close();
+                s.close();
+                System.out.println("Closed::closeConnection() -> closed.");
             }
         } catch (IOException ex) {
             Logger.getLogger(Closed.class.getName()).log(Level.SEVERE, null, ex);
@@ -28,21 +31,12 @@ public class Closed extends TransportState{
     }
 
     @Override
-    public void haltConnection(Transport t) {
+    public void haltConnection(Transport t, Socket s) {
         try {
             t.close();
+            s.close();
         } catch (IOException ex) {
             Logger.getLogger(Closed.class.getName()).log(Level.SEVERE, null, ex);
         }
-    }
-
-    @Override
-    public boolean wasConnected(Transport t) {
-        return t.wasConnected();
-    }
-
-    @Override
-    public boolean isConnected(Transport t) {
-        return t.isConnected();
     }
 }

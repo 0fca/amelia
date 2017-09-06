@@ -18,15 +18,9 @@ public class Opened extends TransportState{
     public void openConnection(InputStream in, OutputStream out) {
         T = new Transport(in,out);
     }
-
-    @Override
-    public boolean wasConnected(Transport t) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public boolean isConnected(Transport t) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    
+    public boolean wasConnected(){
+        return T.wasConnected();
     }
     
     @Override

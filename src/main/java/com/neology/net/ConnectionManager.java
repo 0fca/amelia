@@ -23,23 +23,20 @@ import javafx.concurrent.Task;
 public class ConnectionManager extends Service {
     private boolean IS_CONNECTED = false;
     private ServerSocket ss = null;
-    private Socket s = null;
-    private NetController n = null;
     private HashMap<String,Service> THREADS = null;
     private ConnectionDataHandler CDH = ConnectionDataHandler.getInstance();
     
     {
-        s = new Socket();
-        n = new NetController(s);
         THREADS = CDH.getThreadsMap();
     }
     
-      private Connection initConnection() throws IOException{
+      private Connection initConnection(Socket s) throws IOException{
             Opened o = new Opened();
             Connection c = new Connection();
             c.changeState(o);
-            c.open(s.getInputStream(), s.getOutputStream());
+            c.open(s);
             c.setIp(s.getRemoteSocketAddress().toString());
+            
             return c;
       }
 
@@ -47,49 +44,61 @@ public class ConnectionManager extends Service {
         protected Task createTask() {
             return new Task<Void>(){
                 @Override
-                public Void call(){
+                public Void call() throws IOException{
                     try {
                         if(ss == null){
-                          ss = new ServerSocket(CDH.getPort(),16,new InetSocketAddress(n.getIp(),CDH.getPort()).getAddress());
+                          ss = new ServerSocket(CDH.getPort());
                           System.out.println("ServerSocket prepared.");
                         }
                         while(!this.isCancelled()){
-                            s = ss.accept();
-                            if(!s.isClosed() && !ss.isClosed()){
-                                IS_CONNECTED = true;
-                                System.out.println("Accepted.");
-                                    Connection c;
-                                    try {
-                                        c = initConnection();
-                                        BaudrateMeter meter = new BaudrateMeter();
-                                        c.getTranportInstance().setBaudrateMeter(meter);
-                                        TCPService t = new TCPService(c);
-                                        t.start();
-                                        THREADS.put(c.getTranportInstance().getIp(), t);
-                                       
-                                    } catch (IOException ex) {
-                                        Logger.getLogger(ConnectionManager.class.getName()).log(Level.SEVERE, null, ex);
-                                    }
+                            if(ss != null){
+                                Socket s = ss.accept();
+                                
+                                if(!ss.isClosed()){
+                                    System.out.println("Accepted.");
+                                        Connection c;
+                                        try {
+                                            c = initConnection(s);
+                                            BaudrateMeter meter = new BaudrateMeter();
+                                            c.getTranportInstance().setBaudrateMeter(meter);
+                                            TCPService t = new TCPService(c);
+
+                                            THREADS.put(c.getTranportInstance().getIp(), t);
+                                            t.start();
+                                        } catch (IOException ex) {
+                                            Logger.getLogger(ConnectionManager.class.getName()).log(Level.SEVERE, null, ex);
+                                            break;
+                                        }
+                                }
                             }
                         }
                     } catch (IOException ex) {
-                          //Logger.getLogger(FXMLController.class.getName()).log(Level.SEVERE, null, ex);
-                          s = null;
-                          ss = null;
-                          System.out.println("ConnectionManager stopped.");
+                           //Logger.getLogger(ConnectionManager.class.getName()).log(Level.SEVERE, null, ex);
+                           System.out.println("ConnectionManager stopped.");
                     }
                 return null;
                 }
             };
         }
         
-        public void closeAllConnections() throws IOException{
-            s.close();
-            s = null;
+        private void closeAllConnections() throws IOException{
             ss.close();
             ss = null;
-            this.cancel();
+            CDH.getThreadsMap().values().stream().forEachOrdered( t ->{
+                t.cancel();
+            });
+            CDH.getThreadsMap().clear(); 
+        }
+        
+        @Override
+        public boolean cancel(){
+            try {
+                closeAllConnections();
+            } catch (IOException ex) {
+                Logger.getLogger(ConnectionManager.class.getName()).log(Level.SEVERE, null, ex);
+            }
             
+            return super.cancel();
         }
         
         public void closeConnection(TCPService t){

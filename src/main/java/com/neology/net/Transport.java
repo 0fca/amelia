@@ -35,10 +35,10 @@ import java.nio.charset.Charset;
 public class Transport {
     public final static Charset ISO_8859_2 = Charset.forName("ISO-8859-2");
     public final static Charset UTF8 = Charset.forName("UTF-8");
-    DataInputStream is;
-    DataOutputStream os;
-    InputStream origIs;
-    OutputStream origOs;
+    private DataInputStream is;
+    private DataOutputStream os;
+    private InputStream origIs;
+    private OutputStream origOs;
     //Socket s;
     private boolean WAS_CONNECTED = false;
     private BaudrateMeter baudrateMeter;
@@ -352,7 +352,7 @@ public class Transport {
     }
     
     public boolean isConnected() {
-        return true ? origIs != null && origOs != null : false; 
+        return (origIs != null && origOs != null); 
     }
     
     public boolean wasConnected() {
