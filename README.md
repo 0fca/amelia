@@ -31,9 +31,9 @@ I want to add following features:
 * improve design.
 
 # Quick glance
-![W10&WinXP connection](http://i.imgur.com/CcHi7FV.png)
+![W10&WinXP connection](https://i.imgur.com/VESKEVR.png)
 
-Amelia is receiving screen state from VM on which Windows 10 x64 is installed. 
+Amelia is receiving screen state from physical Linux machine running on Windows 10 x64.
 
 ![settings](http://i.imgur.com/ZCJGvvv.png)
 
