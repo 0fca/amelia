@@ -12,7 +12,7 @@ length is 8192.
 Integer value of first byte in data packet sent by server tells how many bytes counting from index 1 contains 
 bytes of client's machhine name.
 
-![AmeliaFrame structure](http://imgur.com/a/4oP3G)
+![AmeliaFrame structure](https://i.imgur.com/mrvX6So.png)
 
 Server app is built using State pattern.
 
