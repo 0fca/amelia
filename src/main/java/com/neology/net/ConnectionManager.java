@@ -55,7 +55,7 @@ public class ConnectionManager extends Service {
                                 Socket s = ss.accept();
                                 
                                 if(!ss.isClosed()){
-                                    System.out.println("Accepted.");
+                                    System.out.println("Server Accepted Connection Request from "+s.getInetAddress().toString());
                                         Connection c;
                                         try {
                                             c = initConnection(s);

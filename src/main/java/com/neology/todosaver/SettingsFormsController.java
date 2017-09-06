@@ -108,10 +108,6 @@ public class SettingsFormsController extends LocalEnvironment implements Initial
                 setToChanged();
             }
         });
-        
-        DO_TRANSMISSION_BUTTON.setOnAction(evt ->{
-            
-        });
     }    
 
     private void setToChanged() {

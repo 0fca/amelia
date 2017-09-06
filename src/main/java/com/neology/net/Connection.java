@@ -5,6 +5,7 @@
  */
 package com.neology.net;
 
+import com.neology.data.ConnectionDataHandler;
 import com.neology.exceptions.TransportException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -59,7 +60,7 @@ public class Connection {
     }
     
     public boolean wasConnected(){
-        return T.wasConnected();
+        return ConnectionDataHandler.getInstance().checkIfIpWasConnected(T.getIp());
     }
     
     public Transport getTranportInstance(){

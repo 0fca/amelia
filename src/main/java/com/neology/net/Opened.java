@@ -5,6 +5,7 @@
  */
 package com.neology.net;
 
+import com.neology.data.ConnectionDataHandler;
 import java.io.InputStream;
 import java.io.OutputStream;
 
@@ -20,7 +21,7 @@ public class Opened extends TransportState{
     }
     
     public boolean wasConnected(){
-        return T.wasConnected();
+        return ConnectionDataHandler.getInstance().checkIfIpWasConnected(T.getIp());
     }
     
     @Override

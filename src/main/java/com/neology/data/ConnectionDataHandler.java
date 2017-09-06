@@ -5,8 +5,8 @@
  */
 package com.neology.data;
 
-import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import javafx.concurrent.Service;
 
 /**
@@ -16,7 +16,7 @@ import javafx.concurrent.Service;
 public class ConnectionDataHandler {
      private volatile HashMap<String,Service> THREADS = new HashMap<>();   
      private volatile HashMap<String,String> DATA = new HashMap<>();
-     
+     private volatile HashSet<String> IPS_MAP = new HashSet<>(); 
      private static volatile ConnectionDataHandler INSTANCE = new ConnectionDataHandler();
      
      private ConnectionDataHandler(){}
@@ -42,5 +42,12 @@ public class ConnectionDataHandler {
      public synchronized HashMap<String,String> getData(){
          return DATA;
      }
-    
+     
+     public synchronized boolean checkIfIpWasConnected(String ip){
+         return IPS_MAP.contains(ip);
+     }
+     
+     public synchronized void addIpToMap(String ip){
+         IPS_MAP.add(ip);
+     }
 }

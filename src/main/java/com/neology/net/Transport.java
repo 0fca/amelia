@@ -354,8 +354,4 @@ public class Transport {
     public boolean isConnected() {
         return (origIs != null && origOs != null); 
     }
-    
-    public boolean wasConnected() {
-         return WAS_CONNECTED;
-    }
 }

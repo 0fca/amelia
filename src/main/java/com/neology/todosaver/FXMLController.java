@@ -61,9 +61,8 @@ public class FXMLController extends LocalEnvironment implements Initializable,Vi
     @FXML
     private volatile ListView VIEWER_PANEL,INFO_VIEW;
     @FXML
-    private Label TIME_STARTED_LABEL,TIME_STOPPED_LABEL,TIME_PASSAGE_LABEL;
+    private Label TIME_STARTED_LABEL,TIME_STOPPED_LABEL;
     String ACTUAL_NAME;
-    
     
     NetController n = null;
     volatile int PORT;
@@ -96,9 +95,6 @@ public class FXMLController extends LocalEnvironment implements Initializable,Vi
     
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-       
-       
-        
         LOGIN_BUTTON.setOnAction(event ->{
             try {
                 loginUser();
@@ -120,22 +116,22 @@ public class FXMLController extends LocalEnvironment implements Initializable,Vi
         SETTINGS.setOnAction(event ->{
             SettingsForm settings = new SettingsForm();
             try {
-                settings.start(new Stage());
+                viewAlert("Warning","Cannot enter settings!","Settings are in development at the moment, sorry for the inconvience.",AlertType.WARNING);
+                //settings.start(new Stage());
             } catch (Exception ex) {
                 Logger.getLogger(FXMLController.class.getName()).log(Level.SEVERE, null, ex);
             }
         });
         
         CONNECT.setOnAction(event ->{
-            System.out.println(c.getState().toString());
+            System.out.println("ConnectionManager state: "+c.getState().toString());
             if(c.getState() == Service.State.CANCELLED || c.getState() == Service.State.SUCCEEDED){
-                
                 Platform.runLater(() ->{
                    c.restart();
                 });
             }
             if(c.getState() == Service.State.READY){
-                System.out.println("ConnectionManager -> attempting to init.");
+                System.out.println("FXMLController -> attempting to init ConnectionManager");
                 initConnectionManager();
             }
             TIME_STARTED_LABEL.setText("Time started: "+new SimpleDateFormat("HH:mm:ss").format(new Date()));
@@ -148,7 +144,7 @@ public class FXMLController extends LocalEnvironment implements Initializable,Vi
                 IDH.getImagesMap().clear();
                 c.cancel();
                 CDH.getData().clear();
-                  
+                
                 Platform.runLater(() ->{
                     VIEWER_PANEL.getItems().clear(); 
                     INFO_VIEW.getItems().clear();
@@ -240,12 +236,14 @@ public class FXMLController extends LocalEnvironment implements Initializable,Vi
                     setGraphic(null);
 
                 } else {
-                    setText(new File(item.toString()).getName().split("\\.")[0]);
+                    String fn = new File(item.toString()).getName();
+                    setText(fn.split("\\.")[0]);
 
-                    Image out = IDH.getImagesMap().get(new File(item.toString()).getName().split("\\.")[0]);
+                    Image out = IDH.getImagesMap().get(fn.split("\\.")[0]);
 
                     if(out != null){
-                        setGraphic(new ImageView(out));
+                        ImageView im = new ImageView(out);
+                        setGraphic(im);
                         this.setOnMouseClicked(evt ->{
                            int index = VIEWER_PANEL.getSelectionModel().getSelectedIndex();
                            String item2 = item.toString();
@@ -263,11 +261,11 @@ public class FXMLController extends LocalEnvironment implements Initializable,Vi
                                SELECTED = index;
                            }
                         });
-                        setPrefHeight(95);
+                        setPrefHeight(105);
                         backgroundProperty().bind(Bindings.when(this.hoverProperty())
                         .then(new Background(new BackgroundFill(Color.valueOf("#9E9E9E"), CornerRadii.EMPTY, Insets.EMPTY)))
                         .otherwise(new Background(new BackgroundFill(Color.WHITE, CornerRadii.EMPTY, Insets.EMPTY))));
-                        setContentDisplay(ContentDisplay.TOP);
+                        setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
                     }
                 }
         }
@@ -315,7 +313,6 @@ public class FXMLController extends LocalEnvironment implements Initializable,Vi
                                                    line = item.toString().split(":")[2];
                                                 }
                                                 if(line.equals(x)){
-                                                    System.out.println("Updating info view");
                                                     INFO_VIEW.getItems().clear();
                                                     INFO_VIEW.getItems().addAll(Arrays.asList(y.split(",")));
                                                 }
@@ -329,6 +326,7 @@ public class FXMLController extends LocalEnvironment implements Initializable,Vi
                     
                 try {
                     Thread.sleep(1000);
+                    System.gc();
                 } catch (InterruptedException ex) {
                     Logger.getLogger(FXMLController.class.getName()).log(Level.SEVERE, null, ex);
                 }

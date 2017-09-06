@@ -1,6 +1,5 @@
 package com.neology.todosaver;
 
-import com.neology.interfaces.Reachable;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -15,7 +14,7 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 
 
-public class MainApp extends Application implements Reachable {
+public class MainApp extends Application{
 
     @Override
     public void start(Stage stage) throws Exception {
@@ -57,15 +56,4 @@ public class MainApp extends Application implements Reachable {
     public static void main(String[] args) {
         launch(args);
     }
-
-    @Override
-    public boolean isReachable(String ip) throws Exception {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public boolean isConnected(String ip) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
 }
