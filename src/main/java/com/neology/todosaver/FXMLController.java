@@ -80,9 +80,9 @@ public class FXMLController extends LocalEnvironment implements Initializable,Vi
     
     
     {
+        System.out.println("CHCK_DIRS: "+checkFolders());
         if(checkIfInitExists()){
             try {
-                System.out.println("CHCK_DIRS: "+checkFolders());
                 setUpConfiguration();
             } catch (SocketException ex) {
                 Logger.getLogger(FXMLController.class.getName()).log(Level.SEVERE, null, ex);
