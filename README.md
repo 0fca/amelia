@@ -21,7 +21,8 @@ Amelia has following features:
 
 * transfers images of screens of every connected client,
 * provides data for every single connection like transfer speed, client IP, port,
-* simple, light UI.
+* simple, light UI,
+* shows when started and when ended monitoring process.
 
 # Incoming features
 I want to add following features:
