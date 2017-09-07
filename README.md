@@ -24,7 +24,7 @@ PORT - port on which server should listen
 XML_PATH - the absolute path to other .xml files.
 
 
-Note: Only ADDR and PORT markups are loaded by Amelia, PORT is the one applied at server’s startup.
+**Note**: Only ADDR and PORT markups are loaded by Amelia, PORT is the one applied at server’s startup.
 
 Actually server is unable to send settings to clients due to its settings panel is in development at the moment.
 
