@@ -5,92 +5,64 @@
  */
 package com.neology.net;
 
+import com.neology.net.states.Closed;
 import com.neology.data.ConnectionDataHandler;
-import java.io.IOException;
-import java.net.ServerSocket;
-import java.net.Socket;
-import java.util.HashMap;
+import com.neology.data.ImageDataHandler;
+import com.neology.net.states.Established;
+import com.neology.net.states.Opened;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javafx.concurrent.Service;
-import javafx.concurrent.Task;
 
 /**
  *
  * @author obsidiam
  */
-public class ConnectionManager extends Service {
-    private boolean IS_CONNECTED = false;
-    private ServerSocket ss = null;
-    private ConnectionDataHandler CDH = ConnectionDataHandler.getInstance();
+public class ConnectionManager extends Thread implements Runnable{
+    private Thread mgr;
+    private ConnectionDataHandler cdh = ConnectionDataHandler.getInstance();
+    private ImageDataHandler idh = ImageDataHandler.getInstance();
+    private boolean wasInterrupted;
     
-    
-    private Connection initConnection(Socket s) throws IOException{
-            Opened o = new Opened();
-            Connection c = new Connection();
-            c.changeState(o);
-            c.open(s);
-            c.setIp(s.getRemoteSocketAddress().toString());
-            return c;
+    @Override
+    public void start(){
+        if(mgr == null){
+            mgr = new Thread(this, "ConnectionManager");
+            mgr.start();
+        }
     }
-
-        @Override
-        protected Task createTask() {
-            return new Task<Void>(){
-                @Override
-                public Void call() throws IOException{
-                    try {
-                        
-                        this.updateTitle("ConnectionManager");
-                        if(ss == null){
-                          ss = new ServerSocket(CDH.getPort(),17);
-                          System.out.println("ServerSocket prepared.");
-                        }
-                        
-                        while(!this.isCancelled()){
-                            if(ss != null){
-                                Socket s = ss.accept();
-                                
-                                if(!ss.isClosed()){
-                                    System.out.println("Server Accepted Connection Request from "+s.getInetAddress().toString());
-                                        Connection c;
-                                        try {
-                                            c = initConnection(s);
-                                            BaudrateMeter meter = new BaudrateMeter();
-                                            c.getTranportInstance().setBaudrateMeter(meter);
-                                            CDH.getConnectionList().add(c);
-                                            
-                                        } catch (IOException ex) {
-                                            Logger.getLogger(ConnectionManager.class.getName()).log(Level.SEVERE, null, ex);
-                                            break;
-                                        }
-                                }
-                            }
-                        }
-                    } catch (IOException ex) {
-                           System.out.println("ConnectionManager stopped.");
-                    }
-                return null;
+    
+    @Override
+    public void run(){
+        while(!mgr.isInterrupted()){
+            for(Connection con : cdh.getConnectionList()){
+                if(con.getState() == com.neology.net.states.State.CLOSED){
+                    con.close();
+                    cdh.getConnectionList().remove(con);
+                    idh.getImagesMap().remove(con.getConnectionName());
                 }
-            };
-        }
+            
+                if(con.getState() == com.neology.net.states.State.ESTABLISHED){
+                    con.establish(con.getTranportInstance());
+                }
+                }
+            }
         
-        private void closeServerSocket() throws IOException{
-            ss.close();
-            ss = null;
-        }
-        
-        @Override
-        public boolean cancel(){
             try {
-                closeServerSocket();
-            } catch (IOException ex) {
+                Thread.sleep(500);
+            } catch (InterruptedException ex) {
                 Logger.getLogger(ConnectionManager.class.getName()).log(Level.SEVERE, null, ex);
             }
-            return super.cancel();
+            if(wasInterrupted){
+                mgr.interrupt();
+            }
         }
-        
-        private boolean isAnyConnected(){
-            return IS_CONNECTED;
+    
+    public void interruptThread(){
+        if(mgr.getState() != State.TIMED_WAITING){
+            mgr.interrupt();
+        }else{
+            wasInterrupted = true;
         }
-  }
+    }
+    }
+

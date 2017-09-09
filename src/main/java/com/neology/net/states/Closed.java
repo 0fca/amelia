@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.neology.net;
+package com.neology.net.states;
 
 import java.io.IOException;
 import java.net.Socket;

@@ -7,8 +7,8 @@ package com.neology.todosaver;
 
 import abstracts.LocalEnvironment;
 import com.neology.net.Connection;
-import com.neology.net.NetController;
-import com.neology.net.Opened;
+import com.neology.net.states.NetController;
+import com.neology.net.states.Opened;
 import enums.Local;
 import java.io.File;
 import java.io.FileNotFoundException;

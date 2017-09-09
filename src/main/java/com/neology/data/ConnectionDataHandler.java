@@ -64,7 +64,11 @@ public class ConnectionDataHandler {
           return null;
      }
      
-     public synchronized void addConnectionName(String userName, String ip){
-         CONN_USER_DATA.put(userName, ip);
+     public synchronized void putConnectionName(String userName, String ip){
+            CONN_USER_DATA.put(userName, ip);
+     }
+     
+     public synchronized void removeConnectionName(String userName, String ip){
+         CONN_USER_DATA.remove(userName, ip);
      }
 }

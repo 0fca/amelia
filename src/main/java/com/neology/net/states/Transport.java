@@ -21,10 +21,11 @@
 // 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 // -----------------------------------------------------------------------
 //
-package com.neology.net;
+package com.neology.net.states;
 
 import com.neology.exceptions.ClosedConnectionException;
 import com.neology.exceptions.TransportException;
+import com.neology.net.BaudrateMeter;
 
 import java.io.*;
 import java.nio.charset.Charset;

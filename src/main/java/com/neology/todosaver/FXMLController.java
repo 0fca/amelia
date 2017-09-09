@@ -4,11 +4,12 @@ import abstracts.LocalEnvironment;
 import com.neology.data.ConnectionDataHandler;
 import com.neology.data.ImageDataHandler;
 import com.neology.interfaces.Viewable;
-import com.neology.net.Closed;
+import com.neology.net.states.Closed;
 import com.neology.net.Connection;
 import com.neology.net.ConnectionManager;
-import com.neology.net.Established;
-import com.neology.net.NetController;
+import com.neology.net.ConnectionReceiver;
+import com.neology.net.states.Established;
+import com.neology.net.states.NetController;
 import com.neology.net.TCPThread;
 import com.neology.xml.XMLController;
 import enums.Local;
@@ -70,7 +71,8 @@ public class FXMLController extends LocalEnvironment implements Initializable,Vi
     protected boolean IS_LOGGED_IN = false;
     protected String LOGGED_IN = "";
     protected boolean IS_CONNECTED = false;         
-    private ConnectionManager c = new ConnectionManager();
+    private ConnectionReceiver c = new ConnectionReceiver();
+    private ConnectionManager mgr = new ConnectionManager();
     private  ViewUpdater v = new ViewUpdater();
     private ImageDataHandler IDH = ImageDataHandler.getInstance();
     private ConnectionDataHandler CDH = ConnectionDataHandler.getInstance();
@@ -109,6 +111,7 @@ public class FXMLController extends LocalEnvironment implements Initializable,Vi
             DISCONNECT.setDisable(true);
             SETTINGS.setDisable(true);
             LOGIN_BUTTON.setDisable(false);
+            LOG_OUT_BUTTON.setDisable(true);
         });
         
         SETTINGS.setOnAction(event ->{
@@ -122,7 +125,7 @@ public class FXMLController extends LocalEnvironment implements Initializable,Vi
         });
         
         CONNECT.setOnAction(event ->{
-            transitToConnectMode();
+            transitToConnectedMode();
         });
         
         DISCONNECT.setOnAction(event ->{
@@ -189,50 +192,56 @@ public class FXMLController extends LocalEnvironment implements Initializable,Vi
        return !(new File(tmp).mkdir());  
     }
 
-    private void initConnectionManager() {
+    private void initSession() {
         c.start();
         tcp.start();
         v.start();
+        mgr.start();
     }
 
     private void transitToDisconnectedMode() {
-            IDH.getImagesMap().clear();
-            c.cancel();
-            tcp.interrupt();
-            CDH.getData().clear();
+        IDH.getImagesMap().clear();
+        
 
-            CDH.getConnectionList().forEach(con ->{
-                CDH.addIpToMap(con.getTranportInstance().getIp().split(":")[0]);
-                Closed c = new Closed();
-                con.changeState(c);
-                con.close();
-            });
+        c.cancel();
+        tcp.interrupt();
+        mgr.interruptThread();
+        CDH.getData().clear();
+        
+        CDH.getConnectionList().forEach(con ->{
+            CDH.addIpToMap(con.getTranportInstance().getIp().split(":")[0]);
+            Closed c = new Closed();
+            con.changeState(c);
+            con.close();
+        });
 
-            CDH.getConnectionList().clear();
+        
+        CDH.getConnectionList().clear();
 
-            Platform.runLater(() ->{
-                VIEWER_PANEL.getItems().clear(); 
-                INFO_VIEW.getItems().clear();
-            });
-            System.gc();
-            TIME_STOPPED_LABEL.setText("Time stopped: "+new SimpleDateFormat("HH:mm:ss").format(new Date()));
-            DISCONNECT.setDisable(true);
-            CONNECT.setDisable(false);
-            SELECTED = -1;
+        Platform.runLater(() ->{
+            VIEWER_PANEL.getItems().clear(); 
+            INFO_VIEW.getItems().clear();
+        });
+        System.gc();
+        TIME_STOPPED_LABEL.setText("Time stopped: "+new SimpleDateFormat("HH:mm:ss").format(new Date()));
+        DISCONNECT.setDisable(true);
+        CONNECT.setDisable(false);
+        SELECTED = -1;
     }
 
-    private void transitToConnectMode() {
+    private void transitToConnectedMode() {
         System.out.println("ConnectionManager -> "+c.getState().toString());
         if(c.getState() == Service.State.CANCELLED || c.getState() == Service.State.SUCCEEDED){
             Platform.runLater(() ->{
                c.restart();
                tcp.start();
+               mgr.start();
             });
         }
         System.out.println("ConnectionManager -> "+c.getState().toString());
         if(c.getState() == Service.State.READY){
             System.out.println("FXMLController -> attempting to init ConnectionManager");
-            initConnectionManager();
+            initSession();
         }
         TIME_STARTED_LABEL.setText("Time started: "+new SimpleDateFormat("HH:mm:ss").format(new Date()));
         TIME_STOPPED_LABEL.setText("Time stopped: ");
@@ -306,14 +315,10 @@ public class FXMLController extends LocalEnvironment implements Initializable,Vi
                     HashMap<String, Image> map = IDH.getImagesMap();
                     HashMap<String,String> data = CDH.getData();
                     
-                    if(map.size() > 0){
-                        Platform.runLater(() ->{
+                    Platform.runLater(() ->{
+                        VIEWER_PANEL.getItems().clear();
+                        if(map.size() > 0){
                             if(c.getState() == javafx.concurrent.ScheduledService.State.RUNNING){
-                                
-                                if(VIEWER_PANEL.getItems().size() > 0){
-                                    VIEWER_PANEL.getItems().clear();
-                                }
-
                                 map.forEach((x,y) ->{
                                     VIEWER_PANEL.getItems().add("file://"+getLocalVar(Local.TMP)+File.separator+x+".jpg:"+x);
                                 });
@@ -322,7 +327,6 @@ public class FXMLController extends LocalEnvironment implements Initializable,Vi
                                     data.forEach((x,y) ->{
                                             VIEWER_PANEL.getSelectionModel().select(SELECTED);
                                             Object item = VIEWER_PANEL.getItems().get(SELECTED).toString().split(":")[2];
-                                           
                                             if(item != null){
                                                 if(CDH.findConnectionName(item.toString()) != null){
                                                     setInfoViewData(CDH.getData().get(CDH.findConnectionName(item.toString())));
@@ -331,9 +335,8 @@ public class FXMLController extends LocalEnvironment implements Initializable,Vi
                                     });
                                 }
                             }
-                        });
-                    }
-                     
+                        }
+                    });
                 try {
                     Thread.sleep(1000);
                     System.gc();

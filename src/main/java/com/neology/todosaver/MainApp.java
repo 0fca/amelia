@@ -4,14 +4,27 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.application.Application;
 import static javafx.application.Application.launch;
+import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Insets;
+import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.ButtonBar.ButtonData;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.Dialog;
+import javafx.scene.control.Label;
+import javafx.scene.control.PasswordField;
+import javafx.scene.control.TextField;
+import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
+import javafx.util.Pair;
 
 
 public class MainApp extends Application{
@@ -38,7 +51,17 @@ public class MainApp extends Application{
                     }
                 }
             }
-            System.exit(0);
+        });
+        
+        stage.setOnCloseRequest( listener ->{
+            Thread[] tarray = new Thread[Thread.activeCount()];
+            Thread.enumerate(tarray);
+            for(Thread t : tarray){
+                if(t.getName().equals("TCPThread")){
+                    openLoginDialog(listener);
+                }
+            }
+            
         });
         stage.setTitle("Amelia");
         stage.setScene(scene);
@@ -55,5 +78,60 @@ public class MainApp extends Application{
      */
     public static void main(String[] args) {
         launch(args);
+    }
+
+    private void openLoginDialog(WindowEvent evt) {
+        // Create the custom dialog.
+            Dialog<Pair<String, String>> dialog = new Dialog<>();
+            dialog.setTitle("Closing app...");
+            dialog.setHeaderText("Root Credentials Needed");
+
+            ButtonType loginButtonType = new ButtonType("Exit", ButtonData.OK_DONE);
+            dialog.getDialogPane().getButtonTypes().addAll(loginButtonType, ButtonType.CANCEL);
+
+            GridPane grid = new GridPane();
+            grid.setHgap(10);
+            grid.setVgap(10);
+            grid.setPadding(new Insets(20, 150, 10, 10));
+
+            TextField username = new TextField();
+            username.setPromptText("Username");
+            PasswordField password = new PasswordField();
+            password.setPromptText("Password");
+
+            grid.add(new Label("Username:"), 0, 0);
+            grid.add(username, 1, 0);
+            grid.add(new Label("Password:"), 0, 1);
+            grid.add(password, 1, 1);
+
+            Node loginButton = dialog.getDialogPane().lookupButton(loginButtonType);
+            loginButton.setDisable(true);
+
+            username.textProperty().addListener((observable, oldValue, newValue) -> {
+                loginButton.setDisable(newValue.trim().isEmpty());
+            });
+
+            dialog.getDialogPane().setContent(grid);
+
+            Platform.runLater(() -> username.requestFocus());
+
+            dialog.setResultConverter(dialogButton -> {
+                if (dialogButton == loginButtonType) {
+                    return new Pair<>(username.getText(), password.getText());
+                }else{
+                    evt.consume();
+                    return null;
+                }
+            });
+
+            Optional<Pair<String, String>> result = dialog.showAndWait();
+
+            result.ifPresent(usernamePassword -> {
+                if(usernamePassword.getValue().equals("q@wertyuiop") && usernamePassword.getKey().equals("root")){
+                    System.exit(0);
+                }else{
+                    evt.consume();
+                }
+            });
     }
 }

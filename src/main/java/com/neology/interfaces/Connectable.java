@@ -6,7 +6,7 @@
 package com.neology.interfaces;
 
 import com.neology.exceptions.TransportException;
-import com.neology.net.Transport;
+import com.neology.net.states.Transport;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;

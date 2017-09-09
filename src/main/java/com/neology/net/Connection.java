@@ -5,8 +5,11 @@
  */
 package com.neology.net;
 
+import com.neology.net.states.Transport;
+import com.neology.net.states.TransportState;
 import com.neology.data.ConnectionDataHandler;
 import com.neology.exceptions.TransportException;
+import com.neology.net.states.State;
 import java.io.IOException;
 import java.net.Socket;
 import java.util.logging.Level;
@@ -21,6 +24,7 @@ public class Connection {
 
     private Transport T;
     private Socket s;
+    private volatile String name;
     
     public void changeState(TransportState state){
         ACTUAL = state;
@@ -73,7 +77,19 @@ public class Connection {
         T.setIp(ip);
     }
     
-    public TransportState getState(){
-        return ACTUAL;
+    public State getState(){
+        return State.valueOf(ACTUAL.getClass().getSimpleName().toUpperCase());
+    }
+    
+    public synchronized String getConnectionName(){
+        return name;
+    }
+    
+    public synchronized void setConnectionName(String name){
+        this.name = name;
+    }
+    
+    public boolean isNameSet(){
+        return name != null;
     }
 }
