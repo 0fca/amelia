@@ -6,7 +6,7 @@ Amelia has classical server-client scheme. It uses java.net API to transfer data
 Amelia system is built from 2 parts: Amelia Server GUI app and <a href="https://github.com/Obsidiam/ameliaclient">Amelia Client CLI app</a>.
 Server app uses multithreading. 
 
-App transfers images in JFIF format, resolution is 250x200. App loads all data(image and metadata) to an array which
+App transfers images in PNG format, resolution is 250x150. App loads all data(image and metadata) to an array which
 length is 8192.
 
 Integer value of first byte in data packet sent by server tells how many bytes counting from index 1 contains 
@@ -76,8 +76,8 @@ Amelia should be compatible with all Linux OS's, but I am not sure.
 I want to add following features:
 
 * managable connection settings,
-* submission of settings via TCP to every client,
-* improve design.
+* submission of settings via TCP(or UDP) to every client,
+* add more settings like: format choice(JFIF or PNG), port, time step.
 
 # Quick glance
 ![W10&WinXP connection](https://i.imgur.com/VESKEVR.png)
