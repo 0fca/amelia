@@ -2,5 +2,5 @@
 <SETTINGS>
 <XML_PATH>/home/lukas/Desktop</XML_PATH>
 <PORT>7999</PORT>
-<count>3</count>
+<ADDR>192.168.0.103</ADDR>
 </SETTINGS>

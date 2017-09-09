@@ -8,8 +8,6 @@ package com.neology.net;
 import com.neology.data.ConnectionDataHandler;
 import com.neology.exceptions.TransportException;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.net.Socket;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -38,6 +36,10 @@ public class Connection {
         T = ACTUAL.getTransportInstance();
     }
     
+    public void establish(Transport t){
+        ACTUAL.establish(t);
+    }
+    
     public void close(){
         ACTUAL.closeConnection(T, s);
     }
@@ -60,7 +62,7 @@ public class Connection {
     }
     
     public boolean wasConnected(){
-        return ConnectionDataHandler.getInstance().checkIfIpWasConnected(T.getIp());
+        return ConnectionDataHandler.getInstance().checkIfIpWasConnected(T.getIp().split(":")[0]);
     }
     
     public Transport getTranportInstance(){
@@ -69,5 +71,9 @@ public class Connection {
 
     public void setIp(String ip) {
         T.setIp(ip);
+    }
+    
+    public TransportState getState(){
+        return ACTUAL;
     }
 }

@@ -81,8 +81,9 @@ public class XMLController extends LocalEnvironment{
         Document doc = db.parse(new File("init.xml"));
         String store = doc.getElementsByTagName("PORT").item(0).getTextContent();
         String xml_path = doc.getElementsByTagName("XML_PATH").item(0).getTextContent();
+        String addr = doc.getElementsByTagName("ADDR").item(0).getTextContent();
         list.add(store);
-        list.add(xml_path);
+        list.add(addr);
         return list;
     }
     

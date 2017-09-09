@@ -17,6 +17,7 @@ import java.net.Socket;
  */
 public class TransportState implements Connectable{
     private Transport T;
+    
     @Override
     public  void openConnection(InputStream in, OutputStream out){
         Opened o = new Opened();
@@ -37,12 +38,23 @@ public class TransportState implements Connectable{
         this.sendPacket(t, buffer);
     }
     
+    @Override
     public byte[] readPacket(Transport t) throws TransportException{
         System.out.println("TransportState readPacket()");
         return this.readPacket(t);
     }
     
+    @Override
+    public void establish(Transport t){
+        this.establish(t);
+    }
+    
     public Transport getTransportInstance(){
         return T;
+    }
+    
+    @Override
+    public String toString(){
+        return this.getClass().getCanonicalName();
     }
 }

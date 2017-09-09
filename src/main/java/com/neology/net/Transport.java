@@ -344,7 +344,7 @@ public class Transport {
   }
   
     public String getIp(){
-          return IP;
+        return IP;
     }
     
     public void setIp(String ip){

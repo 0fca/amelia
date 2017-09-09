@@ -14,6 +14,13 @@ import java.util.logging.Logger;
  * @author obsidiam
  */
 public class Established extends TransportState{
+    private Transport T;
+    
+    @Override
+    public void establish(Transport t){
+        this.T = t;
+    }
+    
     @Override
     public void sendPacket(Transport t, byte[] buffer) {
         try {
@@ -24,7 +31,12 @@ public class Established extends TransportState{
     }
     @Override
     public byte[] readPacket(Transport t) throws TransportException{
-        System.out.println("Established readPacket()::"+t.getIp());
+       System.out.println("Established readPacket()::"+t.getIp());
        return t.readBytes(8192);
+    }
+    
+    @Override
+    public Transport getTransportInstance(){
+        return T;
     }
 }

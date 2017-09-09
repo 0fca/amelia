@@ -7,7 +7,6 @@ package com.neology.net;
 
 import com.neology.data.ConnectionDataHandler;
 import java.io.IOException;
-import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.HashMap;
@@ -23,22 +22,17 @@ import javafx.concurrent.Task;
 public class ConnectionManager extends Service {
     private boolean IS_CONNECTED = false;
     private ServerSocket ss = null;
-    private HashMap<String,Service> THREADS = null;
     private ConnectionDataHandler CDH = ConnectionDataHandler.getInstance();
     
-    {
-        THREADS = CDH.getThreadsMap();
-    }
     
-      private Connection initConnection(Socket s) throws IOException{
+    private Connection initConnection(Socket s) throws IOException{
             Opened o = new Opened();
             Connection c = new Connection();
             c.changeState(o);
             c.open(s);
             c.setIp(s.getRemoteSocketAddress().toString());
-            
             return c;
-      }
+    }
 
         @Override
         protected Task createTask() {
@@ -46,10 +40,13 @@ public class ConnectionManager extends Service {
                 @Override
                 public Void call() throws IOException{
                     try {
+                        
+                        this.updateTitle("ConnectionManager");
                         if(ss == null){
-                          ss = new ServerSocket(CDH.getPort());
+                          ss = new ServerSocket(CDH.getPort(),17);
                           System.out.println("ServerSocket prepared.");
                         }
+                        
                         while(!this.isCancelled()){
                             if(ss != null){
                                 Socket s = ss.accept();
@@ -61,10 +58,8 @@ public class ConnectionManager extends Service {
                                             c = initConnection(s);
                                             BaudrateMeter meter = new BaudrateMeter();
                                             c.getTranportInstance().setBaudrateMeter(meter);
-                                            TCPService t = new TCPService(c);
-
-                                            THREADS.put(c.getTranportInstance().getIp(), t);
-                                            t.start();
+                                            CDH.getConnectionList().add(c);
+                                            
                                         } catch (IOException ex) {
                                             Logger.getLogger(ConnectionManager.class.getName()).log(Level.SEVERE, null, ex);
                                             break;
@@ -73,7 +68,6 @@ public class ConnectionManager extends Service {
                             }
                         }
                     } catch (IOException ex) {
-                           //Logger.getLogger(ConnectionManager.class.getName()).log(Level.SEVERE, null, ex);
                            System.out.println("ConnectionManager stopped.");
                     }
                 return null;
@@ -81,31 +75,22 @@ public class ConnectionManager extends Service {
             };
         }
         
-        private void closeAllConnections() throws IOException{
+        private void closeServerSocket() throws IOException{
             ss.close();
             ss = null;
-            CDH.getThreadsMap().values().stream().forEachOrdered( t ->{
-                t.cancel();
-            });
-            CDH.getThreadsMap().clear(); 
         }
         
         @Override
         public boolean cancel(){
             try {
-                closeAllConnections();
+                closeServerSocket();
             } catch (IOException ex) {
                 Logger.getLogger(ConnectionManager.class.getName()).log(Level.SEVERE, null, ex);
             }
-            
             return super.cancel();
         }
         
-        public void closeConnection(TCPService t){
-            t.cancel();
-        }
-        
-        public boolean isAnyConnected(){
+        private boolean isAnyConnected(){
             return IS_CONNECTED;
         }
   }

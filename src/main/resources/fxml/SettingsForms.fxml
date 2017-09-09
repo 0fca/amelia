@@ -3,16 +3,10 @@
 <?import java.net.URL?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
-<?import javafx.scene.control.CheckBox?>
 <?import javafx.scene.control.ComboBox?>
-<?import javafx.scene.control.ContextMenu?>
 <?import javafx.scene.control.Label?>
-<?import javafx.scene.control.MenuItem?>
-<?import javafx.scene.control.PasswordField?>
 <?import javafx.scene.control.Tab?>
 <?import javafx.scene.control.TabPane?>
-<?import javafx.scene.control.TableColumn?>
-<?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.BorderPane?>
@@ -55,36 +49,6 @@
                               </HBox>
                            </bottom>
                         </BorderPane>
-                     </children>
-                  </AnchorPane>
-            </content>
-          </Tab>
-          <Tab closable="false" text="Users settings">
-            <content>
-              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-                     <children>
-                        <TextField fx:id="USER_TXT" layoutX="14.0" layoutY="14.0" />
-                        <PasswordField fx:id="PASS_TXT" layoutX="205.0" layoutY="14.0" />
-                        <CheckBox fx:id="IS_ADMIN" layoutX="14.0" layoutY="51.0" mnemonicParsing="false" text="Is admin?" />
-                        <Button fx:id="REGISTER_BUTTON" layoutX="397.0" layoutY="14.0" mnemonicParsing="false" text="Register" />
-                        <TableView layoutX="14.0" layoutY="71.0" prefHeight="200.0" prefWidth="632.0">
-                          <columns>
-                            <TableColumn prefWidth="376.0" text="User" />
-                            <TableColumn prefWidth="249.0" text="Password" />
-                              <TableColumn prefWidth="75.0" text="Is an admin?" />
-                          </columns>
-                           <columnResizePolicy>
-                              <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
-                           </columnResizePolicy>
-                           <contextMenu>
-                              <ContextMenu>
-                                <items>
-                                  <MenuItem mnemonicParsing="false" text="Unspecified Action" />
-                                </items>
-                              </ContextMenu>
-                           </contextMenu>
-                        </TableView>
-                        <Button fx:id="DATA_BUTTON" layoutX="554.0" layoutY="14.0" mnemonicParsing="false" text="Load data" />
                      </children>
                   </AnchorPane>
             </content>

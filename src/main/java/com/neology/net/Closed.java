@@ -15,14 +15,19 @@ import java.util.logging.Logger;
  * @author obsidiam
  */
 public class Closed extends TransportState{
+    private Transport T;
+    
     @Override
     public void closeConnection(Transport t, Socket s) {
         try {
             System.out.println("Closed::closeConnection() -> attempting to close...");
-            if(t.isConnected()){
-                t.close();
-                s.close();
-                System.out.println("Closed::closeConnection() -> closed.");
+            this.T = t;
+            if(t != null){
+                if(t.isConnected()){
+                    t.close();
+                    s.close();
+                    System.out.println("Closed::closeConnection() -> closed.");
+                }
             }
         } catch (IOException ex) {
             Logger.getLogger(Closed.class.getName()).log(Level.SEVERE, null, ex);
@@ -33,10 +38,16 @@ public class Closed extends TransportState{
     @Override
     public void haltConnection(Transport t, Socket s) {
         try {
+            this.T = t;
             t.close();
             s.close();
         } catch (IOException ex) {
             Logger.getLogger(Closed.class.getName()).log(Level.SEVERE, null, ex);
         }
+    }
+    
+    @Override
+    public Transport getTransportInstance(){
+        return T;
     }
 }

@@ -5,6 +5,7 @@
  */
 package com.neology.interfaces;
 
+import com.neology.exceptions.TransportException;
 import com.neology.net.Transport;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -20,4 +21,6 @@ public interface Connectable {
     public void closeConnection(Transport t, Socket s);
     public void haltConnection(Transport t, Socket s);
     public void sendPacket(Transport t, byte[] buffer);
+    public void establish(Transport t);
+    public byte[] readPacket(Transport t) throws TransportException;
 }
