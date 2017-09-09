@@ -29,10 +29,17 @@ public class Established extends TransportState{
             Logger.getLogger(Established.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
+    
     @Override
     public byte[] readPacket(Transport t) throws TransportException{
        System.out.println("Established readPacket()::"+t.getIp());
-       return t.readBytes(8192);
+       return t.readBytes(32768);
+    }
+    
+    @Override
+    public byte[] readPacket(Transport t, int len) throws TransportException{
+       System.out.println("Established readPacket(t,bufferLen)::"+t.getIp());
+       return t.readBytes(len);
     }
     
     @Override

@@ -5,7 +5,7 @@
  */
 package com.neology.xml;
 
-import abstracts.LocalEnvironment;
+import com.neology.environment.LocalEnvironment;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;

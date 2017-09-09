@@ -9,11 +9,11 @@ import com.neology.net.states.Transport;
 import com.neology.net.states.Closed;
 import com.neology.net.states.Established;
 import com.neology.net.states.State;
-import abstracts.LocalEnvironment;
+import com.neology.environment.LocalEnvironment;
 import com.neology.data.ConnectionDataHandler;
 import com.neology.data.ImageDataHandler;
 import com.neology.exceptions.TransportException;
-import enums.Local;
+import com.neology.environment.Local;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -21,6 +21,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import javafx.scene.image.Image;
 import javax.imageio.ImageIO;
 
@@ -36,7 +37,7 @@ public class TCPThread extends Thread implements Runnable{
     private final ImageDataHandler IDH = ImageDataHandler.getInstance();
     private final ConnectionDataHandler CDH = ConnectionDataHandler.getInstance();
     private final LocalEnvironment LOCAL = new LocalEnvironment() {};
-    private static volatile int closedCount = 0;
+    private String ext = "PNG";
     
     @Override
     public void start(){
@@ -51,7 +52,7 @@ public class TCPThread extends Thread implements Runnable{
         
         while(TH != null){
             if(!TH.isInterrupted()){
-                    ArrayList<Connection> connections = cdh.getConnectionList();
+                    List<Connection> connections = cdh.getConnectionList();
                     for(int i = 0; i < connections.size(); i++){
                             Transport t = null;
                             Connection c = connections.get(i);
@@ -73,6 +74,7 @@ public class TCPThread extends Thread implements Runnable{
 
                             try {
                                    buffer = c.read(t);
+                                   System.out.println(buffer.length);
                                    Image im = processData(buffer);
                                    IDH.getImagesMap().put(NAME, im);
 
@@ -117,13 +119,13 @@ public class TCPThread extends Thread implements Runnable{
             String name = String.valueOf(c).trim();
             NAME = name;
             System.out.println("FILE_NAME_RECEIVED: "+name);
-            result = Arrays.copyOfRange(buffer,len,8192);
+            result = Arrays.copyOfRange(buffer,len,32768);
             is = new ByteArrayInputStream(result);
 
             BufferedImage bf = ImageIO.read(is);
             System.out.println("AVAILABLE_BYTE_COUNT: "+is.available());
-            ImageIO.write(bf, "JPG", new FileOutputStream(LOCAL.getLocalVar(Local.TMP)+File.separator+name+".jpg"));
-            Image out = new Image("file:///"+LOCAL.getLocalVar(Local.TMP)+File.separator+name+".jpg",250,200,true,true);
+            ImageIO.write(bf, ext, new FileOutputStream(LOCAL.getLocalVar(Local.TMP)+File.separator+name+"."+ext));
+            Image out = new Image("file:///"+LOCAL.getLocalVar(Local.TMP)+File.separator+name+"."+ext,250,150,true,true);
             System.err.println("Is error: "+out.isError());
             System.out.println("IMAGE_LOADER_STATE: "+out.getProgress()+"\n");
             MTR.count(buffer.length);
@@ -138,9 +140,5 @@ public class TCPThread extends Thread implements Runnable{
             c[i] = (char)((int)buffer[i]);
         }
         return c;
-    }
-    
-    public synchronized static int getClosedCount(){
-        return closedCount;
     }
 }

@@ -5,11 +5,8 @@
  */
 package com.neology.net;
 
-import com.neology.net.states.Closed;
 import com.neology.data.ConnectionDataHandler;
 import com.neology.data.ImageDataHandler;
-import com.neology.net.states.Established;
-import com.neology.net.states.Opened;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -34,21 +31,23 @@ public class ConnectionManager extends Thread implements Runnable{
     @Override
     public void run(){
         while(!mgr.isInterrupted()){
-            for(Connection con : cdh.getConnectionList()){
-                if(con.getState() == com.neology.net.states.State.CLOSED){
-                    con.close();
-                    cdh.getConnectionList().remove(con);
-                    idh.getImagesMap().remove(con.getConnectionName());
-                }
-            
-                if(con.getState() == com.neology.net.states.State.ESTABLISHED){
-                    con.establish(con.getTranportInstance());
-                }
-                }
-            }
+            cdh.getConnectionList().stream().map((con) -> {
+                return con;
+            }).filter((con) -> (con.getState() == com.neology.net.states.State.ESTABLISHED)).forEachOrdered((con) -> {
+                con.establish(con.getTranportInstance());
+            });
         
+            cdh.getConnectionList().stream().map((con) -> {
+                return con;
+            }).filter((con) -> (con.getState() == com.neology.net.states.State.CLOSED)).forEachOrdered((con) -> {
+                con.close();
+                cdh.getConnectionList().remove(con);
+                idh.getImagesMap().remove(con.getConnectionName());
+                
+            });
+            
             try {
-                Thread.sleep(500);
+                Thread.sleep(1000);
             } catch (InterruptedException ex) {
                 Logger.getLogger(ConnectionManager.class.getName()).log(Level.SEVERE, null, ex);
             }
@@ -56,6 +55,7 @@ public class ConnectionManager extends Thread implements Runnable{
                 mgr.interrupt();
             }
         }
+    }
     
     public void interruptThread(){
         if(mgr.getState() != State.TIMED_WAITING){

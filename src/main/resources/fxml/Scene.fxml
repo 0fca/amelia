@@ -41,7 +41,7 @@
             </Button>
          </children>
          <effect>
-            <DropShadow blurType="TWO_PASS_BOX" color="#536dfe" height="26.0" offsetX="5.0" radius="13.75" width="31.0" />
+            <DropShadow color="#536dfe" height="28.5" offsetX="5.0" radius="14.375" width="31.0" />
          </effect>
       </Pane>
       <BorderPane layoutY="119.0" prefHeight="543.0" prefWidth="996.0" AnchorPane.bottomAnchor="-3.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="119.0">

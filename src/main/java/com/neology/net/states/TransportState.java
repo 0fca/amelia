@@ -45,6 +45,12 @@ public class TransportState implements Connectable{
     }
     
     @Override
+    public byte[] readPacket(Transport t, int bufferLen) throws TransportException{
+       System.out.println("TransportState readPacket(t,bufferlen)");
+       return this.readPacket(t, bufferLen);
+    }
+    
+    @Override
     public void establish(Transport t){
         this.establish(t);
     }

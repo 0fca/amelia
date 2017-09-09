@@ -1,6 +1,6 @@
 package com.neology.todosaver;
 
-import abstracts.LocalEnvironment;
+import com.neology.environment.LocalEnvironment;
 import com.neology.data.ConnectionDataHandler;
 import com.neology.data.ImageDataHandler;
 import com.neology.interfaces.Viewable;
@@ -12,7 +12,7 @@ import com.neology.net.states.Established;
 import com.neology.net.states.NetController;
 import com.neology.net.TCPThread;
 import com.neology.xml.XMLController;
-import enums.Local;
+import com.neology.environment.Local;
 import javafx.scene.image.Image;
 import java.io.File;
 import java.io.IOException;
@@ -201,7 +201,6 @@ public class FXMLController extends LocalEnvironment implements Initializable,Vi
 
     private void transitToDisconnectedMode() {
         IDH.getImagesMap().clear();
-        
 
         c.cancel();
         tcp.interrupt();

@@ -51,18 +51,17 @@ public class MainApp extends Application{
                     }
                 }
             }
-        });
-        
-        stage.setOnCloseRequest( listener ->{
+            
             Thread[] tarray = new Thread[Thread.activeCount()];
             Thread.enumerate(tarray);
             for(Thread t : tarray){
                 if(t.getName().equals("TCPThread")){
-                    openLoginDialog(listener);
+                    openLoginDialog(event);
                 }
             }
-            
+            System.exit(0);
         });
+        
         stage.setTitle("Amelia");
         stage.setScene(scene);
         stage.show();

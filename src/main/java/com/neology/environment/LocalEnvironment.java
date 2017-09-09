@@ -3,10 +3,9 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package abstracts;
+package com.neology.environment;
 
 import com.neology.xml.XMLController;
-import enums.Local;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;

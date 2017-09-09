@@ -7,8 +7,10 @@ package com.neology.data;
 
 import com.neology.net.Connection;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 
 /**
  *
@@ -18,7 +20,7 @@ public class ConnectionDataHandler {
      private volatile HashMap<String,String> DATA = new HashMap<>();
      private volatile HashSet<String> IPS_MAP = new HashSet<>(); 
      private static volatile ConnectionDataHandler INSTANCE = new ConnectionDataHandler();
-     private volatile ArrayList<Connection> SOCKET_LIST = new ArrayList<>();
+     private volatile List<Connection> SOCKET_LIST = Collections.synchronizedList(new ArrayList<>());
      private volatile HashMap<String,String> CONN_USER_DATA = new HashMap<>();
      
      private ConnectionDataHandler(){}
@@ -53,7 +55,7 @@ public class ConnectionDataHandler {
          IPS_MAP.remove(ip);
      }
      
-     public synchronized ArrayList<Connection> getConnectionList(){
+     public synchronized List<Connection> getConnectionList(){
          return SOCKET_LIST;
      } 
     

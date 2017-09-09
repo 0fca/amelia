@@ -5,11 +5,11 @@
  */
 package com.neology.todosaver;
 
-import abstracts.LocalEnvironment;
+import com.neology.environment.LocalEnvironment;
 import com.neology.net.Connection;
 import com.neology.net.states.NetController;
 import com.neology.net.states.Opened;
-import enums.Local;
+import com.neology.environment.Local;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
