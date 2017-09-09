@@ -6,7 +6,7 @@ Amelia has classical server-client scheme. It uses java.net API to transfer data
 Amelia system is built from 2 parts: Amelia Server GUI app and <a href="https://github.com/Obsidiam/ameliaclient">Amelia Client CLI app</a>.
 Server app uses multithreading. 
 
-App transfers images in JFIF format, resolution is 150x100. App loads all data(image and metadata) to an array which
+App transfers images in JFIF format, resolution is 250x200. App loads all data(image and metadata) to an array which
 length is 8192.
 
 Integer value of first byte in data packet sent by server tells how many bytes counting from index 1 contains 
@@ -35,8 +35,8 @@ The file is supposed to load IP address and port number.
 For an instance, client app will load settings at startup, then it will auto connect to the server using given data. There is a possibility to load settings manually using ‘load’ command. To print list of commands with short description, just type: ‘help’ or ‘?’. In order of applying changes made to settings, the connection must be restarted.
 
 Configuration is saved in two situations: 
-when exiting,
-when the “Connector Thread” is supposed to end its work.
+* when exiting,
+* when the “Connector Thread” is supposed to end its work.
 There is no option to save it manually during client’s work. 
 
 Server app is built using State pattern.
@@ -48,6 +48,29 @@ Amelia has following features:
 * provides data for every single connection like transfer speed, client IP, port,
 * simple, light UI,
 * shows when started and when ended monitoring process.
+Amelia is compatible with:
+* Windows 10
+* Windows 8
+* Windows 7
+* Windows Vista
+* Windows XP
+
+Amelia should be compatible with all Linux OS's, but I am not sure.
+
+**Amelia Server** was tested on:
+* Windows 10,
+* Windows 7,
+* Windows XP,
+* openSUSE 42.2 Leap,
+* Mint 18.1.
+
+**Amelia Client** was tested on:
+* Windows 10,
+* Windows 7,
+* Windows XP,
+* openSUSE 42.2 Leap,
+* Mint 18.1,
+* Ubuntu 15.04.
 
 # Incoming features
 I want to add following features:
@@ -60,6 +83,10 @@ I want to add following features:
 ![W10&WinXP connection](https://i.imgur.com/VESKEVR.png)
 
 Amelia is receiving screen state from physical Linux machine running on Windows 10 x64.
+
+![suse to XP connection](http://i.imgur.com/GLaOi7K.png)
+
+Amelia is hosted by openSUSE 42.2 Leap and one client is on localhost and the second one is on Windows XP.
 
 ![settings](http://i.imgur.com/ZCJGvvv.png)
 
