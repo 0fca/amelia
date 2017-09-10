@@ -2,6 +2,7 @@
 
 <?import java.net.URL?>
 <?import javafx.geometry.Insets?>
+<?import javafx.scene.Cursor?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.Label?>
@@ -13,7 +14,7 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane id="AnchorPane" prefHeight="400.0" prefWidth="651.0" styleClass="mainFxmlClass" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.neology.todosaver.SettingsFormsController">
+<AnchorPane id="AnchorPane" prefHeight="400.0" prefWidth="651.0" styleClass="mainFxmlClass" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.neology.controllers.SettingsFormsController">
     <stylesheets>
         <URL value="@/styles/Styles.css" />
     </stylesheets>
@@ -42,9 +43,12 @@
                            <bottom>
                               <HBox alignment="CENTER" spacing="40.0" BorderPane.alignment="CENTER">
                                  <children>
-                                    <Button fx:id="SAVE_BUTTON" mnemonicParsing="false" prefHeight="26.0" prefWidth="83.0" text="SAVE" />
-                                    <Button fx:id="BACKUP_BUTTON" mnemonicParsing="false" prefHeight="26.0" prefWidth="83.0" text="BACKUP" />
-                                    <Button fx:id="DO_TRANSMISSION_BUUTON" mnemonicParsing="false" prefHeight="29.0" prefWidth="143.0" text="SEND TO CLIENTS" />
+                                    <Button fx:id="DO_TRANSMISSION_BUTTON" disable="true" mnemonicParsing="false" prefHeight="32.0" prefWidth="143.0" text="SEND TO CLIENTS" />
+                                    <Label fx:id="BACKUP_LABEL" contentDisplay="GRAPHIC_ONLY" text="Label">
+                                       <cursor>
+                                          <Cursor fx:constant="HAND" />
+                                       </cursor>
+                                    </Label>
                                  </children>
                               </HBox>
                            </bottom>

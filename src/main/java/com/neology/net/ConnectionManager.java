@@ -7,6 +7,7 @@ package com.neology.net;
 
 import com.neology.data.ConnectionDataHandler;
 import com.neology.data.ImageDataHandler;
+import com.neology.net.states.Closed;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -33,17 +34,16 @@ public class ConnectionManager extends Thread implements Runnable{
         while(!mgr.isInterrupted()){
             cdh.getConnectionList().stream().map((con) -> {
                 return con;
-            }).filter((con) -> (con.getState() == com.neology.net.states.State.ESTABLISHED)).forEachOrdered((con) -> {
-                con.establish(con.getTranportInstance());
-            });
-        
-            cdh.getConnectionList().stream().map((con) -> {
-                return con;
-            }).filter((con) -> (con.getState() == com.neology.net.states.State.CLOSED)).forEachOrdered((con) -> {
-                con.close();
-                cdh.getConnectionList().remove(con);
-                idh.getImagesMap().remove(con.getConnectionName());
+            }).forEachOrdered( con ->{
+                if( con.getState() == com.neology.net.states.State.ESTABLISHED){
+                    con.establish(con.getTranportInstance());
+                }
                 
+                if( con.getState() == com.neology.net.states.State.CLOSED){
+                    con.close();
+                    cdh.getConnectionList().remove(con);
+                    idh.getImagesMap().remove(con.getConnectionName());
+                }
             });
             
             try {
@@ -63,6 +63,17 @@ public class ConnectionManager extends Thread implements Runnable{
         }else{
             wasInterrupted = true;
         }
+        
+        disconnectAll();
+    }
+
+    private void disconnectAll() {
+        cdh.getConnectionList().forEach(con ->{
+            cdh.addIpToMap(con.getTranportInstance().getIp().split(":")[0]);
+            Closed c = new Closed();
+            con.changeState(c);
+            con.close();
+        });
     }
     }
 

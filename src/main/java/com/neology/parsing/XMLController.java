@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.neology.xml;
+package com.neology.parsing;
 
 import com.neology.environment.LocalEnvironment;
 import java.io.File;

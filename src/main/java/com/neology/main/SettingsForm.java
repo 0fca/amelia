@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.neology.todosaver;
+package com.neology.main;
 
 import com.neology.interfaces.Viewable;
 import javafx.application.Application;
@@ -55,6 +55,11 @@ public class SettingsForm extends Application implements Viewable{
 
     @Override
     public void viewError(String text) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void viewCustom() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 }

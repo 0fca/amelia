@@ -5,7 +5,7 @@
  */
 package com.neology.environment;
 
-import com.neology.xml.XMLController;
+import com.neology.parsing.XMLController;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;

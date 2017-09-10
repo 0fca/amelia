@@ -1,4 +1,4 @@
-package com.neology.todosaver;
+package com.neology.main;
 
 import java.io.File;
 import java.io.IOException;
@@ -38,7 +38,6 @@ public class MainApp extends Application{
         stage.setOnCloseRequest(event ->{
             File img = new File(Paths.get(".").toAbsolutePath().normalize().toString());
             File[] files = img.listFiles();
-            
             
             if(files != null){
                 for(File f : files){

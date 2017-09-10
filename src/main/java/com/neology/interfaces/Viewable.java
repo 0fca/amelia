@@ -14,4 +14,5 @@ import javafx.scene.control.Alert.AlertType;
 public interface Viewable {
     public void viewAlert(String name, String header, String content, AlertType type);
     public void viewError(String text);
+    public void viewCustom();
 }

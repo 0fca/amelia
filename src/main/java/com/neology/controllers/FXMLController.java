@@ -1,18 +1,15 @@
-package com.neology.todosaver;
+package com.neology.controllers;
 
 import com.neology.environment.LocalEnvironment;
 import com.neology.data.ConnectionDataHandler;
 import com.neology.data.ImageDataHandler;
 import com.neology.interfaces.Viewable;
-import com.neology.net.states.Closed;
-import com.neology.net.Connection;
 import com.neology.net.ConnectionManager;
 import com.neology.net.ConnectionReceiver;
-import com.neology.net.states.Established;
-import com.neology.net.states.NetController;
 import com.neology.net.TCPThread;
-import com.neology.xml.XMLController;
+import com.neology.parsing.XMLController;
 import com.neology.environment.Local;
+import com.neology.main.SettingsForm;
 import javafx.scene.image.Image;
 import java.io.File;
 import java.io.IOException;
@@ -25,7 +22,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -33,6 +29,7 @@ import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.concurrent.Service;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
 import javafx.scene.control.Alert;
@@ -49,6 +46,7 @@ import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.CornerRadii;
 import javafx.scene.paint.Color;
+import javafx.stage.Stage;
 import javafx.util.Callback;
 import javax.xml.parsers.ParserConfigurationException;
 import org.xml.sax.SAXException;
@@ -117,8 +115,8 @@ public class FXMLController extends LocalEnvironment implements Initializable,Vi
         SETTINGS.setOnAction(event ->{
             SettingsForm settings = new SettingsForm();
             try {
-                viewAlert("Warning","Cannot enter settings!","Settings are in development at the moment, sorry for the inconvience.",AlertType.WARNING);
-                //settings.start(new Stage());
+                //viewAlert("Warning","Cannot enter settings!","Settings are in development at the moment, sorry for the inconvience.",AlertType.WARNING);
+                settings.start(new Stage());
             } catch (Exception ex) {
                 Logger.getLogger(FXMLController.class.getName()).log(Level.SEVERE, null, ex);
             }
@@ -130,6 +128,17 @@ public class FXMLController extends LocalEnvironment implements Initializable,Vi
         
         DISCONNECT.setOnAction(event ->{
             transitToDisconnectedMode();
+        });
+        
+        ABOUT.setOnAction(listener ->{
+            AboutFormController about;
+            try {
+                about = new AboutFormController(FXMLLoader.load(getClass().getResource("/fxml/AboutForm.fxml")));
+                about.showAbout();
+            } catch (IOException ex) {
+                Logger.getLogger(FXMLController.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            
         });
         VIEWER_PANEL.setCellFactory(new CallbackImpl());
     }  
@@ -151,6 +160,10 @@ public class FXMLController extends LocalEnvironment implements Initializable,Vi
                 IS_LOGGED_IN = true;
                 CONNECT.setDisable(false);
                 SETTINGS.setDisable(false);
+                LOGIN.setText(null);
+                PASS.setText(null);
+                LOGIN_BUTTON.setDisable(true);
+                LOG_OUT_BUTTON.setDisable(false);
 
             }else{
                 if(!LOGGED_IN.isEmpty()){
@@ -162,10 +175,7 @@ public class FXMLController extends LocalEnvironment implements Initializable,Vi
                     viewError("Error. This user hasn't been registered yet.");
                 }
             }
-            LOGIN.setText(null);
-            PASS.setText(null);
-            LOGIN_BUTTON.setDisable(true);
-            LOG_OUT_BUTTON.setDisable(false);
+            
         }
     }
 
@@ -206,14 +216,7 @@ public class FXMLController extends LocalEnvironment implements Initializable,Vi
         tcp.interrupt();
         mgr.interruptThread();
         CDH.getData().clear();
-        
-        CDH.getConnectionList().forEach(con ->{
-            CDH.addIpToMap(con.getTranportInstance().getIp().split(":")[0]);
-            Closed c = new Closed();
-            con.changeState(c);
-            con.close();
-        });
-
+       
         
         CDH.getConnectionList().clear();
 
@@ -253,6 +256,11 @@ public class FXMLController extends LocalEnvironment implements Initializable,Vi
             INFO_VIEW.getItems().clear();
             INFO_VIEW.getItems().addAll(Arrays.asList(line.split(",")));
         }
+    }
+
+    @Override
+    public void viewCustom() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
     
     

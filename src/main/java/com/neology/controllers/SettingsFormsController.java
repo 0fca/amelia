@@ -3,20 +3,16 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.neology.todosaver;
+package com.neology.controllers;
 
 import com.neology.environment.LocalEnvironment;
-import com.neology.net.Connection;
-import com.neology.net.states.NetController;
-import com.neology.net.states.Opened;
 import com.neology.environment.Local;
+import com.neology.google.Authorization;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.net.InetSocketAddress;
-import java.net.ServerSocket;
 import java.net.URL;
 import java.net.UnknownHostException;
 import java.text.SimpleDateFormat;
@@ -34,8 +30,12 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.Label;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TextField;
+import javafx.scene.control.Tooltip;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javax.xml.stream.XMLStreamException;
 /**
@@ -49,7 +49,9 @@ public class SettingsFormsController extends LocalEnvironment implements Initial
      * Initializes the controller class.
      */
     @FXML
-    private Button SAVE_BUTTON,BACKUP_BUTTON,DATA_BUTTON,DO_TRANSMISSION_BUTTON;
+    private Button DATA_BUTTON,DO_TRANSMISSION_BUTTON;
+    @FXML
+    private Label BACKUP_LABEL;
     @FXML
     private TabPane TAB_PANE;
     @FXML
@@ -68,11 +70,16 @@ public class SettingsFormsController extends LocalEnvironment implements Initial
     
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        BACKUP_BUTTON.setOnAction(event ->{
+        Image gd_sync_img = new Image(SettingsFormsController.class.getResourceAsStream("/images/gd_icon48x48.png"),32,32,true,true);
+        BACKUP_LABEL.setGraphic(new ImageView(gd_sync_img));
+        BACKUP_LABEL.setTooltip(new Tooltip("Backup settings to Google Drive"));
+        
+        BACKUP_LABEL.setOnMouseClicked( event ->{
             
         });
+       
         
-        SAVE_BUTTON.setOnAction(event ->{
+        DO_TRANSMISSION_BUTTON.setOnAction( action ->{
             SAVED = true;
           
             try {
