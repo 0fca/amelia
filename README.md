@@ -36,7 +36,7 @@ For an instance, client app will load settings at startup, then it will auto con
 Configuration is saved in two situations: 
 * when exiting,
 * when the “Connector Thread” is supposed to end its work.
-There is no option to save it manually during client’s work. 
+To save settings use command "save".
 
 Server app is built using State pattern.
 
