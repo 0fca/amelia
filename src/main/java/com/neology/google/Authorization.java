@@ -61,7 +61,7 @@ public class Authorization {
             DATA_STORE_FACTORY = new FileDataStoreFactory(DATA_STORE_DIR);
         } catch (IOException | GeneralSecurityException t) {
             t.printStackTrace();
-            System.exit(1);
+            //System.exit(1);
         }
     }
 

@@ -32,6 +32,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
@@ -48,7 +49,9 @@ import javafx.scene.layout.CornerRadii;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import javafx.util.Callback;
+import javafx.util.Duration;
 import javax.xml.parsers.ParserConfigurationException;
+import org.controlsfx.control.Notifications;
 import org.xml.sax.SAXException;
 
 public class FXMLController extends LocalEnvironment implements Initializable,Viewable {
@@ -151,6 +154,7 @@ public class FXMLController extends LocalEnvironment implements Initializable,Vi
             XMLController xml = new XMLController();
             INIT = xml.parseInitFile();
             PORT = Integer.parseInt(INIT.get(0));
+            ADDR = INIT.get(1);
     }
 
     private void loginUser() throws ClassNotFoundException {
@@ -203,6 +207,7 @@ public class FXMLController extends LocalEnvironment implements Initializable,Vi
     }
 
     private void initSession() {
+        mgr.setAccessorInstance(new AccessorImpl(v));
         c.start();
         tcp.start();
         v.start();
@@ -216,10 +221,9 @@ public class FXMLController extends LocalEnvironment implements Initializable,Vi
         tcp.interrupt();
         mgr.interruptThread();
         CDH.getData().clear();
-       
         
         CDH.getConnectionList().clear();
-
+        CDH.setFree(true);
         Platform.runLater(() ->{
             VIEWER_PANEL.getItems().clear(); 
             INFO_VIEW.getItems().clear();
@@ -235,9 +239,7 @@ public class FXMLController extends LocalEnvironment implements Initializable,Vi
         System.out.println("ConnectionManager -> "+c.getState().toString());
         if(c.getState() == Service.State.CANCELLED || c.getState() == Service.State.SUCCEEDED){
             Platform.runLater(() ->{
-               c.restart();
-               tcp.start();
-               mgr.start();
+               reinitSession();
             });
         }
         System.out.println("ConnectionManager -> "+c.getState().toString());
@@ -262,6 +264,12 @@ public class FXMLController extends LocalEnvironment implements Initializable,Vi
     public void viewCustom() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
+
+    private void reinitSession() {
+        c.restart();
+        tcp.start();
+        mgr.start();
+    }
     
     
     private class CallbackImpl implements Callback<ListView<String>, ListCell<String>> {
@@ -280,9 +288,8 @@ public class FXMLController extends LocalEnvironment implements Initializable,Vi
                     setText(null);
                     setGraphic(null);
                 } else {
-                    String fn = Paths.get(item.toString()).getFileName().toString();
-                    setText(fn);
-
+                    String fn = Paths.get(item.toString().split("-")[1]).getFileName().toString();
+                    //setText(fn);
                     Image out = IDH.getImagesMap().get(fn.split("\\.")[0]);
 
                     if(out != null){
@@ -305,9 +312,12 @@ public class FXMLController extends LocalEnvironment implements Initializable,Vi
         }
     }
     
-    private class ViewUpdater extends Thread implements Runnable{
+   class ViewUpdater extends Thread implements Runnable{
         private Thread T = null;
-
+        private boolean wasSignaled = false;
+        private SignalType type;
+        private String msg = null;
+        
         @Override
         public void start(){
             if(T == null){
@@ -324,16 +334,18 @@ public class FXMLController extends LocalEnvironment implements Initializable,Vi
                     
                     Platform.runLater(() ->{
                         VIEWER_PANEL.getItems().clear();
+                        //System.out.println(map.size());
                         if(map.size() > 0){
                             if(c.getState() == javafx.concurrent.ScheduledService.State.RUNNING){
+                                
                                 map.forEach((x,y) ->{
-                                    VIEWER_PANEL.getItems().add("file://"+getLocalVar(Local.TMP)+File.separator+x+".jpg:"+x);
+                                    VIEWER_PANEL.getItems().add("file://"+getLocalVar(Local.TMP)+File.separator+x+".jpg-"+x);
                                 });
 
                                 if(SELECTED > -1 && VIEWER_PANEL.getItems().size() > SELECTED){
                                     data.forEach((x,y) ->{
                                             VIEWER_PANEL.getSelectionModel().select(SELECTED);
-                                            Object item = VIEWER_PANEL.getItems().get(SELECTED).toString().split(":")[2];
+                                            Object item = VIEWER_PANEL.getItems().get(SELECTED).toString().split("-")[1];
                                             if(item != null){
                                                 if(CDH.findConnectionName(item.toString()) != null){
                                                     setInfoViewData(CDH.getData().get(CDH.findConnectionName(item.toString())));
@@ -344,6 +356,11 @@ public class FXMLController extends LocalEnvironment implements Initializable,Vi
                             }
                         }
                     });
+                    
+                    if(wasSignaled && msg != null){
+                       Platform.runLater(() -> showNotification(type.toString(), msg));
+                       wasSignaled = false;
+                    }
                 try {
                     Thread.sleep(1000);
                     System.gc();
@@ -351,6 +368,27 @@ public class FXMLController extends LocalEnvironment implements Initializable,Vi
                     Logger.getLogger(FXMLController.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
+        }
+        
+        synchronized void signal(SignalType type){
+            this.type = type;
+            wasSignaled = true;
+        }
+        
+        synchronized void commitSignalData(String msg){
+            this.msg = msg;
+        }
+        
+        private synchronized void showNotification(String title, String text) {
+            
+            Notifications notificationBuilder = Notifications.create()
+                    .title(title)
+                    .text(text)
+                    .graphic(null)
+                    .hideAfter(Duration.seconds(10))
+                    .darkStyle()
+                    .position(Pos.BOTTOM_RIGHT);
+            notificationBuilder.show();
         }
     }
 }

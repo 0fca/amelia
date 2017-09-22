@@ -33,7 +33,7 @@ public class Established extends TransportState{
     @Override
     public byte[] readPacket(Transport t) throws TransportException{
        System.out.println("Established readPacket()::"+t.getIp());
-       return t.readBytes(32768);
+       return t.readBytes(8192);
     }
     
     @Override

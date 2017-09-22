@@ -29,6 +29,8 @@ import javafx.util.Pair;
 
 public class MainApp extends Application{
 
+    private Thread tcpInst = null;
+    
     @Override
     public void start(Stage stage) throws Exception {
         Parent root = FXMLLoader.load(getClass().getResource("/fxml/Scene.fxml"));
@@ -41,7 +43,7 @@ public class MainApp extends Application{
             
             if(files != null){
                 for(File f : files){
-                    if(f.getName().endsWith(".jpg")){
+                    if(f.getName().endsWith(".jpg") || f.getName().endsWith(".JPG")){
                         try {
                             Files.delete(f.toPath());
                         } catch (IOException ex) {
@@ -51,14 +53,21 @@ public class MainApp extends Application{
                 }
             }
             
-            Thread[] tarray = new Thread[Thread.activeCount()];
-            Thread.enumerate(tarray);
-            for(Thread t : tarray){
-                if(t.getName().equals("TCPThread")){
+            if(tcpInst == null){
+                Thread[] tarray = new Thread[Thread.activeCount()];
+                Thread.enumerate(tarray);
+                for(Thread t : tarray){
+                    if(t.getName().equals("TCPThread")){
+                        openLoginDialog(event);
+                    }
+                }
+            }else{
+                if(tcpInst.isAlive()){
+                    System.out.println("TCP Thread was alive...");
                     openLoginDialog(event);
                 }
             }
-            System.exit(0);
+            //System.exit(0);
         });
         
         stage.setTitle("Amelia");
@@ -117,8 +126,7 @@ public class MainApp extends Application{
                 if (dialogButton == loginButtonType) {
                     return new Pair<>(username.getText(), password.getText());
                 }else{
-                    evt.consume();
-                    return null;
+                    return new Pair<>("","");
                 }
             });
 

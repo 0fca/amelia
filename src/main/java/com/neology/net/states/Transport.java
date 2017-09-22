@@ -40,8 +40,6 @@ public class Transport {
     private DataOutputStream os;
     private InputStream origIs;
     private OutputStream origOs;
-    //Socket s;
-    private boolean WAS_CONNECTED = false;
     private BaudrateMeter baudrateMeter;
     private String IP;
    
@@ -72,7 +70,6 @@ public class Transport {
     void release() {
         origIs = is = null;
         origOs = os = null;
-        WAS_CONNECTED = true;
     }
 
     public void close() throws IOException{
@@ -85,7 +82,7 @@ public class Transport {
             if (baudrateMeter != null) baudrateMeter.count(1);
             return is.readByte();
         } catch (EOFException e) {
-            throw new ClosedConnectionException(e);
+            throw new ClosedConnectionException("Cannot read byte",e);
         } catch (IOException e) {
             throw new TransportException("Cannot read byte", e);
         }
@@ -113,7 +110,7 @@ public class Transport {
             if (baudrateMeter != null) baudrateMeter.count(2);
             return is.readShort();
         } catch (EOFException e) {
-            throw new ClosedConnectionException(e);
+            throw new ClosedConnectionException("Cannot read int16",e);
         } catch (IOException e) {
             throw new TransportException("Cannot read int16", e);
         }
@@ -128,7 +125,7 @@ public class Transport {
             if (baudrateMeter != null) baudrateMeter.count(4);
             return is.readInt();
         } catch (EOFException e) {
-            throw new ClosedConnectionException(e);
+            throw new ClosedConnectionException("Cannot read int32",e);
         } catch (IOException e) {
             throw new TransportException("Cannot read int32", e);
         }
@@ -139,9 +136,9 @@ public class Transport {
             if (baudrateMeter != null) baudrateMeter.count(8);
             return is.readLong();
         } catch (EOFException e) {
-            throw new ClosedConnectionException(e);
+            throw new ClosedConnectionException("Cannot read long",e);
         } catch (IOException e) {
-            throw new TransportException("Cannot read int32", e);
+            throw new TransportException("Cannot read long", e);
         }
     }
 
@@ -209,7 +206,7 @@ public class Transport {
             }
             return b;
         } catch (EOFException e) {
-            throw new ClosedConnectionException(e);
+            throw new ClosedConnectionException("Cannot read " + length + " bytes array",e);
         } catch (IOException e) {
             throw new TransportException("Cannot read " + length + " bytes array", e);
         }
@@ -225,7 +222,7 @@ public class Transport {
                 baudrateMeter.count(length);
             }
         } catch (EOFException e) {
-            throw new ClosedConnectionException(e);
+            throw new ClosedConnectionException("Cannot skip " + length + " bytes",e);
         } catch (IOException e) {
             throw new TransportException("Cannot skip " + length + " bytes", e);
         }

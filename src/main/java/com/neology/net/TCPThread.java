@@ -8,7 +8,6 @@ package com.neology.net;
 import com.neology.net.states.Transport;
 import com.neology.net.states.Closed;
 import com.neology.net.states.Established;
-import com.neology.net.states.State;
 import com.neology.environment.LocalEnvironment;
 import com.neology.data.ConnectionDataHandler;
 import com.neology.data.ImageDataHandler;
@@ -19,9 +18,10 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.scene.image.Image;
 import javax.imageio.ImageIO;
 
@@ -31,13 +31,12 @@ import javax.imageio.ImageIO;
  */
 public class TCPThread extends Thread implements Runnable{
     private Thread TH;
-    private ConnectionDataHandler cdh = ConnectionDataHandler.getInstance();
+    private final ConnectionDataHandler cdh = ConnectionDataHandler.getInstance();
     private String NAME;
     private BaudrateMeter MTR;
     private final ImageDataHandler IDH = ImageDataHandler.getInstance();
-    private final ConnectionDataHandler CDH = ConnectionDataHandler.getInstance();
     private final LocalEnvironment LOCAL = new LocalEnvironment() {};
-    private String ext = "PNG";
+    private String ext = "JPG";
     
     @Override
     public void start(){
@@ -49,55 +48,75 @@ public class TCPThread extends Thread implements Runnable{
     
     @Override
     public void run(){
-        
         while(TH != null){
-            if(!TH.isInterrupted()){
-                    List<Connection> connections = cdh.getConnectionList();
-                    for(int i = 0; i < connections.size(); i++){
-                            Transport t = null;
-                            Connection c = connections.get(i);
-                            
-                            MTR = c.getTranportInstance().getBaudrateMeter();
-                            MTR.startMeasuringCycle();
-                            if(c.getState() == com.neology.net.states.State.OPENED){
-                               Established e = new Established();
-                               c.changeState(e);
-                            }
-
-                            if(c.getState()  == com.neology.net.states.State.CLOSED){
-                                continue;
-                            }
-                            t = c.getTranportInstance();
-                            System.out.println("TRANSPORTER_IP: "+t.getIp());
-
-                            byte[] buffer;
-
-                            try {
-                                   buffer = c.read(t);
-                                   System.out.println(buffer.length);
-                                   Image im = processData(buffer);
-                                   IDH.getImagesMap().put(NAME, im);
-
-                                   String data = "";
-                                   data += "Client name: "+NAME+",";
-                                   data += "IP: "+t.getIp().substring(1)+",";
-                                   data += "Speed: "+t.getBaudrateMeter().kBPS()+"kB/s,";
-                                   data += "Is connected: "+t.isConnected()+",";
-                                   data += "Was connected earlier: "+c.wasConnected();
-                                   CDH.getData().put(t.getIp(), data);
-                                   if(!c.isNameSet()){
-                                      c.setConnectionName(NAME);
-                                   }
-                                   CDH.putConnectionName(NAME, t.getIp());
-                            } catch (TransportException | IOException ex) {
-                                System.err.println("LOCALIZED_ERR_MSG:"+ex.getLocalizedMessage());
-                                c.changeState(new Closed());
-                                break;
-                            }  
+            List<Connection> connections = cdh.getConnectionList();
+            synchronized(connections){
+                    while(!cdh.isFree()){
+                        try {
+                            System.out.println("TCPThread#run() -> waiting on cdh monitor...");
+                            connections.wait();
+                        } catch (InterruptedException ex) {
+                            Logger.getLogger(TCPThread.class.getName()).log(Level.SEVERE, null, ex);
+                        }
                     }
-                
-            }else{
-                break;
+                    
+                    if(!TH.isInterrupted()){
+                            System.out.println("TCPThread#run() -> starting reading...");
+                            for(int i = 0; i < connections.size(); i++){
+                                Transport t = null;
+                                Connection c = connections.get(i);
+
+                                MTR = c.getTranportInstance().getBaudrateMeter();
+                                MTR.startMeasuringCycle();
+
+                                if(c.getState() == com.neology.net.states.State.OPENED){
+                                   Established e = new Established();
+                                   c.changeState(e);
+                                }
+
+                                if(c.getState() == com.neology.net.states.State.CLOSED){
+                                    continue;
+                                }
+
+                                if(c.getState() == com.neology.net.states.State.ESTABLISHED){
+                                    t = c.getTranportInstance();
+                                    System.out.println("TRANSPORTER_IP: "+t.getIp());
+
+                                    byte[] buffer;
+
+                                    try {
+                                           buffer = c.read(t);
+                                           System.out.println(buffer.length);
+                                           Image im = processData(buffer);
+                                           IDH.getImagesMap().put(NAME, im);
+
+                                           String data = "";
+                                           data += "Client name: "+NAME+",";
+                                           data += "IP: "+t.getIp().substring(1)+",";
+                                           data += "Speed: "+t.getBaudrateMeter().kBPS()+"kB/s,";
+                                           data += "Is connected: "+t.isConnected()+",";
+                                           data += "Was connected earlier: "+c.wasConnected();
+                                           cdh.getData().put(t.getIp(), data);
+                                           if(!c.isNameSet()){
+                                              c.setConnectionName(NAME);
+                                                      
+                                           }
+                                           cdh.putConnectionName(NAME, t.getIp());
+
+                                    } catch (TransportException | IOException ex) {
+                                        System.err.println("LOCALIZED_ERR_MSG:"+ex.getLocalizedMessage());
+                                        c.changeState(new Closed());
+                                        
+                                        break;
+                                    }  
+                                }
+                            }
+                        cdh.setFree(false);
+                        System.out.println("TCPThread#run() -> releasing cdh monitor.");
+                        connections.notifyAll();
+                    }else{
+                        break;
+                    }
             }
         }
     }
@@ -105,8 +124,10 @@ public class TCPThread extends Thread implements Runnable{
     @Override
     public void interrupt(){
         if(TH != null){
-            TH.interrupt();
-            TH = null;
+            if(TH.getState() != State.WAITING && TH.getState() != State.TIMED_WAITING){
+                TH.interrupt();
+                TH = null;
+            }
         }
     }
     
@@ -119,7 +140,7 @@ public class TCPThread extends Thread implements Runnable{
             String name = String.valueOf(c).trim();
             NAME = name;
             System.out.println("FILE_NAME_RECEIVED: "+name);
-            result = Arrays.copyOfRange(buffer,len,32768);
+            result = Arrays.copyOfRange(buffer,len,8192);
             is = new ByteArrayInputStream(result);
 
             BufferedImage bf = ImageIO.read(is);

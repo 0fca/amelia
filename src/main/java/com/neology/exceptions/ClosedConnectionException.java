@@ -29,8 +29,8 @@ package com.neology.exceptions;
 @SuppressWarnings("serial")
 public class ClosedConnectionException extends TransportException {
 
-	public ClosedConnectionException(Throwable exception) {
-		super(exception);
+	public ClosedConnectionException(String msg, Throwable exception) {
+		super(msg ,exception);
 	}
 
 }

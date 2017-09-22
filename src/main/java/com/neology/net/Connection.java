@@ -8,6 +8,7 @@ package com.neology.net;
 import com.neology.net.states.Transport;
 import com.neology.net.states.TransportState;
 import com.neology.data.ConnectionDataHandler;
+import com.neology.exceptions.ClosedConnectionException;
 import com.neology.exceptions.TransportException;
 import com.neology.net.states.State;
 import java.io.IOException;
@@ -19,7 +20,7 @@ import java.util.logging.Logger;
  *
  * @author obsidiam
  */
-public class Connection {
+final public class Connection {
     private TransportState ACTUAL;
 
     private Transport T;
@@ -45,7 +46,11 @@ public class Connection {
     }
     
     public void close(){
-        ACTUAL.closeConnection(T, s);
+        try {
+            ACTUAL.closeConnection(T, s);
+        } catch (ClosedConnectionException ex) {
+            Logger.getLogger(Connection.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
     
     public void halt(){

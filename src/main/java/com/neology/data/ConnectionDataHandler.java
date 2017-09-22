@@ -6,22 +6,23 @@
 package com.neology.data;
 
 import com.neology.net.Connection;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+
 
 /**
  *
  * @author obsidiam
  */
-public class ConnectionDataHandler { 
+public final class ConnectionDataHandler{ 
      private volatile HashMap<String,String> DATA = new HashMap<>();
      private volatile HashSet<String> IPS_MAP = new HashSet<>(); 
      private static volatile ConnectionDataHandler INSTANCE = new ConnectionDataHandler();
-     private volatile List<Connection> SOCKET_LIST = Collections.synchronizedList(new ArrayList<>());
+     private final ObservableList<Connection> SOCKET_LIST = FXCollections.synchronizedObservableList(FXCollections.observableArrayList());
      private volatile HashMap<String,String> CONN_USER_DATA = new HashMap<>();
+     private volatile boolean isFree = true;
      
      private ConnectionDataHandler(){}
      
@@ -55,7 +56,7 @@ public class ConnectionDataHandler {
          IPS_MAP.remove(ip);
      }
      
-     public synchronized List<Connection> getConnectionList(){
+     public synchronized ObservableList<Connection> getConnectionList(){
          return SOCKET_LIST;
      } 
     
@@ -72,5 +73,13 @@ public class ConnectionDataHandler {
      
      public synchronized void removeConnectionName(String userName, String ip){
          CONN_USER_DATA.remove(userName, ip);
+     } 
+     
+     public void setFree(boolean free){
+         this.isFree = free;
+     }
+     
+     public boolean isFree(){
+         return isFree;
      }
 }
