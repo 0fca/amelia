@@ -7,7 +7,6 @@ package com.neology.net.states;
 
 import com.neology.exceptions.ClosedConnectionException;
 import java.io.IOException;
-import java.net.Socket;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -19,19 +18,26 @@ public class Closed extends TransportState{
     private Transport T;
     
     @Override
-    public void closeConnection(Transport t, Socket s) throws ClosedConnectionException{
+    public void closeConnection(Transport t) throws ClosedConnectionException{
         try {
             System.out.println("Closed::closeConnection() -> attempting to close...");
             this.T = t;
+            
             if(t != null){
-                if(t.isConnected() && !s.isClosed()){
-                    t.close();
-                    s.close();
-                    T = null;
-                    System.out.println("Closed::closeConnection() -> closed.");
-                }else{
-                    throw new ClosedConnectionException("Connection already closed!",new Throwable());
-                }
+                    if(t.isTcp()){
+                        if(t.isConnected()){
+                            t.close(); 
+                            System.out.println("Closed::closeConnection() -> closed.");
+                        }else{
+                            throw new ClosedConnectionException("Connection already closed!",new Throwable());
+                        }
+                    }else{
+                        if(!t.getDatagramSocket().isClosed()){
+                            t.getDatagramSocket().close();
+                        }else{
+                            throw new ClosedConnectionException("Connection already closed!",new Throwable());
+                        }
+                    }
             }
         } catch (IOException ex) {
             Logger.getLogger(Closed.class.getName()).log(Level.SEVERE, null, ex);
@@ -39,12 +45,14 @@ public class Closed extends TransportState{
     }
 
     @Override
-    public void haltConnection(Transport t, Socket s) {
+    public void haltConnection(Transport t) {
         try {
             this.T = t;
-            t.close();
-            s.close();
-            T = null;
+            if(t.isTcp()){
+                t.close();
+            }else{
+                t.getDatagramSocket().close();
+            }
         } catch (IOException ex) {
             Logger.getLogger(Closed.class.getName()).log(Level.SEVERE, null, ex);
         }

@@ -10,7 +10,6 @@ import com.neology.exceptions.TransportException;
 import com.neology.interfaces.Connectable;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.Socket;
 
 /**
  *
@@ -26,12 +25,12 @@ public class TransportState implements Connectable{
         T = o.getTransportInstance();
     }
     @Override
-    public void closeConnection(Transport t, Socket s) throws ClosedConnectionException{
-        this.closeConnection(t,s);
+    public void closeConnection(Transport t) throws ClosedConnectionException{
+        this.closeConnection(t);
     }
     @Override
-    public void haltConnection(Transport t, Socket s){
-        this.haltConnection(t,s);
+    public void haltConnection(Transport t){
+        this.haltConnection(t);
     }
 
     @Override

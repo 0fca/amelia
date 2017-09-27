@@ -6,6 +6,7 @@
 package com.neology.data;
 
 import com.neology.net.Connection;
+import com.neology.net.Connection;
 import java.util.HashMap;
 import java.util.HashSet;
 import javafx.collections.FXCollections;
@@ -23,6 +24,7 @@ public final class ConnectionDataHandler{
      private final ObservableList<Connection> SOCKET_LIST = FXCollections.synchronizedObservableList(FXCollections.observableArrayList());
      private volatile HashMap<String,String> CONN_USER_DATA = new HashMap<>();
      private volatile boolean isFree = true;
+     private volatile Connection udp;
      
      private ConnectionDataHandler(){}
      
@@ -81,5 +83,9 @@ public final class ConnectionDataHandler{
      
      public boolean isFree(){
          return isFree;
+     }
+     
+     public void setUdpConnection(Connection udp){
+         this.udp = udp;
      }
 }

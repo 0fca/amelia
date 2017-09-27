@@ -52,22 +52,14 @@ public class MainApp extends Application{
                     }
                 }
             }
-            
-            if(tcpInst == null){
-                Thread[] tarray = new Thread[Thread.activeCount()];
-                Thread.enumerate(tarray);
-                for(Thread t : tarray){
-                    if(t.getName().equals("TCPThread")){
-                        openLoginDialog(event);
-                    }
-                }
-            }else{
-                if(tcpInst.isAlive()){
-                    System.out.println("TCP Thread was alive...");
+
+            Thread[] tarray = new Thread[Thread.activeCount()];
+            Thread.enumerate(tarray);
+            for(Thread t : tarray){
+                if(t.getName().equals("TCPThread")){
                     openLoginDialog(event);
                 }
             }
-            //System.exit(0);
         });
         
         stage.setTitle("Amelia");

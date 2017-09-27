@@ -28,7 +28,12 @@ import com.neology.exceptions.TransportException;
 import com.neology.net.BaudrateMeter;
 
 import java.io.*;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.Socket;
 import java.nio.charset.Charset;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * @author dime,obsidiam
@@ -42,7 +47,8 @@ public class Transport {
     private OutputStream origOs;
     private BaudrateMeter baudrateMeter;
     private String IP;
-   
+    private DatagramSocket dt;
+    
 
     public Transport(InputStream is) {
         this(is, null);
@@ -212,6 +218,19 @@ public class Transport {
         }
     }
 
+    public byte[] readBytesUdp(int len){
+        byte[] b = new byte[len];
+        DatagramPacket p = new DatagramPacket(b, len);
+        if(dt != null){
+           try {
+               getDatagramSocket().receive(p);
+           } catch (IOException ex) {
+               Logger.getLogger(Established.class.getName()).log(Level.SEVERE, null, ex);
+           }
+        }
+        return p.getData();
+    }
+    
     public void skip(int length) throws TransportException {
         try {
             int rest = length;
@@ -350,6 +369,30 @@ public class Transport {
     }
     
     public boolean isConnected() {
-        return (origIs != null && origOs != null); 
+        return dt == null ? (origIs != null && origOs != null) : dt.isConnected(); 
+    }
+    
+
+    public void setDatagramSocket(DatagramSocket dt){
+        this.dt = dt;
+    }
+    
+    public DatagramSocket getDatagramSocket(){
+        return dt;
+    }
+    boolean isTcp(){
+        return dt == null;
+    }
+
+    void writeUdp(byte[] buffer) {
+        if(dt != null){
+            DatagramPacket p = new DatagramPacket(buffer, buffer.length);
+
+            try {
+                getDatagramSocket().send(p);
+            } catch (IOException ex) {
+                Logger.getLogger(Established.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
     }
 }

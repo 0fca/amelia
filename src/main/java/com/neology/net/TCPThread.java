@@ -51,6 +51,7 @@ public class TCPThread extends Thread implements Runnable{
         while(TH != null){
             List<Connection> connections = cdh.getConnectionList();
             synchronized(connections){
+                if(connections.size() > 0){
                     while(!cdh.isFree()){
                         try {
                             System.out.println("TCPThread#run() -> waiting on cdh monitor...");
@@ -106,7 +107,6 @@ public class TCPThread extends Thread implements Runnable{
                                     } catch (TransportException | IOException ex) {
                                         System.err.println("LOCALIZED_ERR_MSG:"+ex.getLocalizedMessage());
                                         c.changeState(new Closed());
-                                        
                                         break;
                                     }  
                                 }
@@ -117,6 +117,7 @@ public class TCPThread extends Thread implements Runnable{
                     }else{
                         break;
                     }
+                }
             }
         }
     }
@@ -124,9 +125,10 @@ public class TCPThread extends Thread implements Runnable{
     @Override
     public void interrupt(){
         if(TH != null){
-            if(TH.getState() != State.WAITING && TH.getState() != State.TIMED_WAITING){
+            if(TH.getState() != State.WAITING){
                 TH.interrupt();
                 TH = null;
+                cdh.setFree(false);
             }
         }
     }

@@ -19,8 +19,8 @@ import java.net.Socket;
  */
 public interface Connectable {
     public void openConnection(InputStream in, OutputStream out);
-    public void closeConnection(Transport t, Socket s) throws ClosedConnectionException;
-    public void haltConnection(Transport t, Socket s);
+    public void closeConnection(Transport t) throws ClosedConnectionException;
+    public void haltConnection(Transport t);
     public void sendPacket(Transport t, byte[] buffer);
     public void establish(Transport t);
     public byte[] readPacket(Transport t) throws TransportException;

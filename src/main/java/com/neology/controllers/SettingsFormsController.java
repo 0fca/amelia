@@ -5,9 +5,12 @@
  */
 package com.neology.controllers;
 
+import com.neology.controllers.alert.AlertController;
+import com.neology.controllers.alert.AlertMethod;
 import com.neology.environment.LocalEnvironment;
 import com.neology.environment.Local;
 import com.neology.google.Authorization;
+import com.neology.google.GoogleService;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -66,7 +69,7 @@ public class SettingsFormsController extends LocalEnvironment implements Initial
     //private NetController n = new NetController(s);
     
     protected HashMap<String,String> SETTINGS = new HashMap<>();
-
+    AlertController ac = new AlertController();
     
     @Override
     public void initialize(URL url, ResourceBundle rb) {
@@ -75,7 +78,11 @@ public class SettingsFormsController extends LocalEnvironment implements Initial
         BACKUP_LABEL.setTooltip(new Tooltip("Backup settings to Google Drive"));
         
         BACKUP_LABEL.setOnMouseClicked( event ->{
-            
+           GoogleService g = new GoogleService();
+           ac.prepareViewable(g, new Object[]{"Google Drive connection...","Google Drive authorization","Wait while Amelia is trying to connect to your Google Drive"});
+           ac.viewAlert(AlertMethod.CUSTOM);
+           g.start();
+           
         });
        
         

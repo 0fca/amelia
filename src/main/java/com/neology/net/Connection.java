@@ -47,20 +47,25 @@ final public class Connection {
     
     public void close(){
         try {
-            ACTUAL.closeConnection(T, s);
-        } catch (ClosedConnectionException ex) {
+            ACTUAL.closeConnection(T);
+            s.close();
+        } catch (ClosedConnectionException | IOException ex) {
             Logger.getLogger(Connection.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
     
     public void halt(){
-        ACTUAL.haltConnection(T, s);
+        ACTUAL.haltConnection(T);
+        try {
+            s.close();
+        } catch (IOException ex) {
+            Logger.getLogger(Connection.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
     
-    public void send(TransportState state,byte[] buffer){
+    public void send(byte[] buffer){
         ACTUAL.sendPacket(T, buffer);
-    }
-    
+    }    
     public byte[] read(Transport t) throws TransportException{
         System.out.println("Connection read()::"+t.getIp());
         return ACTUAL.readPacket(t);

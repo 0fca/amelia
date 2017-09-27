@@ -1,9 +1,11 @@
 package com.neology.controllers;
 
+import com.neology.controllers.alert.AlertController;
+import com.neology.controllers.alert.AlertMethod;
 import com.neology.environment.LocalEnvironment;
 import com.neology.data.ConnectionDataHandler;
 import com.neology.data.ImageDataHandler;
-import com.neology.interfaces.Viewable;
+import com.neology.controllers.alert.Viewable;
 import com.neology.net.ConnectionManager;
 import com.neology.net.ConnectionReceiver;
 import com.neology.net.TCPThread;
@@ -54,7 +56,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.controlsfx.control.Notifications;
 import org.xml.sax.SAXException;
 
-public class FXMLController extends LocalEnvironment implements Initializable,Viewable {
+public class FXMLController extends LocalEnvironment implements Initializable{
     @FXML
     private TextField LOGIN;
     @FXML
@@ -79,6 +81,7 @@ public class FXMLController extends LocalEnvironment implements Initializable,Vi
     private ConnectionDataHandler CDH = ConnectionDataHandler.getInstance();
     private int SELECTED = -1;
     private TCPThread tcp = new TCPThread();
+    private AlertController ac = new AlertController();
     
     {
         System.out.println("Does working dir exist: "+checkFolders());
@@ -160,7 +163,8 @@ public class FXMLController extends LocalEnvironment implements Initializable,Vi
     private void loginUser() throws ClassNotFoundException {
         if(LOGIN.getText() != null&PASS.getText() != null){
             if(LOGIN.getText().equals("root")&PASS.getText().equals("q@wertyuiop")){
-                viewAlert("Login","Logging in","Logged in as root.",AlertType.INFORMATION);
+                ac.prepareViewable(new Object[]{"Login","Logging in","Logged in as root", AlertType.INFORMATION});
+                ac.viewAlert(AlertMethod.INFO);
                 IS_LOGGED_IN = true;
                 CONNECT.setDisable(false);
                 SETTINGS.setDisable(false);
@@ -171,35 +175,19 @@ public class FXMLController extends LocalEnvironment implements Initializable,Vi
 
             }else{
                 if(!LOGGED_IN.isEmpty()){
-                    viewAlert("Login","Logging in","Logged in as "+LOGGED_IN,AlertType.INFORMATION);
+                    ac.prepareViewable(new Object[]{"Login","Logging in","Logged in as "+LOGGED_IN,AlertType.INFORMATION, AlertType.INFORMATION});
+                    ac.viewAlert(AlertMethod.INFO);
                     CONNECT.setDisable(false);
                     DISCONNECT.setDisable(false);
                     SETTINGS.setDisable(false);
                 }else{
-                    viewError("Error. This user hasn't been registered yet.");
+                    ac.prepareViewable(new Object[]{"Error. The user hasn't been registered."});
+                    ac.viewAlert(AlertMethod.ERROR);
                 }
             }
             
         }
     }
-
-    @Override
-    public void viewAlert(String name, String header, String content, Alert.AlertType type) {
-       Alert a = new Alert(type);
-       a.setTitle(name);
-       a.setHeaderText(header);
-       a.setContentText(content);
-       a.showAndWait();
-    }
-
-    @Override
-    public void viewError(String text) {
-        Alert a = new Alert(AlertType.ERROR);
-        a.setTitle("Error");
-        a.setHeaderText("An error occured.");
-        a.setContentText(text);
-        a.showAndWait();
-    } 
 
     private boolean checkFolders() {
        String tmp = getLocalVar(Local.TMP);
@@ -221,9 +209,7 @@ public class FXMLController extends LocalEnvironment implements Initializable,Vi
         tcp.interrupt();
         mgr.interruptThread();
         CDH.getData().clear();
-        
-        CDH.getConnectionList().clear();
-        CDH.setFree(true);
+
         Platform.runLater(() ->{
             VIEWER_PANEL.getItems().clear(); 
             INFO_VIEW.getItems().clear();
@@ -236,13 +222,13 @@ public class FXMLController extends LocalEnvironment implements Initializable,Vi
     }
 
     private void transitToConnectedMode() {
-        System.out.println("ConnectionManager -> "+c.getState().toString());
+        System.out.println("ConnectionManager#State -> "+c.getState().toString());
         if(c.getState() == Service.State.CANCELLED || c.getState() == Service.State.SUCCEEDED){
             Platform.runLater(() ->{
                reinitSession();
             });
         }
-        System.out.println("ConnectionManager -> "+c.getState().toString());
+
         if(c.getState() == Service.State.READY){
             System.out.println("FXMLController -> attempting to init ConnectionManager");
             initSession();
@@ -260,14 +246,12 @@ public class FXMLController extends LocalEnvironment implements Initializable,Vi
         }
     }
 
-    @Override
-    public void viewCustom() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
     private void reinitSession() {
-        c.restart();
+        c.reset();
+        System.out.println("ConnectionManager#State -> "+c.getState());
+        c.start();
         tcp.start();
+        mgr.setAccessorInstance(new AccessorImpl(v));
         mgr.start();
     }
     
@@ -358,7 +342,7 @@ public class FXMLController extends LocalEnvironment implements Initializable,Vi
                     });
                     
                     if(wasSignaled && msg != null){
-                       Platform.runLater(() -> showNotification(type.toString(), msg));
+                       Platform.runLater(() -> showNotification());
                        wasSignaled = false;
                     }
                 try {
@@ -379,16 +363,9 @@ public class FXMLController extends LocalEnvironment implements Initializable,Vi
             this.msg = msg;
         }
         
-        private synchronized void showNotification(String title, String text) {
-            
-            Notifications notificationBuilder = Notifications.create()
-                    .title(title)
-                    .text(text)
-                    .graphic(null)
-                    .hideAfter(Duration.seconds(10))
-                    .darkStyle()
-                    .position(Pos.BOTTOM_RIGHT);
-            notificationBuilder.show();
+        synchronized void showNotification(){
+            ac.prepareViewable(new Object[]{type.toString(),msg,10,Pos.BOTTOM_RIGHT});
+            ac.viewAlert(AlertMethod.NOTIFICATION);
         }
     }
 }

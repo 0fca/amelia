@@ -26,7 +26,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class Authorization {
+final public class Authorization {
     /** Application name. */
     private static final String APPLICATION_NAME = "Amelia Server";
 
@@ -49,7 +49,7 @@ public class Authorization {
      *
      */
     private static Credential MAIN;
-    private static final List<String> SCOPES = Arrays.asList(DriveScopes.DRIVE);
+    private static final List<String> SCOPES = Arrays.asList(DriveScopes.DRIVE_FILE);
 
     private static ArrayList<String> NAMES = new ArrayList<>();
     private static ArrayList<String> FILES_IDS = new ArrayList<>();

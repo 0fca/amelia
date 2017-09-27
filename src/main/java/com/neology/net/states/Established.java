@@ -23,10 +23,14 @@ public class Established extends TransportState{
     
     @Override
     public void sendPacket(Transport t, byte[] buffer) {
-        try {
-            t.write(buffer);
-        } catch (TransportException ex) {
-            Logger.getLogger(Established.class.getName()).log(Level.SEVERE, null, ex);
+        if(t.isTcp()){
+            try {
+                t.write(buffer);
+            } catch (TransportException ex) {
+                Logger.getLogger(Established.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }else{
+            t.writeUdp(buffer);
         }
     }
     
@@ -39,7 +43,12 @@ public class Established extends TransportState{
     @Override
     public byte[] readPacket(Transport t, int len) throws TransportException{
        System.out.println("Established readPacket(t,bufferLen)::"+t.getIp());
-       return t.readBytes(len);
+       if(t.isTcp()){
+            return t.readBytes(len);
+       }else{
+           
+           return t.readBytesUdp(len);
+       }
     }
     
     @Override
