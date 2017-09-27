@@ -56,25 +56,25 @@ public class ConnectionReceiver extends Service {
                             }
 
                             while(!this.isCancelled()){
-                                    if(ss != null){
-                                        Socket s = ss.accept();
+                                if(ss != null){
+                                    Socket s = ss.accept();
 
-                                        if(!ss.isClosed()){
-                                            System.out.println("Server Accepted Connection Request from "+s.getInetAddress().toString());
-                                                Connection c;
-                                                try {
-                                                    c = initConnection(s);
-                                                    BaudrateMeter meter = new BaudrateMeter();
-                                                    c.getTranportInstance().setBaudrateMeter(meter);
+                                    if(!ss.isClosed()){
+                                        System.out.println("Server Accepted Connection Request from "+s.getInetAddress().toString());
+                                            Connection c;
+                                            try {
+                                                c = initConnection(s);
+                                                BaudrateMeter meter = new BaudrateMeter();
+                                                c.getTranportInstance().setBaudrateMeter(meter);
 
-                                                    list.add(c);
-                                                    
-                                                } catch (IOException ex) {
-                                                    Logger.getLogger(ConnectionReceiver.class.getName()).log(Level.SEVERE, null, ex);
-                                                    break;
-                                                }
-                                        }
+                                                list.add(c);
+
+                                            } catch (IOException ex) {
+                                                Logger.getLogger(ConnectionReceiver.class.getName()).log(Level.SEVERE, null, ex);
+                                                break;
+                                            }
                                     }
+                                }
                             }
                         
                     } catch (IOException ex) {

@@ -11,6 +11,7 @@ import com.neology.data.ConnectionDataHandler;
 import com.neology.data.ImageDataHandler;
 import com.neology.listeners.ConnectionListChangeListener;
 import com.neology.net.states.Closed;
+import com.neology.net.states.Established;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.collections.ListChangeListener;
@@ -63,8 +64,11 @@ public class ConnectionManager extends Thread implements Runnable{
                                         System.out.println(i);
                                     }else{
 
-                                        if( con.getState() == com.neology.net.states.State.ESTABLISHED){
-                                            con.establish(con.getTranportInstance());
+                                        if( con.getState() == com.neology.net.states.State.OPENED){
+                                            Established e = new Established();
+                                            con.changeState(e);
+                                            con.establish();
+                                            System.out.println("Established");
                                         }
                                     }
                                 }

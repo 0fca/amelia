@@ -27,22 +27,30 @@ final public class Connection {
     private Socket s;
     private volatile String name;
     
+    public Connection(){}
+    
+    public Connection(Transport t){
+        this.T = t;
+    }
+    
     public void changeState(TransportState state){
         ACTUAL = state;
+        
     }
     
     public void open(Socket s){
         this.s = s;
         try {
             ACTUAL.openConnection(s.getInputStream(),s.getOutputStream());
+            T = ACTUAL.getTransportInstance();
         } catch (IOException ex) {
             Logger.getLogger(Connection.class.getName()).log(Level.SEVERE, null, ex);
         }
-        T = ACTUAL.getTransportInstance();
+       
     }
     
-    public void establish(Transport t){
-        ACTUAL.establish(t);
+    public void establish(){
+        ACTUAL.establish(T);
     }
     
     public void close(){
@@ -64,11 +72,11 @@ final public class Connection {
     }
     
     public void send(byte[] buffer){
-        ACTUAL.sendPacket(T, buffer);
+        ACTUAL.sendPacket(buffer);
     }    
-    public byte[] read(Transport t) throws TransportException{
-        System.out.println("Connection read()::"+t.getIp());
-        return ACTUAL.readPacket(t);
+    public byte[] read() throws TransportException{
+        System.out.println("Connection read()::"+T.getIp());
+        return ACTUAL.readPacket();
     }
     
     public boolean isConnected(){

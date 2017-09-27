@@ -21,8 +21,8 @@ public interface Connectable {
     public void openConnection(InputStream in, OutputStream out);
     public void closeConnection(Transport t) throws ClosedConnectionException;
     public void haltConnection(Transport t);
-    public void sendPacket(Transport t, byte[] buffer);
+    public void sendPacket( byte[] buffer);
     public void establish(Transport t);
-    public byte[] readPacket(Transport t) throws TransportException;
-    public byte[] readPacket(Transport t, int len) throws TransportException;
+    public byte[] readPacket() throws TransportException;
+    public byte[] readPacket(int len) throws TransportException;
 }

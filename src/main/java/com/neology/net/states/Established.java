@@ -22,32 +22,32 @@ public class Established extends TransportState{
     }
     
     @Override
-    public void sendPacket(Transport t, byte[] buffer) {
-        if(t.isTcp()){
+    public void sendPacket( byte[] buffer) {
+        if(T.isTcp()){
             try {
-                t.write(buffer);
+                T.write(buffer);
             } catch (TransportException ex) {
                 Logger.getLogger(Established.class.getName()).log(Level.SEVERE, null, ex);
             }
         }else{
-            t.writeUdp(buffer);
+            T.writeUdp(buffer);
         }
     }
     
     @Override
-    public byte[] readPacket(Transport t) throws TransportException{
-       System.out.println("Established readPacket()::"+t.getIp());
-       return t.readBytes(8192);
+    public byte[] readPacket() throws TransportException{
+       System.out.println("Established readPacket()::"+T.getIp());
+       return T.readBytes(8192);
     }
     
     @Override
-    public byte[] readPacket(Transport t, int len) throws TransportException{
-       System.out.println("Established readPacket(t,bufferLen)::"+t.getIp());
-       if(t.isTcp()){
-            return t.readBytes(len);
+    public byte[] readPacket(int len) throws TransportException{
+       System.out.println("Established readPacket(t,bufferLen)::"+T.getIp());
+       if(T.isTcp()){
+            return T.readBytes(len);
        }else{
            
-           return t.readBytesUdp(len);
+           return T.readBytesUdp(len);
        }
     }
     

@@ -16,7 +16,7 @@ import java.io.OutputStream;
  * @author obsidiam
  */
 public class TransportState implements Connectable{
-    private Transport T;
+    protected Transport T;
     
     @Override
     public  void openConnection(InputStream in, OutputStream out){
@@ -34,20 +34,20 @@ public class TransportState implements Connectable{
     }
 
     @Override
-    public void sendPacket(Transport t, byte[] buffer) {
-        this.sendPacket(t, buffer);
+    public void sendPacket(byte[] buffer) {
+        this.sendPacket(buffer);
     }
     
     @Override
-    public byte[] readPacket(Transport t) throws TransportException{
+    public byte[] readPacket() throws TransportException{
         System.out.println("TransportState readPacket()");
-        return this.readPacket(t);
+        return this.readPacket();
     }
     
     @Override
-    public byte[] readPacket(Transport t, int bufferLen) throws TransportException{
+    public byte[] readPacket( int bufferLen) throws TransportException{
        System.out.println("TransportState readPacket(t,bufferlen)");
-       return this.readPacket(t, bufferLen);
+       return this.readPacket(bufferLen);
     }
     
     @Override

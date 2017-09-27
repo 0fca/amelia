@@ -16,6 +16,11 @@
  */
 package com.neology.net;
 
+import java.io.IOException;
+import java.net.DatagramPacket;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 
 /**
  *
@@ -23,6 +28,11 @@ package com.neology.net;
  */
 public class UDPThread extends Thread implements Runnable {
     private Thread TH;
+    private UDPConnector uc;
+    
+    public UDPThread(UDPConnector uc){
+        this.uc = uc;
+    }
     
     @Override
     public void start(){
@@ -36,9 +46,19 @@ public class UDPThread extends Thread implements Runnable {
     public void run(){
         while(TH != null){
             if(!TH.isInterrupted()){
-                
+                try {
+                    DatagramPacket dtg = uc.readDatagramPacket();
+                    processData(dtg.getData());
+                    
+                } catch (IOException ex) {
+                    Logger.getLogger(UDPThread.class.getName()).log(Level.SEVERE, null, ex);
+                }
             }
         }
+    }
+    
+    private void processData(byte[] buffer){
+        System.out.print(new String(buffer));
     }
     
     @Override

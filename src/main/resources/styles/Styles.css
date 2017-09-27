@@ -1,7 +1,7 @@
 
 .button{
     -fx-background-color:  #616161;
-    -fx-text-fill:  #212121;
+    -fx-text-fill:  #FFFFFF;
     -fx-font-family: Ubuntu Light;
 }
 .button:hover{
@@ -18,15 +18,12 @@
     -fx-font-family: Ubuntu Light;
 }
 .list-cell,.text-area{
-    -fx-background-color:  #FFFFFF;
-    -fx-text-fill:  #212121;
+    -fx-background-color:  #222222;
+    -fx-text-fill:  #9E9E9E;
     -fx-font-family: Ubuntu Light;
 }
-.anchor-pane{
-    -fx-background-color: #616161;
-}
 .list-view{
-    -fx-border-color: #FFFFFF;
-    -fx-background-color: #FFFFFF;
+    -fx-border-color: #222222;
+    -fx-background-color: #222222;
 }
 

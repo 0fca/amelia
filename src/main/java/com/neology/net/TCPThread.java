@@ -70,10 +70,10 @@ public class TCPThread extends Thread implements Runnable{
                                 MTR = c.getTranportInstance().getBaudrateMeter();
                                 MTR.startMeasuringCycle();
 
-                                if(c.getState() == com.neology.net.states.State.OPENED){
-                                   Established e = new Established();
-                                   c.changeState(e);
-                                }
+//                                if(c.getState() == com.neology.net.states.State.OPENED){
+//                                   Established e = new Established();
+//                                   c.changeState(e);
+//                                }
 
                                 if(c.getState() == com.neology.net.states.State.CLOSED){
                                     continue;
@@ -86,7 +86,7 @@ public class TCPThread extends Thread implements Runnable{
                                     byte[] buffer;
 
                                     try {
-                                           buffer = c.read(t);
+                                           buffer = c.read();
                                            System.out.println(buffer.length);
                                            Image im = processData(buffer);
                                            IDH.getImagesMap().put(NAME, im);

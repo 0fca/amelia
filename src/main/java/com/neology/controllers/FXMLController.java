@@ -5,7 +5,6 @@ import com.neology.controllers.alert.AlertMethod;
 import com.neology.environment.LocalEnvironment;
 import com.neology.data.ConnectionDataHandler;
 import com.neology.data.ImageDataHandler;
-import com.neology.controllers.alert.Viewable;
 import com.neology.net.ConnectionManager;
 import com.neology.net.ConnectionReceiver;
 import com.neology.net.TCPThread;
@@ -27,6 +26,7 @@ import java.util.HashMap;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javafx.animation.TranslateTransition;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.concurrent.Service;
@@ -35,7 +35,6 @@ import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.ContentDisplay;
@@ -48,12 +47,12 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.CornerRadii;
+import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import javafx.util.Callback;
 import javafx.util.Duration;
 import javax.xml.parsers.ParserConfigurationException;
-import org.controlsfx.control.Notifications;
 import org.xml.sax.SAXException;
 
 public class FXMLController extends LocalEnvironment implements Initializable{
@@ -66,8 +65,12 @@ public class FXMLController extends LocalEnvironment implements Initializable{
     @FXML
     private volatile ListView VIEWER_PANEL,INFO_VIEW;
     @FXML
-    private Label TIME_STARTED_LABEL,TIME_STOPPED_LABEL;
+    private Label TIME_STARTED_LABEL,TIME_STOPPED_LABEL, MENU_LABEL, USERNAME_LOGIN;
+    @FXML
+    private Pane DRAWER,MAIN_BAR;
+    
     String ACTUAL_NAME,ADDR;
+    
     
     volatile int PORT;
     protected ArrayList<String> INIT;
@@ -121,11 +124,14 @@ public class FXMLController extends LocalEnvironment implements Initializable{
         SETTINGS.setOnAction(event ->{
             SettingsForm settings = new SettingsForm();
             try {
-                //viewAlert("Warning","Cannot enter settings!","Settings are in development at the moment, sorry for the inconvience.",AlertType.WARNING);
                 settings.start(new Stage());
             } catch (Exception ex) {
                 Logger.getLogger(FXMLController.class.getName()).log(Level.SEVERE, null, ex);
             }
+        });
+        
+        MENU_LABEL.setOnMouseClicked( listener ->{
+            animateDrawerMove();
         });
         
         CONNECT.setOnAction(event ->{
@@ -146,6 +152,16 @@ public class FXMLController extends LocalEnvironment implements Initializable{
             }
             
         });
+        
+        VIEWER_PANEL.setOnMouseClicked(listener ->{
+            
+        });
+        
+        MAIN_BAR.setOnMouseClicked( listener ->{
+            animateDrawerMove();
+        });
+        
+        MENU_LABEL.setGraphic(new ImageView(this.getClass().getResource("/images/menu.png").toString()));
         VIEWER_PANEL.setCellFactory(new CallbackImpl());
     }  
     
@@ -172,14 +188,21 @@ public class FXMLController extends LocalEnvironment implements Initializable{
                 PASS.setText(null);
                 LOGIN_BUTTON.setDisable(true);
                 LOG_OUT_BUTTON.setDisable(false);
-
+                USERNAME_LOGIN.setText("root");
+                animateDrawerMove();
             }else{
                 if(!LOGGED_IN.isEmpty()){
                     ac.prepareViewable(new Object[]{"Login","Logging in","Logged in as "+LOGGED_IN,AlertType.INFORMATION, AlertType.INFORMATION});
                     ac.viewAlert(AlertMethod.INFO);
+                    IS_LOGGED_IN = true;
                     CONNECT.setDisable(false);
-                    DISCONNECT.setDisable(false);
                     SETTINGS.setDisable(false);
+                    LOGIN.setText(null);
+                    PASS.setText(null);
+                    LOGIN_BUTTON.setDisable(true);
+                    LOG_OUT_BUTTON.setDisable(false);
+                    USERNAME_LOGIN.setText(LOGGED_IN);
+                    animateDrawerMove();
                 }else{
                     ac.prepareViewable(new Object[]{"Error. The user hasn't been registered."});
                     ac.viewAlert(AlertMethod.ERROR);
@@ -254,6 +277,19 @@ public class FXMLController extends LocalEnvironment implements Initializable{
         mgr.setAccessorInstance(new AccessorImpl(v));
         mgr.start();
     }
+
+    private void animateDrawerMove() {
+        TranslateTransition openNav = new TranslateTransition(new Duration(350), DRAWER);
+        openNav.setToX(DRAWER.getWidth());
+        TranslateTransition closeNav = new TranslateTransition(new Duration(350), DRAWER);
+        
+        if(DRAWER.getTranslateX() < DRAWER.getWidth()){
+            openNav.play();
+        }else{
+            closeNav.setToX(-(DRAWER.getWidth()));
+            closeNav.play();
+        }
+    }
     
     
     private class CallbackImpl implements Callback<ListView<String>, ListCell<String>> {
@@ -287,9 +323,10 @@ public class FXMLController extends LocalEnvironment implements Initializable{
                         });
                         
                         setPrefHeight(155);
+                        setPrefWidth(VIEWER_PANEL.getPrefWidth() - 5);
                         backgroundProperty().bind(Bindings.when(this.selectedProperty())
-                        .then(new Background(new BackgroundFill(Color.valueOf("#9E9E9E"), CornerRadii.EMPTY, Insets.EMPTY)))
-                        .otherwise(new Background(new BackgroundFill(Color.WHITE, CornerRadii.EMPTY, Insets.EMPTY))));
+                        .then(new Background(new BackgroundFill(Color.valueOf("#616161"), new CornerRadii(2d), Insets.EMPTY)))
+                        .otherwise(new Background(new BackgroundFill(Color.valueOf("#222222"), new CornerRadii(2d), Insets.EMPTY))));
                         setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
                     }
                 }
