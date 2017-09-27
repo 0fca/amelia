@@ -84,7 +84,7 @@ I want to add following features:
 
 Amelia Server's drawer menu.
 
-![suse to XP connection]((https://i.imgur.com/w6qxYdg.png)
+![suse to XP connection](https://i.imgur.com/w6qxYdg.png)
 
 Amelia working on the loopback on Mint 18.1
 
