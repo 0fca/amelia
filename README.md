@@ -6,11 +6,12 @@ Amelia has classical server-client scheme. It uses java.net API to transfer data
 Amelia system is built from 2 parts: Amelia Server GUI app and <a href="https://github.com/Obsidiam/ameliaclient">Amelia Client CLI app</a>.
 Server app uses multithreading, however there are only 4 threads(os services) that are taking care of view updates, transmission etc. This design is new, the design looked like: one connection = one thread. It caused the memory&CPU usage to be high.
 
-App transfers images in PNG format, resolution is 250x150. App loads all data(image and metadata) to an array which
-length is 32678.
+App transfers images in JFIF format, resolution is 250x150. App loads all data(image and metadata) to an array which
+length is 8192.
 
 **_Important_**: Integer value of first byte in data packet sent by server tells how many bytes counting from index 1 contains 
 bytes of client's machhine name.
+![Amelia Frame](https://i.imgur.com/qyA12Vw.png)
 
 ## Amelia Server
 
@@ -35,7 +36,7 @@ For an instance, client app will load settings at startup, then it will auto con
 Configuration is saved in two situations: 
 * when exiting,
 * when the “Connector Thread” is supposed to end its work.
-There is no option to save it manually during client’s work. 
+To save settings use command "save".
 
 Server app is built using State pattern.
 
