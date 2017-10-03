@@ -31,11 +31,9 @@ public class ConnectionManager extends Thread implements Runnable{
     
     @Override
     public void start(){
-        System.out.println("Starting CM...");
         if(mgr == null){
             mgr = new Thread(this, "ConnectionManager");
             mgr.start();
-            System.out.println("CM started.");
         }
     }
     
@@ -63,12 +61,11 @@ public class ConnectionManager extends Thread implements Runnable{
                                         cons.remove(i);
                                         System.out.println(i);
                                     }else{
-
                                         if( con.getState() == com.neology.net.states.State.OPENED){
                                             Established e = new Established();
                                             con.changeState(e);
                                             con.establish();
-                                            System.out.println("Established");
+                                            cdh.addConnectionName(con.getTranportInstance().getIp().split(":")[0]);
                                         }
                                     }
                                 }
@@ -113,6 +110,7 @@ public class ConnectionManager extends Thread implements Runnable{
                 con.changeState(c);
             }
         });  
+        
         cdh.setFree(true);
     }
     
@@ -139,7 +137,6 @@ public class ConnectionManager extends Thread implements Runnable{
                     local = (Connection)c.getRemoved().get(last - 1);
                     idh.getImagesMap().remove(local.getConnectionName());
                     sendNotificationSignal();
-                    System.out.println("Removed.");
                 }
             }
         }

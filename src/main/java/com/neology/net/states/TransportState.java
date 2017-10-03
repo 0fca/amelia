@@ -51,6 +51,11 @@ public class TransportState implements Connectable{
     }
     
     @Override
+    public void write(byte[] buffer) throws TransportException{
+        this.write(buffer);
+    }
+    
+    @Override
     public void establish(Transport t){
         this.establish(t);
     }

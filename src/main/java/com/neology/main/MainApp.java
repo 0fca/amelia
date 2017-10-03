@@ -1,5 +1,8 @@
 package com.neology.main;
 
+import com.neology.Hasher;
+import com.neology.environment.Local;
+import com.neology.environment.LocalEnvironment;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -28,9 +31,7 @@ import javafx.util.Pair;
 
 
 public class MainApp extends Application{
-
-    private Thread tcpInst = null;
-    
+    LocalEnvironment e = new LocalEnvironment() {};
     @Override
     public void start(Stage stage) throws Exception {
         Parent root = FXMLLoader.load(getClass().getResource("/fxml/Scene.fxml"));
@@ -38,7 +39,7 @@ public class MainApp extends Application{
         Scene scene = new Scene(root);
         scene.getStylesheets().add("/styles/Styles.css");
         stage.setOnCloseRequest(event ->{
-            File img = new File(Paths.get(".").toAbsolutePath().normalize().toString());
+            File img = new File(e.getLocalVar(Local.TMP));
             File[] files = img.listFiles();
             
             if(files != null){
@@ -84,7 +85,7 @@ public class MainApp extends Application{
             Dialog<Pair<String, String>> dialog = new Dialog<>();
             dialog.setTitle("Closing app...");
             dialog.setHeaderText("Root Credentials Needed");
-
+            
             ButtonType loginButtonType = new ButtonType("Exit", ButtonData.OK_DONE);
             dialog.getDialogPane().getButtonTypes().addAll(loginButtonType, ButtonType.CANCEL);
 
@@ -102,7 +103,7 @@ public class MainApp extends Application{
             grid.add(username, 1, 0);
             grid.add(new Label("Password:"), 0, 1);
             grid.add(password, 1, 1);
-
+            grid.getStylesheets().add("/styles/Style.css");
             Node loginButton = dialog.getDialogPane().lookupButton(loginButtonType);
             loginButton.setDisable(true);
 
@@ -125,7 +126,7 @@ public class MainApp extends Application{
             Optional<Pair<String, String>> result = dialog.showAndWait();
 
             result.ifPresent(usernamePassword -> {
-                if(usernamePassword.getValue().equals("q@wertyuiop") && usernamePassword.getKey().equals("root")){
+                if(Hasher.sha(usernamePassword.getValue()).equals(">:��ܰb-���ᦦ�sض5�Z��kxK") && usernamePassword.getKey().equals("root")){
                     System.exit(0);
                 }else{
                     evt.consume();

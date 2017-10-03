@@ -43,6 +43,10 @@ public class BaudrateMeter {
     public int kBPS() {
         return (int) (ema / 1000);
     }
+    
+    public int Mbps(){
+        return (int)(ema/1000000);
+    }
 
     public void startMeasuringCycle() {
         measure = true;

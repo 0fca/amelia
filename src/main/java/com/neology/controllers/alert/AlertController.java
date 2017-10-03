@@ -118,7 +118,7 @@ public class AlertController{
                 dialog.setWidth(300);
                 dialog.setTitle(title);
                 dialog.setHeaderText(headerText);
-
+                
                 ButtonType loginButtonType = new ButtonType("OK", ButtonBar.ButtonData.OK_DONE);
                 ButtonType cancelButtonType = new ButtonType("Cancel", ButtonBar.ButtonData.CANCEL_CLOSE);
                 dialog.getDialogPane().getButtonTypes().addAll(loginButtonType, cancelButtonType);

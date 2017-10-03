@@ -37,6 +37,10 @@ final public class AccessorImpl implements Accessable{
         if(hasAccess){
             instance.signal(s);
         }else{
+            String name = th.getName();
+            if(name == null){
+                throw new AccessDeniedException("Access is denied");
+            }
             throw new AccessDeniedException("Access is denied for "+th.getName());
         }
     }

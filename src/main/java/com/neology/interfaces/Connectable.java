@@ -25,4 +25,5 @@ public interface Connectable {
     public void establish(Transport t);
     public byte[] readPacket() throws TransportException;
     public byte[] readPacket(int len) throws TransportException;
+    public void write(byte[] buffer) throws TransportException;
 }

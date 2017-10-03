@@ -36,19 +36,24 @@ public class Established extends TransportState{
     
     @Override
     public byte[] readPacket() throws TransportException{
-       System.out.println("Established readPacket()::"+T.getIp());
+       System.out.println("Established#readPacket()::"+T.getIp());
        return T.readBytes(8192);
     }
     
     @Override
     public byte[] readPacket(int len) throws TransportException{
-       System.out.println("Established readPacket(t,bufferLen)::"+T.getIp());
+       System.out.println("Established#readPacket(int)::"+T.getIp());
        if(T.isTcp()){
             return T.readBytes(len);
        }else{
-           
-           return T.readBytesUdp(len);
+            return T.readBytesUdp(len);
        }
+    }
+    
+    @Override
+    public void write(byte[] buffer) throws TransportException{
+        System.out.println("Established#write(byte[])::"+T.getIp());
+        T.write(buffer);
     }
     
     @Override

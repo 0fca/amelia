@@ -8,6 +8,7 @@ package com.neology.data;
 import com.neology.net.Connection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
@@ -21,7 +22,7 @@ public final class ConnectionDataHandler{
      private volatile HashSet<String> IPS_MAP = new HashSet<>(); 
      private static volatile ConnectionDataHandler INSTANCE = new ConnectionDataHandler();
      private final ObservableList<Connection> SOCKET_LIST = FXCollections.synchronizedObservableList(FXCollections.observableArrayList());
-     private volatile HashMap<String,String> CONN_USER_DATA = new HashMap<>();
+     private volatile LinkedList<String> CONN_USER_DATA = new LinkedList<>();
      private volatile boolean isFree = false;
      private volatile Connection udp;
      
@@ -60,21 +61,22 @@ public final class ConnectionDataHandler{
      public synchronized ObservableList<Connection> getConnectionList(){
          return SOCKET_LIST;
      } 
-    
-     public synchronized String findConnectionName(String userName){
-          if(CONN_USER_DATA.containsKey(userName)){
-              return CONN_USER_DATA.get(userName);
-          }  
-          return null;
+     
+     public synchronized void addConnectionName(String ip){
+            CONN_USER_DATA.add(ip);
      }
      
-     public synchronized void putConnectionName(String userName, String ip){
-            CONN_USER_DATA.put(userName, ip);
-     }
-     
-     public synchronized void removeConnectionName(String userName, String ip){
-         CONN_USER_DATA.remove(userName, ip);
+     public synchronized void removeConnectionName(String ip){
+         CONN_USER_DATA.remove(ip);
      } 
+     
+     public void clearAllConnections(){
+         CONN_USER_DATA.clear();
+     }
+     
+     public boolean isConnectionRegistered(String ip){
+         return CONN_USER_DATA.contains(ip);
+     }
      
      public void setFree(boolean free){
          this.isFree = free;
@@ -86,5 +88,9 @@ public final class ConnectionDataHandler{
      
      public void setUdpConnection(Connection udp){
          this.udp = udp;
+     }
+     
+     public Connection getUdpConnection(){
+         return udp;
      }
 }

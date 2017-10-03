@@ -16,12 +16,17 @@
  */
 package com.neology.net;
 
+import com.neology.controllers.input.KeyboardStructure;
+import com.neology.controllers.input.MouseStructure;
+import com.neology.data.ConnectionDataHandler;
 import com.neology.net.states.Established;
 import com.neology.net.states.Transport;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
+import java.net.InetAddress;
 import java.net.SocketException;
+import java.net.UnknownHostException;
 
 /**
  *
@@ -29,19 +34,26 @@ import java.net.SocketException;
  */
 public class UDPConnector {
     private volatile int port = 7998;
+    private volatile String ip = "localhost";
     private volatile Transport t;
     private volatile DatagramSocket serverSocket;
+    private volatile MouseStructure mouseStruct = MouseStructure.LOCATION;
+    private volatile KeyboardStructure keyboardStruct = KeyboardStructure.GET_SEQ;
+    
     private static boolean isPrepared = false;
     
-    public UDPConnector(int port){
+    public UDPConnector(String ip,int port){
         this.port = port;
+        this.ip = ip;
     }
     
     public void prepareConnection() throws SocketException{
         serverSocket = new DatagramSocket(port);
         t = new Transport();
+        t.setIp(ip);
         t.setDatagramSocket(serverSocket);
         Connection c = new Connection(t);
+        ConnectionDataHandler.getInstance().setUdpConnection(c);
         Established e = new Established();
         c.changeState(e);
         isPrepared = true;
@@ -52,22 +64,48 @@ public class UDPConnector {
             UDPThread uth = new UDPThread(this);
             uth.start();
         }else{
-            throw new IllegalStateException("UDPConnector was in not prepared state!");
+            throw new IllegalStateException("UDPConnector wasn't in prepared state!");
         }
     }
     
-    public DatagramPacket readDatagramPacket() throws IOException{
-        byte[] buf = new byte[16384];
+    DatagramPacket readDatagramPacket(byte[] buf) throws IOException{
         DatagramPacket dt = new DatagramPacket(buf,buf.length);
         serverSocket.receive(dt);
         return dt;
     }
     
-    public void sendDatagramPacket(DatagramPacket dt) throws IOException{
-        serverSocket.send(dt);
+    void sendDatagramPacket(DatagramPacket dt) throws IOException{
+        if(dt.getData() != null){
+            serverSocket.send(dt);
+            //System.out.println("Sending...");
+        }
     }
     
     private Transport getTransport(){
         return t;
     }
+    
+    public synchronized void setMouseData(MouseStructure m){
+        this.mouseStruct = m;
+    }
+    
+    public synchronized void setKeyboardData(KeyboardStructure k){
+        this.keyboardStruct = k;
+    }
+    
+    MouseStructure getMouseStrucutre(){
+        return mouseStruct;
+    }
+    
+    KeyboardStructure getKeyboardStructure(){
+        return keyboardStruct;
+    } 
+    
+    public InetAddress getAddress() throws UnknownHostException{
+        return InetAddress.getByName(t.getIp());
+    }
+    
+   public boolean wasWritten(){
+       return keyboardStruct.loadState();
+   }
 }

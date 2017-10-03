@@ -7,7 +7,6 @@
 <?import javafx.scene.control.ListView?>
 <?import javafx.scene.control.PasswordField?>
 <?import javafx.scene.control.TextField?>
-<?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
@@ -75,7 +74,7 @@
          <children>
             <BorderPane layoutY="-7.0" prefHeight="668.0" prefWidth="230.0">
                <center>
-                  <VBox alignment="CENTER" prefHeight="472.0" prefWidth="200.0" spacing="50.0">
+                  <VBox alignment="CENTER" prefHeight="472.0" prefWidth="200.0" spacing="25.0">
                      <children>
                         <TextField fx:id="LOGIN" prefHeight="37.0" prefWidth="170.0" promptText="Login" />
                         <PasswordField fx:id="PASS" prefHeight="37.0" prefWidth="170.0" promptText="Pass" />
@@ -101,22 +100,22 @@
                         </Button>
                      </children>
                      <padding>
-                        <Insets left="25.0" right="25.0" />
+                        <Insets left="25.0" right="25.0" top="-5.0" />
                      </padding>
                      <BorderPane.margin>
-                        <Insets top="15.0" />
+                        <Insets />
                      </BorderPane.margin>
                   </VBox>
                </center>
                <top>
                   <Pane prefHeight="135.0" prefWidth="200.0" style="-fx-background-color: #616161;" BorderPane.alignment="CENTER">
                      <children>
-                        <ImageView fx:id="USER_IMG" fitHeight="58.0" fitWidth="64.0" layoutX="14.0" layoutY="39.0" pickOnBounds="true" preserveRatio="true" />
-                        <Label fx:id="USERNAME_LOGIN" layoutX="14.0" layoutY="97.0" prefHeight="16.0" prefWidth="112.0" textFill="WHITE">
+                        <Label fx:id="USERNAME_LOGIN" alignment="CENTER" layoutX="59.0" layoutY="100.0" prefHeight="16.0" prefWidth="112.0" textFill="WHITE">
                            <font>
                               <Font size="18.0" />
                            </font>
                         </Label>
+                        <Label fx:id="USER_IMG" alignment="CENTER" contentDisplay="GRAPHIC_ONLY" layoutX="83.0" layoutY="29.0" prefHeight="64.0" prefWidth="64.0" style="-fx-border-radius: 50; -fx-background-color: #FFFFFF;" />
                      </children>
                   </Pane>
                </top>

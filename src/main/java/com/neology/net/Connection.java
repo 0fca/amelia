@@ -79,6 +79,10 @@ final public class Connection {
         return ACTUAL.readPacket();
     }
     
+    public void write(byte[] buffer) throws TransportException{
+        ACTUAL.write(buffer);
+    }
+    
     public boolean isConnected(){
         return T.isConnected();
     }
