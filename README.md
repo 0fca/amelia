@@ -76,16 +76,17 @@ I want to add following features:
 
 * managable connection settings,
 * submission of settings via TCP(or UDP) to every client,
-* add more settings like: format choice(JFIF or PNG), port, time step.
+* add more settings like: port, time step,
+* remote desktop(using UDP).
 
 # Quick glance
-![W10&WinXP connection](https://i.imgur.com/VESKEVR.png)
+![W10&WinXP connection](https://i.imgur.com/Hn54nZH.png)
 
-Amelia is receiving screen state from physical Linux machine running on Windows 10 x64.
+Amelia Server's drawer menu.
 
-![suse to XP connection](http://i.imgur.com/GLaOi7K.png)
+![suse to XP connection](https://i.imgur.com/w6qxYdg.png)
 
-Amelia is hosted by openSUSE 42.2 Leap and one client is on localhost and the second one is on Windows XP.
+Amelia working on the loopback on Mint 18.1
 
 ![settings](http://i.imgur.com/ZCJGvvv.png)
 
