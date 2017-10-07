@@ -14,36 +14,37 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.neology.google;
+package com.neology.data;
 
-import javafx.concurrent.Service;
-import javafx.concurrent.Task;
+import com.neology.lastdays.TodoTicket;
+import java.util.ArrayList;
 
 /**
  *
  * @author obsidiam
  */
-public class GoogleService extends Service{
-    Task<String> serviceTask;
-    private String nick = "user";
-    
-    public void setNickName(String user){
-        this.nick = user;
+public class Frame {
+    private boolean success = false;
+    private ArrayList<TodoTicket> todo = new ArrayList<>();
+
+    public void setSuccess(boolean success){
+        this.success = success;
     }
-    
-    @Override
-    protected Task createTask() {
-        return serviceTask = new Task<String>(){
-            @Override
-            protected String call() throws Exception {
-                AuthorizeGoogleUser.doLogin(nick);
-                return AuthorizeGoogleUser.getName();
-            }
-        };
+
+    public boolean getSuccess(){
+        return success;
     }
-    
-    @Override
-    public boolean cancel(){
-        return serviceTask.cancel(true);
+
+    public void setTicket(ArrayList<TodoTicket> ticket){
+        this.todo = ticket;
+    }
+
+    public TodoTicket getTicket(int index){
+        return todo.get(index);
+    }
+
+    public ArrayList<TodoTicket> getTickets(){
+        return todo;
     }
 }
+

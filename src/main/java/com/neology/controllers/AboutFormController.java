@@ -42,7 +42,6 @@ public class AboutFormController extends Dialog implements Initializable{
     
     public void showAbout(){
         DialogPane p = new DialogPane();
-        System.out.println(root);
         p.setContent(root);
         this.setDialogPane(p);
         this.setTitle("About");

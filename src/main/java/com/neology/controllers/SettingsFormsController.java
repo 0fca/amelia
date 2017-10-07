@@ -9,8 +9,6 @@ import com.neology.controllers.alert.AlertController;
 import com.neology.controllers.alert.AlertMethod;
 import com.neology.environment.LocalEnvironment;
 import com.neology.environment.Local;
-import com.neology.google.Authorization;
-import com.neology.google.GoogleService;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -73,15 +71,12 @@ public class SettingsFormsController extends LocalEnvironment implements Initial
     
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        Image gd_sync_img = new Image(SettingsFormsController.class.getResourceAsStream("/images/gd_icon48x48.png"),32,32,true,true);
-        BACKUP_LABEL.setGraphic(new ImageView(gd_sync_img));
-        BACKUP_LABEL.setTooltip(new Tooltip("Backup settings to Google Drive"));
+        
+      
+        BACKUP_LABEL.setTooltip(new Tooltip("Backup settings"));
         
         BACKUP_LABEL.setOnMouseClicked( event ->{
-           GoogleService g = new GoogleService();
-           ac.prepareViewable(g, new Object[]{"Google Drive connection...","Google Drive authorization","Wait while Amelia is trying to connect to your Google Drive"});
-           ac.viewAlert(AlertMethod.CUSTOM);
-           g.start();
+                    
            
         });
        

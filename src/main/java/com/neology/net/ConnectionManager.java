@@ -95,23 +95,24 @@ public class ConnectionManager extends Thread implements Runnable{
     }
 
     private void disconnectAll() {
-        
-        if(mgr.getState() != State.WAITING){
-            mgr.interrupt();
-            mgr = null;
-        }else{
-            wasInterrupted = true;
-        }
-        
-        cdh.getConnectionList().forEach(con ->{
-            cdh.addIpToMap(con.getTranportInstance().getIp().split(":")[0]);
-            if(con.getState() != com.neology.net.states.State.CLOSED){
-                Closed c = new Closed();
-                con.changeState(c);
+        if(mgr != null){
+            if(mgr.getState() != State.WAITING){
+                mgr.interrupt();
+                mgr = null;
+            }else{
+                wasInterrupted = true;
             }
-        });  
-        
-        cdh.setFree(true);
+
+            cdh.getConnectionList().forEach(con ->{
+                cdh.addIpToMap(con.getTranportInstance().getIp().split(":")[0]);
+                if(con.getState() != com.neology.net.states.State.CLOSED){
+                    Closed c = new Closed();
+                    con.changeState(c);
+                }
+            });  
+
+            cdh.setFree(true);
+        }
     }
     
     public void setAccessorInstance(AccessorImpl a){

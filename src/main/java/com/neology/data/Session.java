@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 obsidiam
+ * Copyright (C) 2017 zsel
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,15 +14,28 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.neology.google;
-
-import com.neology.parsing.JSONController;
+package com.neology.data;
 
 /**
  *
  * @author obsidiam
  */
-public class SyncChecker {
-    JSONController js = JSONController.getInstance();
-        
+public class Session {
+    private String name,token;
+    
+    public void setName(String name){
+        this.name = name;
+    }
+    
+    public void setToken(String token){
+        this.token = token;
+    }
+    
+    public String getToken(){
+        return token;
+    }
+    
+    public String getName(){
+        return name;
+    }
 }

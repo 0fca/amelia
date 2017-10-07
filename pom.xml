@@ -92,6 +92,7 @@
                     </compilerArguments>
                 </configuration>
             </plugin>
+            
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
@@ -121,11 +122,27 @@
             <groupId>commons-net</groupId>
             <artifactId>commons-net</artifactId>
             <version>3.5</version>
+        </dependency>    
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>javax.servlet-api</artifactId>
+            <version>3.0.1</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>com.google.apis</groupId>
-            <artifactId>google-api-services-drive</artifactId>
-            <version>v3-rev81-1.22.0</version>
+            <artifactId>google-api-services-plus</artifactId>
+            <version>v1-rev530-1.23.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.apis</groupId>
+            <artifactId>google-api-services-identitytoolkit</artifactId>
+            <version>v3-rev243-1.23.0</version>
+        </dependency>
+        <dependency>
+          <groupId>com.squareup.retrofit2</groupId>
+          <artifactId>retrofit</artifactId>
+          <version>2.3.0</version>
         </dependency>
         <dependency>
             <groupId>xml-apis</groupId>
@@ -156,6 +173,11 @@
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
             <version>2.8.1</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.apis</groupId>
+            <artifactId>google-api-services-oauth2</artifactId>
+            <version>v2-rev131-1.23.0</version>
         </dependency>
         <dependency>
             <groupId>org.controlsfx</groupId>

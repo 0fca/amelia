@@ -14,36 +14,26 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.neology.google;
-
-import javafx.concurrent.Service;
-import javafx.concurrent.Task;
+package com.neology.data;
 
 /**
  *
  * @author obsidiam
+/
+
+/**
+ * Created by obsidiam on 10/1/17.
  */
-public class GoogleService extends Service{
-    Task<String> serviceTask;
-    private String nick = "user";
-    
-    public void setNickName(String user){
-        this.nick = user;
+
+public class LoginData {
+    private boolean success;
+    private String token;
+
+    public boolean getSuccess(){
+        return success;
     }
-    
-    @Override
-    protected Task createTask() {
-        return serviceTask = new Task<String>(){
-            @Override
-            protected String call() throws Exception {
-                AuthorizeGoogleUser.doLogin(nick);
-                return AuthorizeGoogleUser.getName();
-            }
-        };
-    }
-    
-    @Override
-    public boolean cancel(){
-        return serviceTask.cancel(true);
+
+    public String getToken(){
+        return token;
     }
 }

@@ -4,6 +4,12 @@
     -fx-text-fill:  #FFFFFF;
     -fx-font-family: Ubuntu Light;
 }
+
+.label{
+    -fx-text-fill:  #FFFFFF;
+    -fx-font-family: Ubuntu Light;
+}
+
 .button:hover{
     -fx-background-color: #9E9E9E;
     -fx-font-family: Ubuntu Light;
@@ -22,8 +28,15 @@
     -fx-text-fill:  #9E9E9E;
     -fx-font-family: Ubuntu Light;
 }
-.list-view{
+.list-view,.border-pane,.dialog-pane{
     -fx-border-color: #222222;
     -fx-background-color: #222222;
 }
+.scroll-bar, .stack-pane{
+    -fx-background-color: #222222;
+}
+#GM_LABEL:hover{
+    -fx-effect: dropshadow(three-pass-box, #536DFE, 10, 0, 0, 0);
+}
+
 

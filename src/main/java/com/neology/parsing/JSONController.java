@@ -17,20 +17,11 @@
 package com.neology.parsing;
 
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-import com.neology.environment.Local;
-import com.neology.environment.LocalEnvironment;
-
+import com.neology.data.Frame;
+import com.neology.data.LoginData;
+import com.neology.data.Session;
+import com.neology.lastdays.TodoTicket;
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.util.ArrayList;
 
 /**
@@ -39,8 +30,11 @@ import java.util.ArrayList;
  */
 public class JSONController {
     private static volatile JSONController JSON;
-    private static LocalEnvironment ENV = new LocalEnvironment(){};
     static BufferedReader br = null;
+    private static final Gson GS = new Gson();
+    private static LoginData ld;
+    private static Frame frame;
+    private static Session s = new Session();
     
     public static synchronized JSONController getInstance(){
         if(JSON == null){
@@ -49,50 +43,23 @@ public class JSONController {
         return JSON;
     } 
     
-    public void writeJson(ArrayList<FileDataWrapper> sync) throws IOException{
-        BufferedWriter writer = new BufferedWriter(new FileWriter(ENV.getLocalVar(Local.USER_HOME)+File.separator+"joanne"+File.separator+"sync_data.json"));
-        Gson gson = new GsonBuilder().setPrettyPrinting().create();
-        gson.toJson(sync, writer);       
-        writer.close();
+    public boolean parseLogin(String json){
+         ld = GS.fromJson(json, LoginData.class);
+         s.setToken(ld.getToken());
+         
+        return (ld != null && ld.getSuccess());
     }
     
-    public FileDataWrapper[] readArray() throws FileNotFoundException{
-        br = new BufferedReader(new FileReader(ENV.getLocalVar(Local.USER_HOME)+File.separator+"joanne"+File.separator+"sync_data.json"));
-        Gson gson = new Gson(); 
-        FileDataWrapper[] wrapper = gson.fromJson(br, FileDataWrapper[].class);
-        return wrapper;
+    public boolean registerUser(String json){
+        ld = GS.fromJson(json, LoginData.class);
+        return (ld != null && ld.getSuccess());
     }
     
-    public String readString(String field) throws FileNotFoundException{
-        br = new BufferedReader(new FileReader(ENV.getLocalVar(Local.USER_HOME)+File.separator+"joanne"+File.separator+"sync_data.json"));
-        JsonArray entries = (JsonArray) new JsonParser().parse(br);
-        return ((JsonObject)entries.get(0)).get(field).toString();
+    public Frame parseFrame(String json){
+        return frame = GS.fromJson(json, Frame.class);
     }
     
-    public int readInt32(String field) throws FileNotFoundException{
-        br = new BufferedReader(new FileReader(ENV.getLocalVar(Local.USER_HOME)+File.separator+"joanne"+File.separator+"sync_data.json"));
-        JsonArray entries = (JsonArray) new JsonParser().parse(br);
-        return ((JsonObject)entries.get(0)).get(field).getAsInt();
-    }
-    
-   
-    /**
-     * Left for testing purposes, NOT an entry point!.
-     * 
-     */
-    @Deprecated
-    private static void main(String[] args) throws FileNotFoundException, IOException{
-//        ArrayList<FileDataWrapper> sync = new ArrayList<>();
-//        SyncDataWrapper s = new SyncDataWrapper();
-//        s.setFileId(1);
-//        s.setFileModifDate(1234566778L);
-//        s.setFileName("File1");
-//        SyncDataWrapper s2 = new SyncDataWrapper();
-//        s2.setFileId(2);
-//        s2.setFileModifDate(1234567890L);
-//        s2.setFileName("File2");
-//        sync.add(s);
-//        sync.add(s2);
-        //writeJson(sync,sync.size());
+    public Session getSession(){
+        return s;
     }
 }

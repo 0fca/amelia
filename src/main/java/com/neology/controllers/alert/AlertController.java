@@ -41,9 +41,10 @@ import org.controlsfx.control.Notifications;
  * @author obsidiam
  */
 public class AlertController{
-    private ViewableImpl i = new ViewableImpl();
+    private ViewableImpl vi = new ViewableImpl();
     private Object[] args = new Object[]{""};
     private Class<?>[] types;
+  
     
     public void prepareViewable(Object[] args){
         this.args = args;
@@ -51,20 +52,22 @@ public class AlertController{
     }
     
     public void prepareViewable(Service s, Object[] args){
-        i = new ViewableImpl(s);
+        vi = new ViewableImpl(s);
         this.args = args;
         bindTypes();
     }
 
-    public void viewAlert(AlertMethod m){
+    public Object viewAlert(AlertMethod m){
         try {
             Method method = ViewableImpl.class.getDeclaredMethod(m.getValue(m.toString()), types);
-            method.invoke(i, args);
+            return method.invoke(vi, args);
         } catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
             Logger.getLogger(AlertController.class.getName()).log(Level.SEVERE, null, ex);
         }
+        return null;
     }
 
+    
     private void bindTypes() {
         types = new Class<?>[args.length];
        
@@ -86,8 +89,7 @@ public class AlertController{
         Alert a = new Alert(AlertType.NONE);
         Service t = null;
         
-        ViewableImpl(){
-        }
+        ViewableImpl(){}
         
         ViewableImpl(Service s){
             this.t = s;
@@ -180,6 +182,7 @@ public class AlertController{
                     .position(p);
             notificationBuilder.show();
         }
+       
    }
     
 }

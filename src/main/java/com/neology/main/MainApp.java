@@ -3,10 +3,10 @@ package com.neology.main;
 import com.neology.Hasher;
 import com.neology.environment.Local;
 import com.neology.environment.LocalEnvironment;
+import java.awt.Toolkit;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -34,9 +34,13 @@ public class MainApp extends Application{
     LocalEnvironment e = new LocalEnvironment() {};
     @Override
     public void start(Stage stage) throws Exception {
+        double x = Toolkit.getDefaultToolkit().getScreenSize().width * 0.75;
+        double y = Toolkit.getDefaultToolkit().getScreenSize().height * 0.75;
+        
         Parent root = FXMLLoader.load(getClass().getResource("/fxml/Scene.fxml"));
         
-        Scene scene = new Scene(root);
+        Scene scene = new Scene(root,x,y);
+        
         scene.getStylesheets().add("/styles/Styles.css");
         stage.setOnCloseRequest(event ->{
             File img = new File(e.getLocalVar(Local.TMP));
@@ -63,9 +67,12 @@ public class MainApp extends Application{
             }
         });
         
-        stage.setTitle("Amelia");
+        stage.setMinWidth(x);
+        stage.setMinHeight(y);
+        stage.setTitle("Amelia Server");
         stage.setScene(scene);
         stage.show();
+        stage.centerOnScreen();
     }
 
     /**

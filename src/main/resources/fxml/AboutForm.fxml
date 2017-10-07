@@ -10,12 +10,12 @@
 <?import javafx.scene.layout.Pane?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane id="AnchorPane" prefHeight="295.0" prefWidth="503.0" styleClass="mainFxmlClass" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.neology.controllers.AboutFormController">
+<AnchorPane id="AnchorPane" prefHeight="295.0" prefWidth="503.0" style="-fx-background-color: #222222;" styleClass="mainFxmlClass" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.neology.controllers.AboutFormController">
     <stylesheets>
         <URL value="@/styles/Styles.css" />
     </stylesheets>
    <children>
-      <BorderPane prefHeight="295.0" prefWidth="503.0" style="-fx-background-color: ;">
+      <BorderPane prefHeight="295.0" prefWidth="503.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
          <center>
             <Pane prefHeight="241.0" prefWidth="409.0" BorderPane.alignment="CENTER">
                <children>
@@ -34,7 +34,7 @@
                         <Font size="24.0" />
                      </font>
                   </Label>
-                  <Label alignment="CENTER" prefHeight="62.0" prefWidth="37.0" text="v.2.1" textAlignment="JUSTIFY">
+                  <Label alignment="CENTER" prefHeight="62.0" prefWidth="37.0" text="v.2.2" textAlignment="JUSTIFY">
                      <font>
                         <Font size="14.0" />
                      </font>
