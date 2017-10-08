@@ -3,8 +3,10 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.Cursor?>
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ContextMenu?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.MenuItem?>
 <?import javafx.scene.control.PasswordField?>
 <?import javafx.scene.control.Tab?>
 <?import javafx.scene.control.TabPane?>
@@ -17,7 +19,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane id="AnchorPane" fx:id="MAIN_PANE" minHeight="-Infinity" minWidth="-Infinity" style="-fx-background-color: #222222;" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.neology.controllers.FXMLController">
+<AnchorPane id="AnchorPane" fx:id="MAIN_PANE" minHeight="-Infinity" minWidth="-Infinity" style="-fx-background-color: #222222;" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.neology.controllers.MainViewController">
     <children>
       <Pane fx:id="MAIN_BAR" prefHeight="72.0" prefWidth="996.0" style="-fx-background-color: #212121;" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
          <children>
@@ -42,13 +44,22 @@
             </AnchorPane>
          </center>
          <right>
-            <ListView fx:id="INFO_VIEW" prefHeight="497.0" prefWidth="200.0" BorderPane.alignment="CENTER" />
+            <ListView fx:id="INFO_VIEW" prefHeight="497.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+               <contextMenu>
+                  <ContextMenu>
+                    <items>
+                      <MenuItem fx:id="ADD_ITEM" mnemonicParsing="false" text="Add..." />
+                        <MenuItem fx:id="UPDATE_ITEM" mnemonicParsing="false" text="Update" />
+                        <MenuItem fx:id="REMOVE_ITEM" mnemonicParsing="false" text="Remove" />
+                    </items>
+                  </ContextMenu>
+               </contextMenu></ListView>
          </right>
          <bottom>
-            <HBox fx:id="BOTTOM_BAR" alignment="CENTER_LEFT" prefHeight="71.0" prefWidth="996.0" spacing="25.0" style="-fx-background-color: #222222;" BorderPane.alignment="CENTER">
+            <HBox fx:id="BOTTOM_BAR" alignment="CENTER_LEFT" prefHeight="71.0" prefWidth="996.0" spacing="15.0" style="-fx-background-color: #222222;" BorderPane.alignment="CENTER">
                <children>
-                  <Button fx:id="DESKTOP_BUTTON" disable="true" mnemonicParsing="false" prefHeight="39.0" prefWidth="134.0" text="Remote desktop" />
-                  <ToggleButton fx:id="TODO_BUTTON" mnemonicParsing="false" text="View TODO" />
+                  <Button fx:id="DESKTOP_BUTTON" disable="true" mnemonicParsing="false" prefHeight="39.0" prefWidth="97.0" text="Remote" />
+                  <ToggleButton fx:id="TODO_BUTTON" disable="true" mnemonicParsing="false" prefHeight="39.0" prefWidth="97.0" text="View TODO" />
                </children>
                <BorderPane.margin>
                   <Insets />

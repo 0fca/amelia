@@ -16,7 +16,7 @@
  */
 package com.neology;
 
-import com.neology.data.Session;
+import com.neology.data.model.Session;
 import com.neology.lastdays.LastDaysService;
 import com.neology.lastdays.TodoTicket;
 import com.neology.parsing.JSONController;

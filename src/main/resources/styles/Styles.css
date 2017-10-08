@@ -1,5 +1,5 @@
 
-.button{
+.button,.toggle-button{
     -fx-background-color:  #616161;
     -fx-text-fill:  #FFFFFF;
     -fx-font-family: Ubuntu Light;
@@ -10,7 +10,7 @@
     -fx-font-family: Ubuntu Light;
 }
 
-.button:hover{
+.button:hover,.toggle-button:hover{
     -fx-background-color: #9E9E9E;
     -fx-font-family: Ubuntu Light;
 }
@@ -39,4 +39,14 @@
     -fx-effect: dropshadow(three-pass-box, #536DFE, 10, 0, 0, 0);
 }
 
+.menu-item{
+    -fx-cursor:hand;
+    -fx-background-color: #222222;
+    
+}
 
+.context-menu{
+    -fx-background-color: #222222;
+    -fx-border-color: #616161;
+    -fx-border-width: 2px;
+}

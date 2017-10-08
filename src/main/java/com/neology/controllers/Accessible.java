@@ -20,7 +20,7 @@ package com.neology.controllers;
  *
  * @author obsidiam
  */
-public interface Accessable {
+public interface Accessible {
     boolean checkViewUpdaterAccess(Thread th);
     void sendNotificationSignal(SignalType s);
     void commitSignalData(String msg);

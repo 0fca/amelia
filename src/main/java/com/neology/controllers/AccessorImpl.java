@@ -16,14 +16,14 @@
  */
 package com.neology.controllers;
 
-import com.neology.controllers.FXMLController.ViewUpdater;
+import com.neology.controllers.MainViewController.ViewUpdater;
 import com.neology.exceptions.AccessDeniedException;
 
 /**
  *
  * @author obsidiam
  */
-final public class AccessorImpl implements Accessable{
+final public class AccessorImpl implements Accessible{
     private ViewUpdater instance;
     private boolean hasAccess = false;
     private Thread th;

@@ -17,9 +17,9 @@
 package com.neology.parsing;
 
 import com.google.gson.Gson;
-import com.neology.data.Frame;
-import com.neology.data.LoginData;
-import com.neology.data.Session;
+import com.neology.data.model.Frame;
+import com.neology.data.model.LoginData;
+import com.neology.data.model.Session;
 import com.neology.lastdays.TodoTicket;
 import java.io.BufferedReader;
 import java.util.ArrayList;

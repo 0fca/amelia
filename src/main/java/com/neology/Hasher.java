@@ -16,7 +16,7 @@
  */
 package com.neology;
 
-import com.neology.controllers.FXMLController;
+import com.neology.controllers.MainViewController;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.logging.Level;
@@ -32,7 +32,7 @@ final public class Hasher {
         try {
             md = MessageDigest.getInstance("SHA-256");
         } catch (NoSuchAlgorithmException ex) {
-            Logger.getLogger(FXMLController.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(MainViewController.class.getName()).log(Level.SEVERE, null, ex);
         }
         return new String(md.digest(msg.getBytes()));
     }
