@@ -94,20 +94,19 @@ public class TCPThread extends Thread implements Runnable{
                                            inputDataBuffer = c.read();
                                            Image im = processData(inputDataBuffer);
                                            IDH.getImagesMap().put(ip, im);
-
+                                           int b = t.getBaudrateMeter().kBPS();
                                            String data = "";
                                            data += "Client name: "+NAME+",";
                                            data += "IP: "+t.getIp().substring(1)+",";
-                                           data += "Speed: "+t.getBaudrateMeter().kBPS()+"kB/s,";
+                                           data += "Speed: "+( (b < 10000) ? (b +"kB/s,") : (t.getBaudrateMeter().Mbps())+"MB/s,");
                                            data += "Is connected: "+t.isConnected()+",";
                                            data += "Was connected earlier: "+c.wasConnected();
                                            cdh.getData().put(ip, data);
                                            if(!c.isNameSet()){
                                               c.setConnectionName(NAME);
-                                                      
-                                           }
-                                           
 
+                                           }
+                                            
                                     } catch (TransportException | IOException ex) {
                                         System.err.println("LOCALIZED_ERR_MSG:"+ex.getLocalizedMessage());
                                         c.changeState(new Closed());

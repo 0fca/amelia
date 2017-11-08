@@ -14,47 +14,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.neology.controllers.input;
-
-
-
+package com.neology.lastdays;
 
 /**
  *
  * @author obsidiam
  */
-public enum MouseStructure {
-    X(0,0),
-    Y(0,0),
-    LOCATION(0,0);
+public class TodoResult {
+    private boolean success;
     
-    private int x,y;
-    public boolean hasChanged = false;
- 
-    MouseStructure(int x, int y){
-        this.x = x;
-        this.y = y;
-    }
- 
-    
-    public void setLocation(int x , int y){
-       this.x = x;
-       this.y = y;
-    }
-    
-    public void setX(int x){
-        this.x = x;
-    }
-    
-    public void setY(int y){
-        this.y = y;
-    }
-    
-    public double getX(){
-        return x;
-    }
-    
-    public double getY(){
-        return y;
+    public boolean getSuccess(){
+        return this.success;
     }
 }

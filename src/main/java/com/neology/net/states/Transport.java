@@ -80,7 +80,6 @@ public class Transport {
 
     public void close() throws IOException{
         release();
-        IP = "";
     }
     
     public byte readByte() throws TransportException {

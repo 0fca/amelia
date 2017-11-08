@@ -3,6 +3,8 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.Cursor?>
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ButtonBar?>
+<?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.ContextMenu?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ListView?>
@@ -44,7 +46,7 @@
             </AnchorPane>
          </center>
          <right>
-            <ListView fx:id="INFO_VIEW" prefHeight="497.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+            <ListView fx:id="INFO_VIEW" editable="true" prefHeight="497.0" prefWidth="200.0" BorderPane.alignment="CENTER">
                <contextMenu>
                   <ContextMenu>
                     <items>
@@ -170,5 +172,18 @@
             </BorderPane>
          </children>
       </Pane>
+      <VBox fx:id="ADD_PANEL" layoutX="796.0" layoutY="-130.0" prefHeight="130.0" prefWidth="200.0" spacing="5.0" AnchorPane.rightAnchor="0.0">
+         <children>
+            <TextField fx:id="NAME" promptText="Name" />
+            <TextField fx:id="STATE" promptText="State" />
+            <ComboBox fx:id="IMPORTANCE" prefHeight="26.0" prefWidth="208.0" promptText="Importance" />
+            <ButtonBar prefHeight="40.0" prefWidth="200.0">
+              <buttons>
+                <Button fx:id="COLOR_PICKER_BUTTON" mnemonicParsing="false" text="Color..." />
+                  <Button fx:id="ACTION_TODO_BUTTON" mnemonicParsing="false" text="Add" />
+              </buttons>
+            </ButtonBar>
+         </children>
+      </VBox>
     </children>
 </AnchorPane>

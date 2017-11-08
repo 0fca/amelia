@@ -3,7 +3,9 @@ package com.neology.controllers;
 import com.neology.RestClient;
 import com.neology.controllers.alert.AlertController;
 import com.neology.controllers.alert.AlertMethod;
+import com.neology.controllers.cells.ContentAdapter;
 import com.neology.controllers.cells.DefaultInfoViewListCell;
+import com.neology.controllers.cells.PlainTextAdapter;
 import com.neology.environment.LocalEnvironment;
 import com.neology.data.ConnectionDataHandler;
 import com.neology.data.ImageDataHandler;
@@ -18,6 +20,7 @@ import com.neology.google.GoogleService;
 import com.neology.lastdays.TodoTicket;
 import com.neology.main.SettingsForm;
 import com.neology.net.UDPConnector;
+import io.reactivex.schedulers.Schedulers;
 import javafx.scene.image.Image;
 import java.io.File;
 import java.io.IOException;
@@ -29,6 +32,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -46,6 +50,8 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
+import javafx.scene.control.ColorPicker;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
@@ -60,20 +66,22 @@ import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import javafx.util.Callback;
 import javafx.util.Duration;
 import javax.xml.parsers.ParserConfigurationException;
 import org.xml.sax.SAXException;
+import io.reactivex.disposables.CompositeDisposable;
 
 public class MainViewController extends LocalEnvironment implements Initializable{
     @FXML
-    private TextField LOGIN,LOGIN_REG,EMAIL;
+    private TextField LOGIN, LOGIN_REG, EMAIL, NAME, STATE;
     @FXML
     private PasswordField PASS,PASS_REG;
     @FXML
-    private Button LOGIN_BUTTON,SETTINGS,ABOUT,CONNECT,DISCONNECT,REGISTER_BUTTON,DESKTOP_BUTTON;
+    private Button LOGIN_BUTTON,SETTINGS,ABOUT,CONNECT,DISCONNECT,REGISTER_BUTTON,DESKTOP_BUTTON,ACTION_TODO_BUTTON,COLOR_PICKER_BUTTON;
     @FXML
     private volatile ListView VIEWER_PANEL,INFO_VIEW;
     @FXML
@@ -86,9 +94,16 @@ public class MainViewController extends LocalEnvironment implements Initializabl
     private ToggleButton TODO_BUTTON;       
     @FXML
     private MenuItem ADD_ITEM,REMOVE_ITEM,UPDATE_ITEM;
+    @FXML
+    private VBox ADD_PANEL;        
+    @FXML
+    private ComboBox IMPORTANCE;        
     
+    
+    ColorPicker clp = new ColorPicker();
     String ACTUAL_NAME = "",ADDR,loginType;
-    
+    ContentAdapter adapter = new PlainTextAdapter(); 
+    private final CompositeDisposable compositeDisposable = new CompositeDisposable();
     
     volatile int PORT;
     protected ArrayList<String> INIT;
@@ -127,9 +142,9 @@ public class MainViewController extends LocalEnvironment implements Initializabl
         LOGIN_BUTTON.setOnAction(event ->{
             if(!IS_LOGGED_IN){
                 if(loginType != null && LOGIN.getText() != null){
+                    lc = new LoginController(rest);
                     if(loginType.equals("LD")){
                         try {
-                            lc = new LoginController(rest);
                             if(lc.loginWithLD(LOGIN.getText(), PASS.getText())){
                                 s = lc.getSession();
                                 viewConfirmationDialog(LOGIN.getText());
@@ -238,7 +253,7 @@ public class MainViewController extends LocalEnvironment implements Initializabl
         });
         
         DESKTOP_BUTTON.setOnAction(listener ->{
-            UDPConnector udp = new UDPConnector("192.168.0.108",7998);
+            UDPConnector udp = new UDPConnector("192.168.0.13",7998);
             try {
                 udp.prepareConnection();
                 udp.startThread();
@@ -255,14 +270,19 @@ public class MainViewController extends LocalEnvironment implements Initializabl
         TODO_BUTTON.setOnAction(event ->{
             if(TODO_BUTTON.isSelected()){
                 if(loginType != null){
-                    if(loginType.equals("LD")){
+                    if(loginType.equals("LD")){;
                         rest.init();
-                        try {
-                            setTodoData(rest.getTodoTickets(s.getToken()));
-                            
-                        } catch (IOException ex) {
-                            Logger.getLogger(MainViewController.class.getName()).log(Level.SEVERE, null, ex);
-                        }
+                        
+                            try {
+                                compositeDisposable.add(
+                                    rest.getTodoTickets(s.getToken()).observeOn(Schedulers.single()).subscribeOn(Schedulers.io()).subscribe(items ->{
+                                        setTodoData(items.getTickets());
+                                    })
+                                );
+                            } catch (IOException ex) {
+                                Logger.getLogger(MainViewController.class.getName()).log(Level.SEVERE, null, ex);
+                            }
+                        
                     }else{
                         ac.prepareViewable(new Object[]{"You have logged in using "+loginType+" login type"});
                         ac.viewAlert(AlertMethod.ERROR);
@@ -270,9 +290,12 @@ public class MainViewController extends LocalEnvironment implements Initializabl
                 }
                 INFO_VIEW.setEditable(true);
             }else{
+                compositeDisposable.clear();
+                adapter = new PlainTextAdapter();
                 INFO_VIEW.getItems().clear();
                 INFO_VIEW.setEditable(false);
             }
+            
         });
 
         
@@ -293,10 +316,28 @@ public class MainViewController extends LocalEnvironment implements Initializabl
         });
 
         ADD_ITEM.setOnAction( listener ->{
-            
+            animateActionPanelMove();
         });
-        
-        
+
+        COLOR_PICKER_BUTTON.setOnAction( event ->{
+            clp.show();
+        });
+
+        ACTION_TODO_BUTTON.setOnAction( event ->{
+            TodoTicket t = new TodoTicket();
+            t.setPriority("Important", "#0099FF");
+            t.setName("Test");
+            t.setState("Done");
+            boolean result = rest.postTodo(lc.getSession().getToken().getBytes(),t);
+            
+            if(result){
+                ac.prepareViewable(new Object[]{"Add todo","Add todo ticket","Adding successful!",AlertType.INFORMATION});
+                ac.viewAlert(AlertMethod.INFO);
+            }else{
+                ac.prepareViewable(new Object[]{"Adding todo failed."});
+                ac.viewAlert(AlertMethod.ERROR);
+            }
+        });
         
         MENU_LABEL.setGraphic(new ImageView(this.getClass().getResource("/images/menu.png").toString()));
         VIEWER_PANEL.setCellFactory(new CallbackImpl());
@@ -353,13 +394,12 @@ public class MainViewController extends LocalEnvironment implements Initializabl
             tcp.interrupt();
             mgr.interruptThread();
             CDH.getData().clear();
-            CDH.clearAllConnections();
+            //CDH.clearAllConnections();
             TIME_STOPPED_LABEL.setText("Time stopped: "+new SimpleDateFormat("HH:mm:ss").format(new Date()));
             
         }
         Platform.runLater(() ->{
             VIEWER_PANEL.getItems().clear(); 
-            INFO_VIEW.getItems().clear();
         });
         
         DISCONNECT.setDisable(true);
@@ -370,8 +410,7 @@ public class MainViewController extends LocalEnvironment implements Initializabl
     
     private void setInfoViewData(String line) {
         if(line != null){
-            INFO_VIEW.getItems().clear();
-            INFO_VIEW.getItems().addAll(Arrays.asList(line.split(",")));
+            INFO_VIEW.setItems(FXCollections.observableList(Arrays.asList(line.split(","))));
         }
     }
 
@@ -397,6 +436,19 @@ public class MainViewController extends LocalEnvironment implements Initializabl
         }
     }
 
+    private void animateActionPanelMove(){
+        TranslateTransition openNav = new TranslateTransition(new Duration(350), ADD_PANEL);
+        openNav.setToY(-ADD_PANEL.getHeight());
+        TranslateTransition closeNav = new TranslateTransition(new Duration(350), ADD_PANEL);
+        
+        if(ADD_PANEL.getTranslateY() > ADD_PANEL.getHeight()){
+            openNav.play();
+        }else{
+            closeNav.setToY((ADD_PANEL.getHeight()));
+            closeNav.play();
+        }
+    }
+    
     private void viewRemoteDesktopView(UDPConnector udp) throws IOException {
         UDPConnectorResources r  = new UDPConnectorResources();
         r.putObject("UDPConnector", udp);
@@ -444,9 +496,10 @@ public class MainViewController extends LocalEnvironment implements Initializabl
     }
 
 
-    private void setTodoData(ArrayList<TodoTicket> todoTickets) {
-        INFO_VIEW.getItems().clear();
-        INFO_VIEW.setItems(FXCollections.observableArrayList(todoTickets));
+    private void setTodoData(List<TodoTicket> todoTickets) {
+        Platform.runLater(() ->{
+            INFO_VIEW.setItems(FXCollections.observableArrayList(todoTickets));
+        });
     }
     
     private class CallbackImpl implements Callback<ListView<String>, ListCell<String>> {
@@ -457,9 +510,11 @@ public class MainViewController extends LocalEnvironment implements Initializabl
     }
     
     private class InfoViewCallbackImpl implements Callback<ListView<String>, ListCell<String>> {
+        DefaultInfoViewListCell divlc = new DefaultInfoViewListCell();
         @Override
         public ListCell<String> call(ListView<String> list) {
-            return new DefaultInfoViewListCell();
+            divlc.setContentAdapter(adapter);
+            return divlc;
         }
     }
     
@@ -516,10 +571,9 @@ public class MainViewController extends LocalEnvironment implements Initializabl
         @Override
         public void run(){
             while(!T.isInterrupted()){
-                if(!TODO_BUTTON.isSelected()){
+                
                     HashMap<String, Image> map = IDH.getImagesMap();
                     HashMap<String,String> data = CDH.getData();
-                    
                     Platform.runLater(() ->{
                         VIEWER_PANEL.getItems().clear();
 
@@ -534,9 +588,10 @@ public class MainViewController extends LocalEnvironment implements Initializabl
                                             VIEWER_PANEL.getSelectionModel().select(SELECTED);
                                             Object item = VIEWER_PANEL.getItems().get(SELECTED);
                                             if(item != null){
-                                                
-                                                if(CDH.isConnectionRegistered(item.toString())){
-                                                    setInfoViewData(CDH.getData().get(item.toString()));
+                                                if(!TODO_BUTTON.isSelected()){
+                                                    if(CDH.isConnectionRegistered(item.toString())){
+                                                        setInfoViewData(CDH.getData().get(item.toString()));
+                                                    }
                                                 }
                                             }
                                     });
@@ -555,7 +610,7 @@ public class MainViewController extends LocalEnvironment implements Initializabl
                     } catch (InterruptedException ex) {
                         Logger.getLogger(MainViewController.class.getName()).log(Level.SEVERE, null, ex);
                     }
-                }
+                
             }
         }
         

@@ -79,7 +79,7 @@ public class ConnectionManager extends Thread implements Runnable{
                     Logger.getLogger(ConnectionManager.class.getName()).log(Level.SEVERE, null, ex);
                 }
 
-                if(wasInterrupted){
+                if(wasInterrupted && cons.size() > 0){
                     interruptThread();
                     break;
                 }
@@ -136,7 +136,8 @@ public class ConnectionManager extends Thread implements Runnable{
                 if(c.wasRemoved()){
                     int last = c.getRemovedSize();
                     local = (Connection)c.getRemoved().get(last - 1);
-                    idh.getImagesMap().remove(local.getConnectionName());
+                    System.out.println("IP: "+local.getTranportInstance().getIp());
+                    idh.getImagesMap().remove(local.getTranportInstance().getIp().split(":")[0]);
                     sendNotificationSignal();
                 }
             }

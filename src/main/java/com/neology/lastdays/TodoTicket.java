@@ -50,8 +50,13 @@ public class TodoTicket {
        priority.setColor(color);
        priority.setName(name);
    }
+   
+   @Override
+   public String toString(){
+       return "Name: "+name+","+"State: "+state+","+"Importance: "+priority.getName();
+   }
 
-   public class Priority{
+   public static class Priority{
        private String name = "Name", color = "#000000";
 
        public void setName(String name){

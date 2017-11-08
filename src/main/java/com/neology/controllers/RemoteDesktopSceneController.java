@@ -70,14 +70,14 @@ public class RemoteDesktopSceneController implements Initializable {
         double calcY = y/REMOTE_DESKTOP.getPrefHeight();
         
         Double calcXprec = BigDecimal.valueOf(calcX)
-        .setScale(4, RoundingMode.HALF_UP)
+        .setScale(2, RoundingMode.HALF_UP)
         .doubleValue();
         
         Double calcYprec = BigDecimal.valueOf(calcY)
-        .setScale(4, RoundingMode.HALF_UP)
+        .setScale(2, RoundingMode.HALF_UP)
         .doubleValue();
         
-        mouseStruct.setLocation(calcXprec, calcYprec);
+        mouseStruct.setLocation(calcXprec.intValue(), calcYprec.intValue());
         udp.setMouseData(mouseStruct);
         System.out.println(calcXprec+" "+calcYprec);
         mouseStruct.hasChanged = true;

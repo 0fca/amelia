@@ -18,6 +18,7 @@ package com.neology.controllers;
 
 import com.neology.Hasher;
 import com.neology.RestClient;
+import com.neology.data.model.LoginData;
 import com.neology.data.model.Session;
 import com.neology.google.GoogleService;
 import java.io.IOException;
@@ -29,6 +30,7 @@ import java.io.IOException;
 public class LoginController {
     private static Session s;
     private RestClient rest;
+    
     LoginController(RestClient rest){
         this.rest = rest;
     }
@@ -39,7 +41,13 @@ public class LoginController {
                 return true;
             }else{
                 rest.init();
-                return rest.loginUser(login, pass, 10);
+                LoginData ld = rest.loginUser(login, pass, 10);
+                if(ld.getSuccess()){
+                    s = new Session();
+                    s.setName(login);
+                    s.setToken(ld.getToken());
+                    return true;
+                }
             }
         }
         return false;
@@ -50,7 +58,7 @@ public class LoginController {
     }
     
     Session getSession(){
-        return rest.getSession();
+        return s;
     }
     
     static boolean validLoginDataFormat(String password, String email, String login) {

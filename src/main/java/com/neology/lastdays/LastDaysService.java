@@ -16,35 +16,40 @@
  */
 package com.neology.lastdays;
 
+import com.neology.data.model.Frame;
+import com.neology.data.model.LoginData;
+import io.reactivex.Observable;
+import io.reactivex.Single;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
+import retrofit2.http.Body;
 import retrofit2.http.Field;
 import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.GET;
 import retrofit2.http.Header;
 import retrofit2.http.POST;
+import retrofit2.http.PUT;
 
 /**
  *
  * @author obsidiam
  */
 public interface LastDaysService {
-     @FormUrlEncoded
+    @FormUrlEncoded
     @POST("/api/login")
-    Call<ResponseBody> postCredential(@Field("username")String userName, @Field("password") String password, @Field("expires") String expires);
+    Single<LoginData> postCredential(@Field("username")String userName, @Field("password") String password, @Field("expires") String expires);
 
     @GET("/api/token")
     Call<ResponseBody> postToken(@Header("Authorization") String token);
 
     @FormUrlEncoded
     @POST("/api/register")
-    Call<ResponseBody> postRegisterUser(@Field("username") String userName, @Field("password")String password, @Field("email") String email);
+    Single<LoginData> postRegisterUser(@Field("username") String userName, @Field("password")String password, @Field("email") String email);
 
-    @FormUrlEncoded
-    @POST("/api/todo")
-    Call<ResponseBody> postTodo(@Header("Authorization") byte[] token, @Field("name")String name, @Field("priority") TodoTicket.Priority p, @Field("state") boolean state);
+    @PUT("/api/todo")
+    Single<TodoResult> postTodo(@Header("Authorization") String token, @Body TodoTicket t);
 
     @GET("/api/todo")
-    Call<ResponseBody> getTodoList(@Header("Authorization") String token);
+    Observable<Frame> getTodoList(@Header("Authorization") String token);
 }
 

@@ -16,14 +16,18 @@
  */
 package com.neology;
 
+import com.neology.data.model.Frame;
+import com.neology.data.model.LoginData;
 import com.neology.data.model.Session;
 import com.neology.lastdays.LastDaysService;
+import com.neology.lastdays.TodoResult;
 import com.neology.lastdays.TodoTicket;
-import com.neology.parsing.JSONController;
+import io.reactivex.Observable;
+import io.reactivex.Single;
 import java.io.IOException;
-import java.util.ArrayList;
-import okhttp3.ResponseBody;
 import retrofit2.Retrofit;
+import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
+import retrofit2.converter.gson.GsonConverterFactory;
 
 /**
  *
@@ -32,12 +36,13 @@ import retrofit2.Retrofit;
 public class RestClient {
     private Retrofit retrofit;
     private LastDaysService service;
-    private String output;
     
      public void init(){
         if(!wasInitiated()) {
             retrofit = new Retrofit.Builder()
                     .baseUrl("http://thelastdays.ct8.pl/")
+                    .addConverterFactory(GsonConverterFactory.create())
+                    .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
                     .build();
             service = retrofit.create(LastDaysService.class);
         }
@@ -47,36 +52,21 @@ public class RestClient {
         return (service != null && retrofit != null);
     }
      
-    public boolean loginUser(String userName, String pass, int expires) throws IOException {
-        ResponseBody body = service.postCredential(userName,pass,expires+"d").execute().body();
-        if(body != null) {
-            output = body.string();
-            System.out.println(output);
-            return JSONController.getInstance().parseLogin(output);
-        }
-        return false;
+    public LoginData loginUser(String userName, String pass, int expires) throws IOException {
+        return service.postCredential(userName,pass,expires+"d").blockingGet();
     }
     
     public boolean registerUser(String userName, String pass, String mail) throws IOException{
-        ResponseBody body = service.postRegisterUser(userName, pass, mail).execute().body();
-        if(body != null) {
-            output = body.string();
-            System.out.println(output);
-            return JSONController.getInstance().registerUser(output);
-        }
-        return false;
+       return service.postRegisterUser(userName, pass, mail).blockingGet().getSuccess();
     }
     
-    public ArrayList<TodoTicket> getTodoTickets(String token) throws IOException{
-        ResponseBody body = service.getTodoList(token).execute().body();
-        if(body != null){
-            output = body.string();
-            return JSONController.getInstance().parseFrame(output).getTickets();
-        }
-        return null;
+    public Observable<Frame> getTodoTickets(String token) throws IOException{
+        return service.getTodoList(token);
     }
     
-    public Session getSession(){
-        return JSONController.getInstance().getSession();
+    public boolean postTodo(byte[] token,TodoTicket t){
+        Single<TodoResult> result = service.postTodo(new String(token), t);
+        
+        return result.blockingGet().getSuccess();
     }
 }

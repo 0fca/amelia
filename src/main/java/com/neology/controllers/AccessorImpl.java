@@ -53,10 +53,10 @@ final public class AccessorImpl implements Accessible{
          hasAccess = true;
         }finally{
             if(hasAccess){
+                this.th = t;
                 return true;
             }
         }
-        this.th = t;
         return false;
     }
 

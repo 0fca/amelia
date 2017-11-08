@@ -17,8 +17,10 @@
 package com.neology.controllers.cells;
 
 import com.neology.lastdays.TodoTicket;
+import io.reactivex.annotations.NonNull;
 import javafx.beans.binding.Bindings;
 import javafx.geometry.Insets;
+import javafx.scene.Cursor;
 import javafx.scene.control.ListCell;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundFill;
@@ -30,23 +32,21 @@ import javafx.scene.paint.Color;
  * @author obsidiam
  */
  public class DefaultInfoViewListCell<T> extends ListCell<T> {
-        @Override 
-        public void updateItem(T item, boolean empty) {
-            super.updateItem(item, empty);
-            if (empty) {
-                setText(null);
-                setGraphic(null);
-            } else {
-                if(item instanceof TodoTicket){
-                    TodoTicket ticket = (TodoTicket)item;
-                    setText("Name: "+ticket.getName()+"\n"+"State: "+ticket.getState()+"\n"+"Importance: "+ticket.getPriority().getName());
-                    setPrefHeight(this.getFont().getSize()*5);
-                    backgroundProperty().bind(Bindings.when(this.visibleProperty())
-                    .then(new Background(new BackgroundFill(Color.valueOf(ticket.getPriority().getColor()), new CornerRadii(2d), new Insets(10,0,0,0))))
-                    .otherwise(new Background(new BackgroundFill(Color.DARKCYAN, new CornerRadii(2d), Insets.EMPTY))));
-                }else{
-                    setText(item.toString().replace(",","\n"));
-                }
-            }
+     private ContentAdapter ca;
+    @Override 
+    public void updateItem(T item, boolean empty) {
+        super.updateItem(item, empty);
+        if (empty) {
+            setText(null);
+        } else {
+            ca.setContent(item);
+            System.out.println(ca.getAdaptedContent().toString());
+            setText(ca.getAdaptedContent().toString());
+            setPrefHeight(this.getFont().getSize()*2);
         }
     }
+    
+    public void setContentAdapter(ContentAdapter ca){
+        this.ca = ca;
+    }
+}

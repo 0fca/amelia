@@ -9,6 +9,7 @@ Without this configuration present, some functionality in the IDE may be limited
     <config-data xmlns="http://www.netbeans.org/ns/maven-config-data/1">
         <configurations>
             <configuration id="performance-profile" profiles=""/>
+            <configuration id="jdk-9-test-profile" profiles=""/>
         </configurations>
     </config-data>
     <properties xmlns="http://www.netbeans.org/ns/maven-properties-data/1">

@@ -73,8 +73,8 @@ public class AuthorizeGoogleUser {
               Credential credential = authorize(user);
               oauth2 = new Oauth2.Builder(httpTransport, JSON_FACTORY, credential).setApplicationName(APPLICATION_NAME).build();
               String picture = oauth2.userinfo().get().execute().getPicture();
-              name = oauth2.userinfo().get().execute().getName();
-              downloadProfileImage(picture,name.toLowerCase());
+              //name = oauth2.userinfo().get().execute().getName();
+              downloadProfileImage(picture,user.toLowerCase());
               
         } catch (IOException e) {
           System.err.println(e.getMessage());

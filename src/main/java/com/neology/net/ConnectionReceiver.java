@@ -101,7 +101,9 @@ public class ConnectionReceiver extends Service {
             }
             return super.cancel();
         }
-        
+        /** 
+         * @deprecated 
+        */
         private boolean isAnyConnected(){
             return IS_CONNECTED;
         }
