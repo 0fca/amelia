@@ -3,11 +3,11 @@ package com.neology.controllers;
 import com.neology.RestClient;
 import com.neology.controllers.alert.AlertController;
 import com.neology.controllers.alert.AlertMethod;
-import com.neology.controllers.cells.ContentAdapter;
-import com.neology.controllers.cells.DefaultInfoViewListCell;
-import com.neology.controllers.cells.PlainTextAdapter;
-import com.neology.controllers.cells.TodoAdapter;
-import com.neology.controllers.cells.TodoListCell;
+import com.neology.views.ContentAdapter;
+import com.neology.views.DefaultInfoViewListCell;
+import com.neology.views.adapters.PlainTextAdapter;
+import com.neology.views.adapters.TodoAdapter;
+import com.neology.views.TodoListCell;
 import com.neology.environment.LocalEnvironment;
 import com.neology.data.ConnectionDataHandler;
 import com.neology.data.ImageDataHandler;
@@ -20,6 +20,7 @@ import com.neology.parsing.XMLController;
 import com.neology.environment.Local;
 import com.neology.google.GoogleService;
 import com.neology.lastdays.TodoTicket;
+import com.neology.log.Log;
 import com.neology.main.SettingsForm;
 import com.neology.net.UDPConnector;
 import io.reactivex.schedulers.Schedulers;
@@ -77,6 +78,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.xml.sax.SAXException;
 import io.reactivex.disposables.CompositeDisposable;
 import javafx.scene.control.ProgressIndicator;
+import javafx.scene.input.KeyCode;
 
 
 public class MainViewController implements Initializable{
@@ -199,21 +201,19 @@ public class MainViewController implements Initializable{
             if(LOGIN_REG.getText() != null && PASS_REG.getText() != null && EMAIL.getText() != null){
                 if(LoginController.validLoginDataFormat(PASS_REG.getText(), EMAIL.getText(), PASS_REG.getText())){
                     rest.init();
-
-                    try {
+                    progressIndicator.setVisible(true);
                         if(rest.registerUser(LOGIN_REG.getText(), PASS_REG.getText(),EMAIL.getText())){
                             ac.prepareViewable(new Object[]{"Register","Registering Last Days' account","Registering to Last Days successful!",AlertType.INFORMATION});
                             ac.viewAlert(AlertMethod.INFO);
                             PASS_REG.setText(null);
                             LOGIN_REG.setText(null);
                             EMAIL.setText(null);
+                            progressIndicator.setVisible(false);
                         }else{
                             ac.prepareViewable(new Object[]{"Error. Couldn't register account "+LOGIN_REG.getText()});
                             ac.viewAlert(AlertMethod.ERROR);
                         }
-                    } catch (IOException ex) {
-                        Logger.getLogger(MainViewController.class.getName()).log(Level.SEVERE, null, ex);
-                    }
+                    
                 }
             }
         });
@@ -256,10 +256,6 @@ public class MainViewController implements Initializable{
             }
         });
         
-        MAIN_PANE.setOnMouseClicked( listener ->{
-            animateDrawerMove();
-        });
-        
         DESKTOP_BUTTON.setOnAction(listener ->{
             UDPConnector udp = new UDPConnector("192.168.0.13",7998);
             try {
@@ -280,15 +276,13 @@ public class MainViewController implements Initializable{
                 if(loginType != null){
                     if(loginType.equals("LD")){
                         rest.init();
-                            try {
+                        progressIndicator.setVisible(true);
                                 compositeDisposable.add(
                                     rest.getTodoTickets(s.getToken()).observeOn(Schedulers.single()).subscribeOn(Schedulers.io()).subscribe(items ->{
                                         setTodoData(items.getTickets());
                                     })
                                 );
-                            } catch (IOException ex) {
-                                Logger.getLogger(MainViewController.class.getName()).log(Level.SEVERE, null, ex);
-                            }
+                                
                     }else{
                         ac.prepareViewable(new Object[]{"You have logged in using "+loginType+" login type"});
                         ac.viewAlert(AlertMethod.ERROR);
@@ -323,6 +317,10 @@ public class MainViewController implements Initializable{
             clp.show();
         });
 
+        ADD_PANEL.setOnMouseClicked(event ->{
+            animateActionPanelMove();
+        });
+        
         ACTION_TODO_BUTTON.setOnAction( event ->{
             TodoTicket t = new TodoTicket();
             t.setPriority("Important", "#0099FF");
@@ -336,6 +334,16 @@ public class MainViewController implements Initializable{
             }else{
                 ac.prepareViewable(new Object[]{"Adding todo failed."});
                 ac.viewAlert(AlertMethod.ERROR);
+            }
+        });
+        
+        DRAWER.setOnMouseClicked(event ->{
+            animateDrawerMove();
+        });
+        
+        DRAWER.setOnKeyPressed(event ->{
+            if(event.getCode() == KeyCode.ESCAPE){
+                animateDrawerMove();
             }
         });
         
@@ -370,7 +378,7 @@ public class MainViewController implements Initializable{
         }
 
         if(c.getState() == Service.State.READY){
-            System.out.println("FXMLController -> attempting to init ConnectionManager");
+            Log.log("FXMLController","attempting to init ConnectionManager");
             initSession();
         }
         TIME_STARTED_LABEL.setText("Time started: "+new SimpleDateFormat("HH:mm:ss").format(new Date()));
@@ -387,7 +395,6 @@ public class MainViewController implements Initializable{
             tcp.interrupt();
             mgr.interruptThread();
             CDH.getData().clear();
-            //CDH.clearAllConnections();
             TIME_STOPPED_LABEL.setText("Time stopped: "+new SimpleDateFormat("HH:mm:ss").format(new Date()));
             
         }
@@ -409,7 +416,7 @@ public class MainViewController implements Initializable{
 
     private void reinitSession() {
         c.reset();
-        System.out.println("ConnectionManager.State -> "+c.getState());
+        Log.log("ConnectionManager.State",c.getState().toString());
         c.start();
         tcp.start();
         mgr.start();
@@ -429,14 +436,14 @@ public class MainViewController implements Initializable{
     }
 
     private void animateActionPanelMove(){
-        TranslateTransition openNav = new TranslateTransition(new Duration(350), ADD_PANEL);
-        openNav.setToY(-ADD_PANEL.getHeight());
-        TranslateTransition closeNav = new TranslateTransition(new Duration(350), ADD_PANEL);
+        TranslateTransition openNav = new TranslateTransition(new Duration(400), ADD_PANEL);
+        openNav.setToY(71 + 50 + ADD_PANEL.getHeight());
+        TranslateTransition closeNav = new TranslateTransition(new Duration(400), ADD_PANEL);
         
-        if(ADD_PANEL.getTranslateY() > ADD_PANEL.getHeight()){
+        if(ADD_PANEL.getTranslateY() < ADD_PANEL.getHeight()){
             openNav.play();
         }else{
-            closeNav.setToY((ADD_PANEL.getHeight()));
+            closeNav.setToY(-(71 + 50 + ADD_PANEL.getHeight()));
             closeNav.play();
         }
     }
@@ -487,10 +494,10 @@ public class MainViewController implements Initializable{
 
 
     private void setTodoData(List<TodoTicket> todoTickets) {
-
         Platform.runLater(() ->{
             TODO_VIEW.setItems(FXCollections.observableArrayList(todoTickets));
         });
+        progressIndicator.setVisible(false);
     }
     
     private class CallbackImpl implements Callback<ListView<String>, ListCell<String>> {

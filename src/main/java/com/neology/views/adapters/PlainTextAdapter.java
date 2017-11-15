@@ -14,57 +14,53 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.neology.controllers.cells;
+package com.neology.views.adapters;
 
-import com.neology.lastdays.TodoTicket;
+import com.neology.views.ContentAdapter;
 
 /**
  *
  * @author obsidiam
  */
-public class TodoAdapter implements ContentAdapter{
-    private TodoTicket t;
-    private String adaptedForm;
+public class PlainTextAdapter implements ContentAdapter{
+
+    String content;
+    private int height;
     
     @Override
     public String getContentType() {
-        return TodoTicket.class.getCanonicalName();
+        return "String";
     }
 
     @Override
     public void setContent(Object content) {
-        if(content instanceof TodoTicket){
-            t = (TodoTicket)content;
+        if(content instanceof String){
+            this.content = String.valueOf(content);
         }
     }
 
     @Override
     public Object getContent() {
-        return t;
+        return content;
+    }
+    
+    private void adapt(){
+        content = content.replace(",","\n");
     }
 
     @Override
-    
     public Object getAdaptedContent() {
         adapt();
-        return adaptedForm;
+        return content;
     }
 
     @Override
     public void setCellHeight(int height) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        this.height = height;
     }
 
     @Override
     public int getHeight() {
-        return Constants.TODO_TICKET_CELL_HEIGHT;
-    }
-    
-    private void adapt(){
-        adaptedForm = t.getName()+"\n"+t.getState()+"\n"+t.getPriority().getName()+"\n";
-    }
-    
-    public String getColor(){
-        return t.getPriority().getColor();
+        return height;
     }
 }

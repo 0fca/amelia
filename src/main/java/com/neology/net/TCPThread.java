@@ -12,6 +12,7 @@ import com.neology.data.ConnectionDataHandler;
 import com.neology.data.ImageDataHandler;
 import com.neology.exceptions.TransportException;
 import com.neology.environment.Local;
+import com.neology.log.Log;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -52,7 +53,7 @@ public class TCPThread extends Thread implements Runnable{
                 if(connections.size() > 0){
                     while(!cdh.isFree()){
                         try {
-                            System.out.println("TCPThread#run() -> waiting on cdh monitor...");
+                            Log.log("TCPThread#run()","waiting on cdh monitor...");
                             connections.wait();
                         } catch (InterruptedException ex) {
                             Logger.getLogger(TCPThread.class.getName()).log(Level.SEVERE, null, ex);
@@ -61,7 +62,7 @@ public class TCPThread extends Thread implements Runnable{
                     
                     if(!th.isInterrupted()){
                             
-                            System.out.println("TCPThread#run() -> starting reading...");
+                            Log.log("TCPThread#run()","starting reading...");
                             for(int i = 0; i < connections.size(); i++){
                                 Transport t;
                                 Connection c = connections.get(i);
@@ -76,7 +77,7 @@ public class TCPThread extends Thread implements Runnable{
 
                                 if(c.getState() == com.neology.net.states.State.ESTABLISHED){
                                     t = c.getTranportInstance();
-                                    System.out.println("TRANSPORTER_IP: "+t.getIp());
+                                    Log.log("Transporter IP",t.getIp());
                                     String ip = t.getIp().split(":")[0];
                                     byte[] inputDataBuffer;
                                     byte[] outputDataBuffer = new byte[256];
@@ -107,7 +108,7 @@ public class TCPThread extends Thread implements Runnable{
                                            }
                                             
                                     } catch (TransportException | IOException ex) {
-                                        System.err.println("LOCALIZED_ERR_MSG:"+ex.getLocalizedMessage());
+                                        Log.log(System.err,"LOCALIZED_ERR_MSG",ex.getLocalizedMessage());
                                         c.changeState(new Closed());
                                         break;
                                     }  
@@ -115,7 +116,7 @@ public class TCPThread extends Thread implements Runnable{
                             }
                         mtr.stopMeasuringCycle();
                         cdh.setFree(false);
-                        System.out.println("TCPThread#run() -> releasing cdh monitor.");
+                        Log.log("TCPThread#run()","releasing cdh monitor.");
                         connections.notifyAll();
                     }else{
                         break;
@@ -144,16 +145,17 @@ public class TCPThread extends Thread implements Runnable{
 
             String name = String.valueOf(c).trim();
             this.name = name;
-            System.out.println("FILE_NAME_RECEIVED: "+name);
+            Log.log("File name received",name);
             result = Arrays.copyOfRange(buffer,len,8192);
             is = new ByteArrayInputStream(result);
-            System.out.println("AVAILABLE_BYTE_COUNT: "+is.available());
+            Log.log("Available byte count",String.valueOf(is.available()));
             BufferedImage bf = ImageIO.read(is);
            
             ImageIO.write(bf, ext, new FileOutputStream(LocalEnvironment.getLocalVar(Local.TMP)+File.separator+name+"."+ext));
             Image out = new Image("file:///"+LocalEnvironment.getLocalVar(Local.TMP)+File.separator+name+"."+ext,250,150,true,true);
-            System.err.println("Is error: "+out.isError());
-            System.out.println("IMAGE_LOADER_STATE: "+out.getProgress()+"\n");
+            Log.log("Is error",String.valueOf(out.isError()));
+            Log.log("Image loader state", String.valueOf(out.getProgress()));
+            Log.signAsLast();
             mtr.count(buffer.length);
             
             return out;

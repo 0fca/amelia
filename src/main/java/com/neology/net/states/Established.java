@@ -6,6 +6,7 @@
 package com.neology.net.states;
 
 import com.neology.exceptions.TransportException;
+import com.neology.log.Log;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -36,13 +37,13 @@ public class Established extends TransportState{
     
     @Override
     public byte[] readPacket() throws TransportException{
-       System.out.println("Established#readPacket()::"+T.getIp());
+       Log.log("Established#readPacket()",T.getIp());
        return T.readBytes(8192);
     }
     
     @Override
     public byte[] readPacket(int len) throws TransportException{
-       System.out.println("Established#readPacket(int)::"+T.getIp());
+       Log.log("Established#readPacket(int)",T.getIp());
        if(T.isTcp()){
             return T.readBytes(len);
        }else{
@@ -52,7 +53,7 @@ public class Established extends TransportState{
     
     @Override
     public void write(byte[] buffer) throws TransportException{
-        System.out.println("Established#write(byte[])::"+T.getIp());
+        Log.log("Established#write(byte[])::",T.getIp());
         T.write(buffer);
     }
     

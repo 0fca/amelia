@@ -14,8 +14,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.neology.controllers.cells;
+package com.neology.views;
 
+import com.neology.views.adapters.TodoAdapter;
 import com.neology.lastdays.TodoTicket;
 import javafx.beans.binding.Bindings;
 import javafx.geometry.Insets;

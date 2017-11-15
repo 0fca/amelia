@@ -10,6 +10,7 @@ import com.neology.controllers.SignalType;
 import com.neology.data.ConnectionDataHandler;
 import com.neology.data.ImageDataHandler;
 import com.neology.listeners.ConnectionListChangeListener;
+import com.neology.log.Log;
 import com.neology.net.states.Closed;
 import com.neology.net.states.Established;
 import java.util.logging.Level;
@@ -48,7 +49,7 @@ public class ConnectionManager extends Thread implements Runnable{
                 try {
                     synchronized(cons){
                         while(cdh.isFree()){
-                            System.out.println("ConnectionManager#run() -> Waiting on cdh.");
+                            Log.log("ConnectionManager#run()","Waiting on cdh.");
                             cons.wait();
                         }
 
@@ -138,7 +139,7 @@ public class ConnectionManager extends Thread implements Runnable{
                 if(c.wasRemoved()){
                     int last = c.getRemovedSize();
                     local = (Connection)c.getRemoved().get(last - 1);
-                    System.out.println("IP: "+local.getTranportInstance().getIp());
+                    Log.log("IP ",local.getTranportInstance().getIp());
                     idh.getImagesMap().remove(local.getTranportInstance().getIp().split(":")[0]);
                     sendNotificationSignal();
                 }

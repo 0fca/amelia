@@ -30,7 +30,6 @@ import com.neology.net.BaudrateMeter;
 import java.io.*;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
-import java.net.Socket;
 import java.nio.charset.Charset;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -152,11 +151,13 @@ public class Transport {
      * Use this method only when sure no character accept ASCII will be read.
      * Use readBytes and character encoding conversion instead.
      *
-     * @return String read
+     * @param length the length of the string to be read
+     * @return String - output string value
+     * @throws com.neology.exceptions.TransportException
      */
     public String readString(int length) throws TransportException {
 //        return new String(readBytes(length), ISO_8859_1);
-    return stringWithBytesAndCharset(readBytes(length));
+        return stringWithBytesAndCharset(readBytes(length));
     }
 
     /**

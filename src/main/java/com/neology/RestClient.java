@@ -51,15 +51,15 @@ public class RestClient {
         return (service != null && retrofit != null);
     }
      
-    public LoginData loginUser(String userName, String pass, int expires) throws IOException {
+    public LoginData loginUser(String userName, String pass, int expires){
         return service.postCredential(userName,pass,expires+"d").blockingGet();
     }
     
-    public boolean registerUser(String userName, String pass, String mail) throws IOException{
+    public boolean registerUser(String userName, String pass, String mail){
        return service.postRegisterUser(userName, pass, mail).blockingGet().getSuccess();
     }
     
-    public Observable<Frame> getTodoTickets(String token) throws IOException{
+    public Observable<Frame> getTodoTickets(String token){
         return service.getTodoList(token);
     }
     

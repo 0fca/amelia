@@ -7,6 +7,7 @@ package com.neology.net;
 
 import com.neology.net.states.Opened;
 import com.neology.data.ConnectionDataHandler;
+import com.neology.log.Log;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -52,7 +53,7 @@ public class ConnectionReceiver extends Service {
                             if(ss == null){
                               ss = new ServerSocket(CDH.getPort(),17);
 
-                              System.out.println("ServerSocket prepared.");
+                              Log.log("ConnectionRecevier","ServerSocket prepared");
                             }
 
                             while(!this.isCancelled()){
@@ -60,7 +61,8 @@ public class ConnectionReceiver extends Service {
                                     Socket s = ss.accept();
 
                                     if(!ss.isClosed()){
-                                        System.out.println("Server Accepted Connection Request from "+s.getInetAddress().toString());
+                                        Log.log("ConnectionReceiver","Accepted from "+s.getInetAddress().toString());
+                                        Log.signAsLast();
                                             Connection c;
                                             try {
                                                 c = initConnection(s);
@@ -78,7 +80,7 @@ public class ConnectionReceiver extends Service {
                             }
                         
                     } catch (IOException ex) {
-                           System.out.println("ConnectionReceiver stopped.");
+                           Log.log(System.err, "ConnectionReceiver", "Stopped.");
                     }
                 return null;
                 }

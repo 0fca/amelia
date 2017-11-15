@@ -6,6 +6,7 @@
 package com.neology.net.states;
 
 import com.neology.exceptions.ClosedConnectionException;
+import com.neology.log.Log;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -20,14 +21,14 @@ public class Closed extends TransportState{
     @Override
     public void closeConnection(Transport t) throws ClosedConnectionException{
         try {
-            System.out.println("Closed::closeConnection() -> attempting to close...");
+            Log.log("Closed::closeConnection()","attempting to close...");
             this.T = t;
             
             if(t != null){
                     if(t.isTcp()){
                         if(t.isConnected()){
                             t.close(); 
-                            System.out.println("Closed::closeConnection() -> closed.");
+                            Log.log("Closed::closeConnection()","closed.");
                         }else{
                             throw new ClosedConnectionException("Connection already closed!",new Throwable());
                         }

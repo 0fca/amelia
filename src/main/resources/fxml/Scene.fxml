@@ -25,7 +25,7 @@
 
 <AnchorPane id="AnchorPane" fx:id="MAIN_PANE" minHeight="-Infinity" minWidth="-Infinity" style="-fx-background-color: #222222;" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.neology.controllers.MainViewController">
     <children>
-      <FlowPane alignment="CENTER_LEFT" columnHalignment="RIGHT" hgap="25.0" prefHeight="71.0" prefWidth="996.0" rowValignment="BOTTOM" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+      <FlowPane alignment="CENTER_LEFT" columnHalignment="RIGHT" hgap="25.0" prefHeight="71.0" prefWidth="996.0" rowValignment="BOTTOM" style="-fx-background-color: #222222;" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
          <children>
             <Label fx:id="MENU_LABEL" contentDisplay="GRAPHIC_ONLY" prefHeight="32.0" prefWidth="32.0" text="Label">
                <cursor>
@@ -46,7 +46,7 @@
          <center>
           <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="494.0" prefWidth="735.0">
                <children>
-                  <ListView fx:id="VIEWER_PANEL" cache="true" cacheHint="QUALITY" fixedCellSize="150.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="-5.0" AnchorPane.topAnchor="0.0" />
+                  <ListView fx:id="VIEWER_PANEL" cache="true" cacheHint="QUALITY" fixedCellSize="150.0" layoutX="-2.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="-2.0" AnchorPane.rightAnchor="-3.0" AnchorPane.topAnchor="0.0" />
                </children>
             </AnchorPane>
          </center>
@@ -82,6 +82,19 @@
             </HBox>
          </bottom>
       </BorderPane>
+      <VBox fx:id="ADD_PANEL" layoutY="-166.0" prefHeight="166.0" prefWidth="996.0" spacing="5.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
+         <children>
+            <TextField fx:id="NAME" promptText="Name" />
+            <TextField fx:id="STATE" promptText="State" />
+            <ComboBox fx:id="IMPORTANCE" prefHeight="26.0" prefWidth="208.0" promptText="Importance" />
+            <ButtonBar prefHeight="40.0" prefWidth="200.0">
+              <buttons>
+                <Button fx:id="COLOR_PICKER_BUTTON" mnemonicParsing="false" text="Color..." />
+                  <Button fx:id="ACTION_TODO_BUTTON" mnemonicParsing="false" text="Add" />
+              </buttons>
+            </ButtonBar>
+         </children>
+      </VBox>
       <HBox alignment="CENTER_LEFT" layoutY="72.0" prefHeight="43.0" prefWidth="996.0" spacing="15.0" style="-fx-background-color: #222222;" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="72.0">
          <children>
             <Button fx:id="CONNECT" disable="true" mnemonicParsing="false" prefHeight="38.0" prefWidth="97.0" text="Connect" />
@@ -183,18 +196,5 @@
             </BorderPane>
          </children>
       </Pane>
-      <VBox fx:id="ADD_PANEL" layoutX="796.0" layoutY="-130.0" prefHeight="130.0" prefWidth="200.0" spacing="5.0" AnchorPane.rightAnchor="0.0">
-         <children>
-            <TextField fx:id="NAME" promptText="Name" />
-            <TextField fx:id="STATE" promptText="State" />
-            <ComboBox fx:id="IMPORTANCE" prefHeight="26.0" prefWidth="208.0" promptText="Importance" />
-            <ButtonBar prefHeight="40.0" prefWidth="200.0">
-              <buttons>
-                <Button fx:id="COLOR_PICKER_BUTTON" mnemonicParsing="false" text="Color..." />
-                  <Button fx:id="ACTION_TODO_BUTTON" mnemonicParsing="false" text="Add" />
-              </buttons>
-            </ButtonBar>
-         </children>
-      </VBox>
     </children>
 </AnchorPane>
