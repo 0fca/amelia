@@ -89,10 +89,13 @@ public class AlertController{
         Alert a = new Alert(AlertType.NONE);
         Service t = null;
         
-        ViewableImpl(){}
+        ViewableImpl(){
+            a.getDialogPane().getStylesheets().add("/styles/Styles.css");
+        }
         
         ViewableImpl(Service s){
             this.t = s;
+            a.getDialogPane().getStylesheets().add("/styles/Styles.css");
         }   
 
         @Override
@@ -154,7 +157,7 @@ public class AlertController{
                     cancelButton.setDisable(true);
                 });
                 dialog.getDialogPane().setContent(vbox);
-
+                dialog.getDialogPane().getStylesheets().add("/styles/Styles.css");
                 dialog.setResultConverter(dialogButton -> {
                     if (dialogButton == loginButtonType) {
 
@@ -177,7 +180,7 @@ public class AlertController{
                     .title(title)
                     .text(content)
                     .graphic(null)
-                    .hideAfter(Duration.seconds(10))
+                    .hideAfter(Duration.seconds(hideAfter))
                     .darkStyle()
                     .position(p);
             notificationBuilder.show();

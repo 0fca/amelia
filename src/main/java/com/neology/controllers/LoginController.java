@@ -30,9 +30,14 @@ import java.io.IOException;
 public class LoginController {
     private static Session s;
     private RestClient rest;
+    private GoogleService gs;
     
     LoginController(RestClient rest){
         this.rest = rest;
+    }
+    
+    LoginController(GoogleService gs){
+        this.gs = gs;
     }
     
     boolean loginWithLD(String login, String pass) throws ClassNotFoundException, IOException {
@@ -53,8 +58,8 @@ public class LoginController {
         return false;
     }
     
-    void loginWithGoogleAccount(GoogleService g) {
-        g.start();
+    void loginWithGoogleAccount() {
+        gs.start();
     }
     
     Session getSession(){

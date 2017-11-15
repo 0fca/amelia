@@ -10,12 +10,14 @@
 <?import javafx.scene.control.ListView?>
 <?import javafx.scene.control.MenuItem?>
 <?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.ProgressIndicator?>
 <?import javafx.scene.control.Tab?>
 <?import javafx.scene.control.TabPane?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.control.ToggleButton?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.FlowPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Pane?>
 <?import javafx.scene.layout.VBox?>
@@ -23,39 +25,47 @@
 
 <AnchorPane id="AnchorPane" fx:id="MAIN_PANE" minHeight="-Infinity" minWidth="-Infinity" style="-fx-background-color: #222222;" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.neology.controllers.MainViewController">
     <children>
-      <Pane fx:id="MAIN_BAR" prefHeight="72.0" prefWidth="996.0" style="-fx-background-color: #212121;" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+      <FlowPane alignment="CENTER_LEFT" columnHalignment="RIGHT" hgap="25.0" prefHeight="71.0" prefWidth="996.0" rowValignment="BOTTOM" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
          <children>
-            <Label fx:id="MENU_LABEL" contentDisplay="GRAPHIC_ONLY" layoutX="14.0" layoutY="22.0" prefHeight="32.0" prefWidth="32.0" text="Label">
+            <Label fx:id="MENU_LABEL" contentDisplay="GRAPHIC_ONLY" prefHeight="32.0" prefWidth="32.0" text="Label">
                <cursor>
                   <Cursor fx:constant="HAND" />
                </cursor>
+               <FlowPane.margin>
+                  <Insets left="25.0" />
+               </FlowPane.margin>
             </Label>
-            <Label accessibleRole="HYPERLINK" layoutX="58.0" layoutY="23.0" text="Amelia Server" textFill="WHITE">
+            <Label accessibleRole="HYPERLINK" text="Amelia Server" textFill="WHITE">
                <font>
                   <Font size="24.0" />
                </font>
             </Label>
          </children>
-      </Pane>
+      </FlowPane>
       <BorderPane layoutY="119.0" prefHeight="543.0" prefWidth="996.0" AnchorPane.bottomAnchor="-3.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="119.0">
          <center>
           <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="494.0" prefWidth="735.0">
                <children>
-                  <ListView fx:id="VIEWER_PANEL" cache="true" cacheHint="QUALITY" fixedCellSize="150.0" prefHeight="543.0" prefWidth="996.0" AnchorPane.bottomAnchor="-71.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="-200.0" AnchorPane.topAnchor="0.0" />
+                  <ListView fx:id="VIEWER_PANEL" cache="true" cacheHint="QUALITY" fixedCellSize="150.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="-5.0" AnchorPane.topAnchor="0.0" />
                </children>
             </AnchorPane>
          </center>
          <right>
-            <ListView fx:id="INFO_VIEW" editable="true" prefHeight="497.0" prefWidth="200.0" BorderPane.alignment="CENTER">
-               <contextMenu>
-                  <ContextMenu>
-                    <items>
-                      <MenuItem fx:id="ADD_ITEM" mnemonicParsing="false" text="Add..." />
-                        <MenuItem fx:id="UPDATE_ITEM" mnemonicParsing="false" text="Update" />
-                        <MenuItem fx:id="REMOVE_ITEM" mnemonicParsing="false" text="Remove" />
-                    </items>
-                  </ContextMenu>
-               </contextMenu></ListView>
+            <VBox BorderPane.alignment="CENTER">
+               <children>
+                  <ListView fx:id="INFO_VIEW" editable="true" prefHeight="145.0" prefWidth="200.0" />
+                  <ListView fx:id="TODO_VIEW" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity">
+                     <contextMenu>
+                        <ContextMenu>
+                          <items>
+                            <MenuItem fx:id="ADD_ITEM" mnemonicParsing="false" text="Add..." />
+                              <MenuItem fx:id="UPDATE_ITEM" mnemonicParsing="false" text="Update" />
+                              <MenuItem fx:id="REMOVE_ITEM" mnemonicParsing="false" text="Remove" />
+                          </items>
+                        </ContextMenu>
+                     </contextMenu></ListView>
+               </children>
+            </VBox>
          </right>
          <bottom>
             <HBox fx:id="BOTTOM_BAR" alignment="CENTER_LEFT" prefHeight="71.0" prefWidth="996.0" spacing="15.0" style="-fx-background-color: #222222;" BorderPane.alignment="CENTER">
@@ -76,6 +86,7 @@
          <children>
             <Button fx:id="CONNECT" disable="true" mnemonicParsing="false" prefHeight="38.0" prefWidth="97.0" text="Connect" />
             <Button fx:id="DISCONNECT" disable="true" mnemonicParsing="false" prefHeight="38.0" prefWidth="97.0" text="Disconnect" />
+            <ProgressIndicator fx:id="progressIndicator" prefHeight="17.0" prefWidth="24.0" visible="false" />
             <Label fx:id="TIME_STARTED_LABEL" alignment="CENTER" prefHeight="17.0" prefWidth="165.0" style="-fx-text-fill: #9E9E9E;" />
             <Label fx:id="TIME_STOPPED_LABEL" alignment="CENTER" prefHeight="17.0" prefWidth="165.0" style="-fx-text-fill: #9E9E9E;" />
             <Label fx:id="TIME_PASSAGE_LABEL" alignment="CENTER" prefWidth="165.0" style="-fx-text-fill: #9E9E9E;" />

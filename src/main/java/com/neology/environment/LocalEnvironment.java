@@ -18,8 +18,8 @@ import org.xml.sax.SAXException;
  *
  * @author Obsidiam
  */
-public abstract class LocalEnvironment {
-    public String getLocalVar(Local l) throws NullPointerException{
+public final class LocalEnvironment {
+    public static String getLocalVar(Local l) throws NullPointerException{
         String var = null;
         XMLController xml = new XMLController();
         

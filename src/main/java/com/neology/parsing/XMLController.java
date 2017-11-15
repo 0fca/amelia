@@ -25,7 +25,7 @@ import org.xml.sax.*;
  *
  * @author Obsidiam
  */
-public class XMLController extends LocalEnvironment{
+public class XMLController{
     SAXParserFactory SPF = SAXParserFactory.newInstance();
 
     public void createInitXML(String xml_path,String subnet,String count) throws SAXException, ParserConfigurationException, IOException, XMLStreamException{

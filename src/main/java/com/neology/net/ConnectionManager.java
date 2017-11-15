@@ -79,7 +79,7 @@ public class ConnectionManager extends Thread implements Runnable{
                     Logger.getLogger(ConnectionManager.class.getName()).log(Level.SEVERE, null, ex);
                 }
 
-                if(wasInterrupted && cons.size() > 0){
+                if(wasInterrupted){
                     interruptThread();
                     break;
                 }
@@ -91,10 +91,6 @@ public class ConnectionManager extends Thread implements Runnable{
     }
     
     public void interruptThread(){
-        disconnectAll();
-    }
-
-    private void disconnectAll() {
         if(mgr != null){
             if(mgr.getState() != State.WAITING){
                 mgr.interrupt();
@@ -102,17 +98,23 @@ public class ConnectionManager extends Thread implements Runnable{
             }else{
                 wasInterrupted = true;
             }
-
-            cdh.getConnectionList().forEach(con ->{
-                cdh.addIpToMap(con.getTranportInstance().getIp().split(":")[0]);
-                if(con.getState() != com.neology.net.states.State.CLOSED){
-                    Closed c = new Closed();
-                    con.changeState(c);
-                }
-            });  
-
-            cdh.setFree(true);
         }
+        
+        if(cdh.getConnectionList().size() > 0){
+            disconnectAll();
+        }
+        
+        cdh.setFree(true);
+    }
+
+    private void disconnectAll() {
+        cdh.getConnectionList().forEach(con ->{
+            cdh.addIpToMap(con.getTranportInstance().getIp().split(":")[0]);
+            if(con.getState() != com.neology.net.states.State.CLOSED){
+                Closed c = new Closed();
+                con.changeState(c);
+            }
+        });  
     }
     
     public void setAccessorInstance(AccessorImpl a){
@@ -121,8 +123,8 @@ public class ConnectionManager extends Thread implements Runnable{
 
     private class ConnectionListChangeListenerImpl implements ConnectionListChangeListener {
 
-        public ConnectionListChangeListenerImpl() {
-        }
+        public ConnectionListChangeListenerImpl() {}
+        
         private Connection local;
 
         @Override

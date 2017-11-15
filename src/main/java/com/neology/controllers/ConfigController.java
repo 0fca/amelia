@@ -14,33 +14,23 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.neology.controllers.cells;
+package com.neology.controllers;
 
-import javafx.scene.control.ListCell;
+import com.neology.environment.Local;
+import com.neology.environment.LocalEnvironment;
+import java.io.File;
 
 /**
  *
  * @author obsidiam
  */
- public class DefaultInfoViewListCell<T> extends ListCell<T>  {
-     private ContentAdapter ca;
-    @Override 
-    public void updateItem(T item, boolean empty) {
-        super.updateItem(item, empty);
-        if (empty) {
-            setText(null);
-        } else {
-            ca.setContent(item);
-            setText(ca.getAdaptedContent().toString());
-
-            if(ca.getContentType().contains("PlainTextAdapter")){
-                setPrefHeight(this.getFont().getSize() * Constants.PLAIN_TEXT_CELL_HEIGHT);
-            }
-            
-        }
+public final class ConfigController{
+    public static boolean checkIfInitExists(){
+        return new File("init.xml").exists();
     }
-    
-    public void setContentAdapter(ContentAdapter ca){
-        this.ca = ca;
+
+    public static boolean checkFolders() {
+       String tmp = LocalEnvironment.getLocalVar(Local.TMP);
+       return !(new File(tmp).mkdir());  
     }
 }

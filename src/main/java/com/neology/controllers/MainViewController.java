@@ -6,6 +6,8 @@ import com.neology.controllers.alert.AlertMethod;
 import com.neology.controllers.cells.ContentAdapter;
 import com.neology.controllers.cells.DefaultInfoViewListCell;
 import com.neology.controllers.cells.PlainTextAdapter;
+import com.neology.controllers.cells.TodoAdapter;
+import com.neology.controllers.cells.TodoListCell;
 import com.neology.environment.LocalEnvironment;
 import com.neology.data.ConnectionDataHandler;
 import com.neology.data.ImageDataHandler;
@@ -74,8 +76,10 @@ import javafx.util.Duration;
 import javax.xml.parsers.ParserConfigurationException;
 import org.xml.sax.SAXException;
 import io.reactivex.disposables.CompositeDisposable;
+import javafx.scene.control.ProgressIndicator;
 
-public class MainViewController extends LocalEnvironment implements Initializable{
+
+public class MainViewController implements Initializable{
     @FXML
     private TextField LOGIN, LOGIN_REG, EMAIL, NAME, STATE;
     @FXML
@@ -83,7 +87,7 @@ public class MainViewController extends LocalEnvironment implements Initializabl
     @FXML
     private Button LOGIN_BUTTON,SETTINGS,ABOUT,CONNECT,DISCONNECT,REGISTER_BUTTON,DESKTOP_BUTTON,ACTION_TODO_BUTTON,COLOR_PICKER_BUTTON;
     @FXML
-    private volatile ListView VIEWER_PANEL,INFO_VIEW;
+    private volatile ListView VIEWER_PANEL,INFO_VIEW,TODO_VIEW;
     @FXML
     private Label TIME_STARTED_LABEL,TIME_STOPPED_LABEL, MENU_LABEL, USERNAME_LOGIN, USER_IMG,GM_LABEL,LOGIN_TYPE_LABEL,LD_LABEL;
     @FXML
@@ -98,11 +102,11 @@ public class MainViewController extends LocalEnvironment implements Initializabl
     private VBox ADD_PANEL;        
     @FXML
     private ComboBox IMPORTANCE;        
-    
+    @FXML
+    private ProgressIndicator progressIndicator;        
     
     ColorPicker clp = new ColorPicker();
-    String ACTUAL_NAME = "",ADDR,loginType;
-    ContentAdapter adapter = new PlainTextAdapter(); 
+    String ACTUAL_NAME = "",ADDR,loginType; 
     private final CompositeDisposable compositeDisposable = new CompositeDisposable();
     
     volatile int PORT;
@@ -118,14 +122,13 @@ public class MainViewController extends LocalEnvironment implements Initializabl
     private int SELECTED = -1;
     private TCPThread tcp = new TCPThread();
     private AlertController ac = new AlertController();
-    private LocalEnvironment env = new LocalEnvironment() {};
     private static Session s;
     private RestClient rest = new RestClient();
     private LoginController lc;
     
     {
-        System.out.println("Does working dir exist: "+checkFolders());
-        if(checkIfInitExists()){
+        System.out.println("Does working dir exist: "+ConfigController.checkFolders());
+        if(ConfigController.checkIfInitExists()){
             try {
                 setUpConfiguration();
             } catch (SocketException ex) {
@@ -142,8 +145,10 @@ public class MainViewController extends LocalEnvironment implements Initializabl
         LOGIN_BUTTON.setOnAction(event ->{
             if(!IS_LOGGED_IN){
                 if(loginType != null && LOGIN.getText() != null){
-                    lc = new LoginController(rest);
+                    progressIndicator.setVisible(true);
+                    
                     if(loginType.equals("LD")){
+                        lc = new LoginController(rest);
                         try {
                             if(lc.loginWithLD(LOGIN.getText(), PASS.getText())){
                                 s = lc.getSession();
@@ -151,6 +156,7 @@ public class MainViewController extends LocalEnvironment implements Initializabl
                                 setProfileImage();
                                 LOGIN_BUTTON.setText("Log out");
                                 TODO_BUTTON.setDisable(false);
+                                progressIndicator.setVisible(false);
                             }else{
                                 ac.prepareViewable(new Object[]{"No user like "+LOGIN.getText()});
                                 ac.viewAlert(AlertMethod.ERROR);
@@ -166,8 +172,10 @@ public class MainViewController extends LocalEnvironment implements Initializabl
                         g.setOnSucceeded( listener ->{
                             viewConfirmationDialog(LOGIN.getText());
                             setProfileImage();
+                            progressIndicator.setVisible(false);
                         });
-                        lc.loginWithGoogleAccount(g);
+                        lc = new LoginController(g);
+                        lc.loginWithGoogleAccount();
                         LOGIN_BUTTON.setText("Log out");
                     }
                 }
@@ -270,9 +278,8 @@ public class MainViewController extends LocalEnvironment implements Initializabl
         TODO_BUTTON.setOnAction(event ->{
             if(TODO_BUTTON.isSelected()){
                 if(loginType != null){
-                    if(loginType.equals("LD")){;
+                    if(loginType.equals("LD")){
                         rest.init();
-                        
                             try {
                                 compositeDisposable.add(
                                     rest.getTodoTickets(s.getToken()).observeOn(Schedulers.single()).subscribeOn(Schedulers.io()).subscribe(items ->{
@@ -282,24 +289,17 @@ public class MainViewController extends LocalEnvironment implements Initializabl
                             } catch (IOException ex) {
                                 Logger.getLogger(MainViewController.class.getName()).log(Level.SEVERE, null, ex);
                             }
-                        
                     }else{
                         ac.prepareViewable(new Object[]{"You have logged in using "+loginType+" login type"});
                         ac.viewAlert(AlertMethod.ERROR);
                     }
                 }
-                INFO_VIEW.setEditable(true);
             }else{
                 compositeDisposable.clear();
-                adapter = new PlainTextAdapter();
-                INFO_VIEW.getItems().clear();
-                INFO_VIEW.setEditable(false);
+                TODO_VIEW.getItems().clear();
             }
-            
         });
 
-        
-        
         Image gac_img = new Image(SettingsFormsController.class.getResourceAsStream("/images/gac.png"),32,32,true,true);
         GM_LABEL.setGraphic(new ImageView(gac_img));
         GM_LABEL.setOnMouseClicked(clicked ->{
@@ -341,23 +341,16 @@ public class MainViewController extends LocalEnvironment implements Initializabl
         
         MENU_LABEL.setGraphic(new ImageView(this.getClass().getResource("/images/menu.png").toString()));
         VIEWER_PANEL.setCellFactory(new CallbackImpl());
-        INFO_VIEW.setCellFactory(new InfoViewCallbackImpl());
+        INFO_VIEW.setCellFactory(new ViewCallbackImpl(new PlainTextAdapter()));
+        TODO_VIEW.setCellFactory(new ViewCallbackImpl(new TodoAdapter()));
+        
     }  
-    
-    private boolean checkIfInitExists(){
-        return new File("init.xml").exists();
-    }
     
     private void setUpConfiguration() throws SAXException, IOException, ParserConfigurationException, ClassNotFoundException, SQLException{
             XMLController xml = new XMLController();
             INIT = xml.parseInitFile();
             PORT = Integer.parseInt(INIT.get(0));
             ADDR = INIT.get(1);
-    }
-
-    private boolean checkFolders() {
-       String tmp = getLocalVar(Local.TMP);
-       return !(new File(tmp).mkdir());  
     }
 
     private void initSession() {
@@ -416,10 +409,9 @@ public class MainViewController extends LocalEnvironment implements Initializabl
 
     private void reinitSession() {
         c.reset();
-        System.out.println("ConnectionManager#State -> "+c.getState());
+        System.out.println("ConnectionManager.State -> "+c.getState());
         c.start();
         tcp.start();
-        mgr.setAccessorInstance(new AccessorImpl(v));
         mgr.start();
     }
 
@@ -466,11 +458,9 @@ public class MainViewController extends LocalEnvironment implements Initializabl
         stage.show();
     }
 
-    
-
     private void viewConfirmationDialog(String text) {
-        ac.prepareViewable(new Object[]{"Login","Logging in","Logged in as "+text, AlertType.INFORMATION});
-        ac.viewAlert(AlertMethod.INFO);
+        ac.prepareViewable(new Object[]{"Login","Logged in as "+text,10, Pos.BASELINE_RIGHT});
+        ac.viewAlert(AlertMethod.NOTIFICATION);
         IS_LOGGED_IN = true;
         CONNECT.setDisable(false);
         SETTINGS.setDisable(false);
@@ -483,7 +473,7 @@ public class MainViewController extends LocalEnvironment implements Initializabl
 
     private void setProfileImage() {
         System.out.println(ACTUAL_NAME.toLowerCase());
-        File file = new File(env.getLocalVar(Local.TMP)+File.separator+ACTUAL_NAME.toLowerCase()+".png");
+        File file = new File(LocalEnvironment.getLocalVar(Local.TMP)+File.separator+ACTUAL_NAME.toLowerCase()+".png");
         Image i;
         if(!file.exists()){
            i = new Image(this.getClass().getResource("/images/user.png").toString(), 32,32, true,true);
@@ -497,8 +487,9 @@ public class MainViewController extends LocalEnvironment implements Initializabl
 
 
     private void setTodoData(List<TodoTicket> todoTickets) {
+
         Platform.runLater(() ->{
-            INFO_VIEW.setItems(FXCollections.observableArrayList(todoTickets));
+            TODO_VIEW.setItems(FXCollections.observableArrayList(todoTickets));
         });
     }
     
@@ -509,13 +500,26 @@ public class MainViewController extends LocalEnvironment implements Initializabl
         }
     }
     
-    private class InfoViewCallbackImpl implements Callback<ListView<String>, ListCell<String>> {
-        DefaultInfoViewListCell divlc = new DefaultInfoViewListCell();
+    private class ViewCallbackImpl implements Callback<ListView<String>, ListCell<String>> {
+        private ContentAdapter c;
+        
+        ViewCallbackImpl(ContentAdapter c){
+            this.c = c;
+        }
+        
+        
         @Override
         public ListCell<String> call(ListView<String> list) {
-            divlc.setContentAdapter(adapter);
-            return divlc;
+            ListCell<String> cell;
+            if(c instanceof PlainTextAdapter){
+                cell = new DefaultInfoViewListCell<>();
+                ((DefaultInfoViewListCell)cell).setContentAdapter(c);
+            }else{
+                cell = new TodoListCell((TodoAdapter)c);
+            }
+            return cell;
         }
+
     }
     
     class MainViewListCell<T> extends ListCell<T> {
@@ -535,10 +539,8 @@ public class MainViewController extends LocalEnvironment implements Initializabl
                         im.setPreserveRatio(true);
                         setGraphic(im);
                         this.setOnMouseClicked(evt ->{
-                            if(!TODO_BUTTON.isSelected()){
                                SELECTED = VIEWER_PANEL.getSelectionModel().getSelectedIndex();
                                setInfoViewData(CDH.getData().get(item.toString().split(":")[0]));
-                            }
                         });
                         
                         setPrefHeight(155);
@@ -571,7 +573,6 @@ public class MainViewController extends LocalEnvironment implements Initializabl
         @Override
         public void run(){
             while(!T.isInterrupted()){
-                
                     HashMap<String, Image> map = IDH.getImagesMap();
                     HashMap<String,String> data = CDH.getData();
                     Platform.runLater(() ->{
@@ -588,10 +589,8 @@ public class MainViewController extends LocalEnvironment implements Initializabl
                                             VIEWER_PANEL.getSelectionModel().select(SELECTED);
                                             Object item = VIEWER_PANEL.getItems().get(SELECTED);
                                             if(item != null){
-                                                if(!TODO_BUTTON.isSelected()){
-                                                    if(CDH.isConnectionRegistered(item.toString())){
-                                                        setInfoViewData(CDH.getData().get(item.toString()));
-                                                    }
+                                                if(CDH.isConnectionRegistered(item.toString())){
+                                                    setInfoViewData(CDH.getData().get(item.toString()));
                                                 }
                                             }
                                     });

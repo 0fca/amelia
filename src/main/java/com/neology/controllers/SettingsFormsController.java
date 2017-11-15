@@ -6,7 +6,6 @@
 package com.neology.controllers;
 
 import com.neology.controllers.alert.AlertController;
-import com.neology.controllers.alert.AlertMethod;
 import com.neology.environment.LocalEnvironment;
 import com.neology.environment.Local;
 import java.io.File;
@@ -35,8 +34,6 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Tooltip;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javax.xml.stream.XMLStreamException;
 /**
@@ -44,7 +41,7 @@ import javax.xml.stream.XMLStreamException;
  *
  * @author Obsidiam
  */
-public class SettingsFormsController extends LocalEnvironment implements Initializable {
+public class SettingsFormsController implements Initializable {
 
     /**
      * Initializes the controller class.
@@ -131,7 +128,7 @@ public class SettingsFormsController extends LocalEnvironment implements Initial
                     {
                         Properties p = new Properties();
                         try {
-                            OutputStream o = new FileOutputStream(new File(getLocalVar(Local.TMP)));
+                            OutputStream o = new FileOutputStream(new File(LocalEnvironment.getLocalVar(Local.TMP)));
                             SETTINGS.forEach((x,y) ->{
                                 p.setProperty(x, y);
                             });

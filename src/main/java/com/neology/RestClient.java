@@ -18,7 +18,6 @@ package com.neology;
 
 import com.neology.data.model.Frame;
 import com.neology.data.model.LoginData;
-import com.neology.data.model.Session;
 import com.neology.lastdays.LastDaysService;
 import com.neology.lastdays.TodoResult;
 import com.neology.lastdays.TodoTicket;

@@ -250,14 +250,14 @@ public class Transport {
         if (null == os) throw new TransportException("Uninitialized writer");
     }
 
-    public Transport flush() throws TransportException {
+    public boolean flush() throws TransportException {
         checkForOutputInit();
         try {
             os.flush();
         } catch (IOException e) {
             throw new TransportException("Cannot flush output stream", e);
         }
-        return this;
+        return true;
     }
 
     public Transport writeByte(int b) throws TransportException {

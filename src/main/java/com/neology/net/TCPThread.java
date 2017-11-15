@@ -29,25 +29,24 @@ import javax.imageio.ImageIO;
  * @author obsidiam
  */
 public class TCPThread extends Thread implements Runnable{
-    private Thread TH;
+    private Thread th;
     private final ConnectionDataHandler cdh = ConnectionDataHandler.getInstance();
-    private String NAME;
-    private BaudrateMeter MTR;
-    private final ImageDataHandler IDH = ImageDataHandler.getInstance();
-    private final LocalEnvironment LOCAL = new LocalEnvironment() {};
+    private String name;
+    private BaudrateMeter mtr;
+    private final ImageDataHandler idh = ImageDataHandler.getInstance();
     private String ext = "JPG";
     
     @Override
     public void start(){
-        if(TH == null){
-            TH = new Thread(this,"TCPThread");
-            TH.start();
+        if(th == null){
+            th = new Thread(this,"TCPThread");
+            th.start();
         }
     }
     
     @Override
     public void run(){
-        while(TH != null){
+        while(th != null){
             List<Connection> connections = cdh.getConnectionList();
             synchronized(connections){
                 if(connections.size() > 0){
@@ -60,15 +59,15 @@ public class TCPThread extends Thread implements Runnable{
                         }
                     }
                     
-                    if(!TH.isInterrupted()){
+                    if(!th.isInterrupted()){
                             
                             System.out.println("TCPThread#run() -> starting reading...");
                             for(int i = 0; i < connections.size(); i++){
                                 Transport t;
                                 Connection c = connections.get(i);
 
-                                MTR = c.getTranportInstance().getBaudrateMeter();
-                                MTR.startMeasuringCycle();
+                                mtr = c.getTranportInstance().getBaudrateMeter();
+                                mtr.startMeasuringCycle();
 
 
                                 if(c.getState() == com.neology.net.states.State.CLOSED){
@@ -92,19 +91,19 @@ public class TCPThread extends Thread implements Runnable{
                                                 }
                                             }
                                            inputDataBuffer = c.read();
+                                           c.getTranportInstance().flush();
                                            Image im = processData(inputDataBuffer);
-                                           IDH.getImagesMap().put(ip, im);
+                                           idh.getImagesMap().put(ip, im);
                                            int b = t.getBaudrateMeter().kBPS();
                                            String data = "";
-                                           data += "Client name: "+NAME+",";
+                                           data += "Client name: "+name+",";
                                            data += "IP: "+t.getIp().substring(1)+",";
                                            data += "Speed: "+( (b < 10000) ? (b +"kB/s,") : (t.getBaudrateMeter().Mbps())+"MB/s,");
                                            data += "Is connected: "+t.isConnected()+",";
                                            data += "Was connected earlier: "+c.wasConnected();
                                            cdh.getData().put(ip, data);
                                            if(!c.isNameSet()){
-                                              c.setConnectionName(NAME);
-
+                                              c.setConnectionName(name);
                                            }
                                             
                                     } catch (TransportException | IOException ex) {
@@ -114,7 +113,7 @@ public class TCPThread extends Thread implements Runnable{
                                     }  
                                 }
                             }
-                        MTR.stopMeasuringCycle();
+                        mtr.stopMeasuringCycle();
                         cdh.setFree(false);
                         System.out.println("TCPThread#run() -> releasing cdh monitor.");
                         connections.notifyAll();
@@ -128,10 +127,10 @@ public class TCPThread extends Thread implements Runnable{
     
     @Override
     public void interrupt(){
-        if(TH != null){
-            if(TH.getState() != State.WAITING){
-                TH.interrupt();
-                TH = null;
+        if(th != null){
+            if(th.getState() != State.WAITING){
+                th.interrupt();
+                th = null;
                 cdh.setFree(false);
             }
         }
@@ -144,18 +143,18 @@ public class TCPThread extends Thread implements Runnable{
             char[] c = readMetaData(len, buffer);
 
             String name = String.valueOf(c).trim();
-            NAME = name;
+            this.name = name;
             System.out.println("FILE_NAME_RECEIVED: "+name);
             result = Arrays.copyOfRange(buffer,len,8192);
             is = new ByteArrayInputStream(result);
             System.out.println("AVAILABLE_BYTE_COUNT: "+is.available());
             BufferedImage bf = ImageIO.read(is);
            
-            ImageIO.write(bf, ext, new FileOutputStream(LOCAL.getLocalVar(Local.TMP)+File.separator+name+"."+ext));
-            Image out = new Image("file:///"+LOCAL.getLocalVar(Local.TMP)+File.separator+name+"."+ext,250,150,true,true);
+            ImageIO.write(bf, ext, new FileOutputStream(LocalEnvironment.getLocalVar(Local.TMP)+File.separator+name+"."+ext));
+            Image out = new Image("file:///"+LocalEnvironment.getLocalVar(Local.TMP)+File.separator+name+"."+ext,250,150,true,true);
             System.err.println("Is error: "+out.isError());
             System.out.println("IMAGE_LOADER_STATE: "+out.getProgress()+"\n");
-            MTR.count(buffer.length);
+            mtr.count(buffer.length);
             
             return out;
         }

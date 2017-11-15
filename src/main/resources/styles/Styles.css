@@ -45,6 +45,10 @@
     
 }
 
+.grid-pane{
+    -fx-background-color: #222222;
+}
+
 
 .context-menu{
     -fx-background-color: #222222;

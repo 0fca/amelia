@@ -31,7 +31,6 @@ import javafx.util.Pair;
 
 
 public class MainApp extends Application{
-    LocalEnvironment e = new LocalEnvironment() {};
     @Override
     public void start(Stage stage) throws Exception {
         double x = Toolkit.getDefaultToolkit().getScreenSize().width * 0.75;
@@ -43,7 +42,7 @@ public class MainApp extends Application{
         
         scene.getStylesheets().add("/styles/Styles.css");
         stage.setOnCloseRequest(event ->{
-            File img = new File(e.getLocalVar(Local.TMP));
+            File img = new File(LocalEnvironment.getLocalVar(Local.TMP));
             File[] files = img.listFiles();
             
             if(files != null){
@@ -110,7 +109,7 @@ public class MainApp extends Application{
             grid.add(username, 1, 0);
             grid.add(new Label("Password:"), 0, 1);
             grid.add(password, 1, 1);
-            grid.getStylesheets().add("/styles/Style.css");
+            dialog.getDialogPane().getStylesheets().add("/styles/Styles.css");
             Node loginButton = dialog.getDialogPane().lookupButton(loginButtonType);
             loginButton.setDisable(true);
 

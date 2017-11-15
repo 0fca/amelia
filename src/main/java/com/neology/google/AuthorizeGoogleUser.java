@@ -63,7 +63,6 @@ public class AuthorizeGoogleUser {
 
       private static Oauth2 oauth2;
       private static GoogleClientSecrets clientSecrets;
-      static LocalEnvironment env = new LocalEnvironment() {};
       private static String name = "";
       
       public static void doLogin(String user){
@@ -104,7 +103,7 @@ public class AuthorizeGoogleUser {
                 URL url = new URL(picture);
                 image = ImageIO.read(url);
                 BufferedImage bimg = toBufferedImage(image);
-                ImageIO.write(bimg, "PNG", new File(env.getLocalVar(Local.TMP)+File.separator+name+".png"));
+                ImageIO.write(bimg, "PNG", new File(LocalEnvironment.getLocalVar(Local.TMP)+File.separator+name+".png"));
             } catch (IOException e) {
                 System.err.println(e);
             }
