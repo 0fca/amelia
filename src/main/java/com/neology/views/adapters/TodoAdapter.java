@@ -18,7 +18,6 @@ package com.neology.views.adapters;
 
 import com.neology.lastdays.TodoTicket;
 import com.neology.views.Constants;
-import com.neology.views.ContentAdapter;
 
 /**
  *

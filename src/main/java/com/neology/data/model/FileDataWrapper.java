@@ -1,4 +1,4 @@
-package com.neology.parsing;
+package com.neology.data.model;
 
 /**
  *

@@ -9,23 +9,18 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ListView?>
 <?import javafx.scene.control.MenuItem?>
-<?import javafx.scene.control.PasswordField?>
-<?import javafx.scene.control.ProgressIndicator?>
-<?import javafx.scene.control.Tab?>
-<?import javafx.scene.control.TabPane?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.control.ToggleButton?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.FlowPane?>
 <?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.Pane?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane id="AnchorPane" fx:id="MAIN_PANE" minHeight="-Infinity" minWidth="-Infinity" style="-fx-background-color: #222222;" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.neology.controllers.MainViewController">
+<AnchorPane id="AnchorPane" fx:id="MAIN_PANE" minHeight="-Infinity" minWidth="-Infinity" style="-fx-background-color: #1E90FF;" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.neology.controllers.MainViewController">
     <children>
-      <FlowPane alignment="CENTER_LEFT" columnHalignment="RIGHT" hgap="25.0" prefHeight="71.0" prefWidth="996.0" rowValignment="BOTTOM" style="-fx-background-color: #222222;" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+      <FlowPane alignment="CENTER_LEFT" columnHalignment="RIGHT" hgap="25.0" prefHeight="71.0" prefWidth="996.0" rowValignment="BOTTOM" style="-fx-background-color: #1E90FF;" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
          <children>
             <Label fx:id="MENU_LABEL" contentDisplay="GRAPHIC_ONLY" prefHeight="32.0" prefWidth="32.0" text="Label">
                <cursor>
@@ -35,7 +30,7 @@
                   <Insets left="25.0" />
                </FlowPane.margin>
             </Label>
-            <Label accessibleRole="HYPERLINK" text="Amelia Server" textFill="WHITE">
+            <Label fx:id="TITLE_LBL" accessibleRole="HYPERLINK" text="Amelia Server" textFill="WHITE">
                <font>
                   <Font size="24.0" />
                </font>
@@ -54,7 +49,7 @@
             <VBox BorderPane.alignment="CENTER">
                <children>
                   <ListView fx:id="INFO_VIEW" editable="true" prefHeight="145.0" prefWidth="200.0" />
-                  <ListView fx:id="TODO_VIEW" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity">
+                  <ListView fx:id="TODO_VIEW" minHeight="-Infinity" minWidth="-Infinity" VBox.vgrow="ALWAYS">
                      <contextMenu>
                         <ContextMenu>
                           <items>
@@ -68,10 +63,11 @@
             </VBox>
          </right>
          <bottom>
-            <HBox fx:id="BOTTOM_BAR" alignment="CENTER_LEFT" prefHeight="71.0" prefWidth="996.0" spacing="15.0" style="-fx-background-color: #222222;" BorderPane.alignment="CENTER">
+            <HBox fx:id="BOTTOM_BAR" alignment="CENTER_LEFT" prefHeight="71.0" prefWidth="996.0" spacing="15.0" style="-fx-background-color: #FFFFFF;" BorderPane.alignment="CENTER">
                <children>
                   <Button fx:id="DESKTOP_BUTTON" disable="true" mnemonicParsing="false" prefHeight="39.0" prefWidth="97.0" text="Remote" />
                   <ToggleButton fx:id="TODO_BUTTON" disable="true" mnemonicParsing="false" prefHeight="39.0" prefWidth="97.0" text="View TODO" />
+                  <ToggleButton fx:id="SWITCH_MODE" mnemonicParsing="false" prefHeight="39.0" prefWidth="106.0" text="Remote" />
                </children>
                <BorderPane.margin>
                   <Insets />
@@ -82,7 +78,7 @@
             </HBox>
          </bottom>
       </BorderPane>
-      <VBox fx:id="ADD_PANEL" layoutY="-166.0" prefHeight="166.0" prefWidth="996.0" spacing="5.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
+      <VBox fx:id="ADD_PANEL" layoutY="-166.0" prefHeight="141.0" prefWidth="996.0" spacing="5.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
          <children>
             <TextField fx:id="NAME" promptText="Name" />
             <TextField fx:id="STATE" promptText="State" />
@@ -95,11 +91,10 @@
             </ButtonBar>
          </children>
       </VBox>
-      <HBox alignment="CENTER_LEFT" layoutY="72.0" prefHeight="43.0" prefWidth="996.0" spacing="15.0" style="-fx-background-color: #222222;" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="72.0">
+      <HBox fx:id="topPanel" alignment="CENTER_LEFT" layoutY="72.0" prefHeight="43.0" prefWidth="996.0" spacing="15.0" style="-fx-background-color: #1E90FF;" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="72.0">
          <children>
             <Button fx:id="CONNECT" disable="true" mnemonicParsing="false" prefHeight="38.0" prefWidth="97.0" text="Connect" />
             <Button fx:id="DISCONNECT" disable="true" mnemonicParsing="false" prefHeight="38.0" prefWidth="97.0" text="Disconnect" />
-            <ProgressIndicator fx:id="progressIndicator" prefHeight="17.0" prefWidth="24.0" visible="false" />
             <Label fx:id="TIME_STARTED_LABEL" alignment="CENTER" prefHeight="17.0" prefWidth="165.0" style="-fx-text-fill: #9E9E9E;" />
             <Label fx:id="TIME_STOPPED_LABEL" alignment="CENTER" prefHeight="17.0" prefWidth="165.0" style="-fx-text-fill: #9E9E9E;" />
             <Label fx:id="TIME_PASSAGE_LABEL" alignment="CENTER" prefWidth="165.0" style="-fx-text-fill: #9E9E9E;" />
@@ -111,90 +106,5 @@
             <Insets left="20.0" />
          </padding>
       </HBox>
-      <Pane fx:id="DRAWER" layoutX="-230.0" prefHeight="659.0" prefWidth="230.0" style="-fx-background-color: #222222;" AnchorPane.bottomAnchor="0.0" AnchorPane.topAnchor="0.0">
-         <children>
-            <BorderPane layoutY="-7.0" prefHeight="668.0" prefWidth="230.0" style="-fx-background-color: #222222;">
-               <center>
-                  <TabPane>
-                     <BorderPane.margin>
-                        <Insets />
-                     </BorderPane.margin>
-                     <tabs>
-                        <Tab closable="false" style="-fx-background: #222222;" text="Login">
-                           <content>
-                              <VBox alignment="CENTER" prefHeight="472.0" prefWidth="200.0" spacing="25.0">
-                                 <children>
-                                    <Label fx:id="LOGIN_TYPE_LABEL" alignment="CENTER" prefHeight="16.0" prefWidth="251.0" text="Choose how to log in" />
-                                    <HBox alignment="CENTER" spacing="25.0">
-                                       <VBox.margin>
-                                          <Insets />
-                                       </VBox.margin>
-                                       <children>
-                                          <Label fx:id="GM_LABEL" contentDisplay="GRAPHIC_ONLY" prefHeight="32.0" prefWidth="32.0" text="GM" textFill="WHITE">
-                                             <cursor>
-                                                <Cursor fx:constant="HAND" />
-                                             </cursor>
-                                          </Label>
-                                          <Label fx:id="LD_LABEL" prefHeight="32.0" prefWidth="32.0" text="LD" textFill="WHITE">
-                                             <cursor>
-                                                <Cursor fx:constant="HAND" />
-                                             </cursor>
-                                          </Label>
-                                       </children>
-                                    </HBox>
-                                    <TextField fx:id="LOGIN" disable="true" prefHeight="37.0" prefWidth="170.0" promptText="Login" />
-                                    <PasswordField fx:id="PASS" disable="true" prefHeight="37.0" prefWidth="170.0" promptText="Pass" />
-                                    <Button fx:id="LOGIN_BUTTON" mnemonicParsing="false" prefHeight="37.0" prefWidth="199.0" text="Log in" />
-                                    <Button fx:id="SETTINGS" disable="true" mnemonicParsing="false" prefHeight="37.0" prefWidth="203.0" text="Settings" />
-                                    <Button fx:id="ABOUT" mnemonicParsing="false" prefHeight="37.0" prefWidth="200.0" text="About" />
-                                 </children>
-                                 <padding>
-                                    <Insets left="25.0" right="25.0" top="-5.0" />
-                                 </padding>
-                              </VBox>
-                           </content>
-                        </Tab>
-                        <Tab closable="false" style="-fx-background: #222222;" text="Register">
-                          <content>
-                            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-                                 <children>
-                                    <Label alignment="CENTER" contentDisplay="CENTER" layoutY="20.0" prefHeight="32.0" prefWidth="230.0" text="Register LastDays' account" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="20.0" />
-                                    <VBox alignment="CENTER" layoutX="-2.0" layoutY="2.0" prefHeight="442.0" prefWidth="230.0" spacing="15.0" AnchorPane.bottomAnchor="6.0" AnchorPane.leftAnchor="-2.0" AnchorPane.rightAnchor="2.0">
-                                       <children>
-                                          <TextField fx:id="LOGIN_REG" prefHeight="37.0" prefWidth="170.0" promptText="Login" />
-                                          <TextField fx:id="EMAIL" prefHeight="37.0" promptText="E-mail" />
-                                          <PasswordField fx:id="PASS_REG" prefHeight="37.0" promptText="Password" />
-                                          <Button fx:id="REGISTER_BUTTON" mnemonicParsing="false" prefHeight="37.0" prefWidth="199.0" text="Register">
-                                             <font>
-                                                <Font size="15.0" />
-                                             </font>
-                                          </Button>
-                                       </children>
-                                       <padding>
-                                          <Insets left="25.0" right="25.0" top="-15.0" />
-                                       </padding>
-                                    </VBox>
-                                 </children>
-                              </AnchorPane>
-                          </content>
-                        </Tab>
-                     </tabs>
-                  </TabPane>
-               </center>
-               <top>
-                  <Pane prefHeight="135.0" prefWidth="200.0" style="-fx-background-color: #616161;" BorderPane.alignment="CENTER">
-                     <children>
-                        <Label fx:id="USERNAME_LOGIN" alignment="CENTER" layoutX="2.0" layoutY="100.0" prefHeight="21.0" prefWidth="230.0" textFill="WHITE">
-                           <font>
-                              <Font size="18.0" />
-                           </font>
-                        </Label>
-                        <Label fx:id="USER_IMG" alignment="CENTER" contentDisplay="GRAPHIC_ONLY" layoutX="83.0" layoutY="29.0" prefHeight="64.0" prefWidth="64.0" style="-fx-border-radius: 50;" />
-                     </children>
-                  </Pane>
-               </top>
-            </BorderPane>
-         </children>
-      </Pane>
     </children>
 </AnchorPane>

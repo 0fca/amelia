@@ -3,12 +3,11 @@ package com.neology.controllers;
 import com.neology.RestClient;
 import com.neology.controllers.alert.AlertController;
 import com.neology.controllers.alert.AlertMethod;
-import com.neology.views.ContentAdapter;
-import com.neology.views.DefaultInfoViewListCell;
+import com.neology.views.adapters.ContentAdapter;
+import com.neology.views.cells.DefaultInfoViewListCell;
 import com.neology.views.adapters.PlainTextAdapter;
 import com.neology.views.adapters.TodoAdapter;
-import com.neology.views.TodoListCell;
-import com.neology.environment.LocalEnvironment;
+import com.neology.views.cells.TodoListCell;
 import com.neology.data.ConnectionDataHandler;
 import com.neology.data.ImageDataHandler;
 import com.neology.data.model.Session;
@@ -17,15 +16,15 @@ import com.neology.net.ConnectionManager;
 import com.neology.net.ConnectionReceiver;
 import com.neology.net.TCPThread;
 import com.neology.parsing.XMLController;
-import com.neology.environment.Local;
-import com.neology.google.GoogleService;
 import com.neology.lastdays.TodoTicket;
 import com.neology.log.Log;
-import com.neology.main.SettingsForm;
+import com.neology.net.Mode;
 import com.neology.net.UDPConnector;
+import com.neology.views.drawer.Drawer;
+import com.neology.views.drawer.DrawerFactory;
+import com.neology.views.drawer.Status;
 import io.reactivex.schedulers.Schedulers;
 import javafx.scene.image.Image;
-import java.io.File;
 import java.io.IOException;
 import java.net.SocketException;
 import java.net.URL;
@@ -60,15 +59,12 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.MenuItem;
-import javafx.scene.control.PasswordField;
-import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.CornerRadii;
-import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
@@ -77,36 +73,37 @@ import javafx.util.Duration;
 import javax.xml.parsers.ParserConfigurationException;
 import org.xml.sax.SAXException;
 import io.reactivex.disposables.CompositeDisposable;
+import java.lang.reflect.Field;
+import java.util.Observable;
+import java.util.Observer;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.input.KeyCode;
+import javafx.scene.layout.HBox;
 
 
 public class MainViewController implements Initializable{
     @FXML
-    private TextField LOGIN, LOGIN_REG, EMAIL, NAME, STATE;
-    @FXML
-    private PasswordField PASS,PASS_REG;
-    @FXML
-    private Button LOGIN_BUTTON,SETTINGS,ABOUT,CONNECT,DISCONNECT,REGISTER_BUTTON,DESKTOP_BUTTON,ACTION_TODO_BUTTON,COLOR_PICKER_BUTTON;
+    public Button CONNECT,DISCONNECT,DESKTOP_BUTTON,ACTION_TODO_BUTTON,COLOR_PICKER_BUTTON;
     @FXML
     private volatile ListView VIEWER_PANEL,INFO_VIEW,TODO_VIEW;
     @FXML
-    private Label TIME_STARTED_LABEL,TIME_STOPPED_LABEL, MENU_LABEL, USERNAME_LOGIN, USER_IMG,GM_LABEL,LOGIN_TYPE_LABEL,LD_LABEL;
-    @FXML
-    private Pane DRAWER,MAIN_BAR;  
+    private Label TIME_STARTED_LABEL,TIME_STOPPED_LABEL, MENU_LABEL;
     @FXML
     private AnchorPane MAIN_PANE;
     @FXML
-    private ToggleButton TODO_BUTTON;       
+    private ToggleButton TODO_BUTTON, SWITCH_MODE;       
     @FXML
     private MenuItem ADD_ITEM,REMOVE_ITEM,UPDATE_ITEM;
     @FXML
     private VBox ADD_PANEL;        
     @FXML
-    private ComboBox IMPORTANCE;        
+    private ComboBox IMPORTANCE;  
     @FXML
-    private ProgressIndicator progressIndicator;        
+    private HBox topPanel;
+
+    private static ProgressIndicator progressIndicator = new ProgressIndicator();        
     
+    static Button b = new Button();
     ColorPicker clp = new ColorPicker();
     String ACTUAL_NAME = "",ADDR,loginType; 
     private final CompositeDisposable compositeDisposable = new CompositeDisposable();
@@ -118,7 +115,7 @@ public class MainViewController implements Initializable{
     protected boolean IS_CONNECTED = false;         
     private ConnectionReceiver c = new ConnectionReceiver();
     private ConnectionManager mgr = new ConnectionManager();
-    private  ViewUpdater v = new ViewUpdater();
+    private ViewUpdater v = new ViewUpdater();
     private ImageDataHandler IDH = ImageDataHandler.getInstance();
     private ConnectionDataHandler CDH = ConnectionDataHandler.getInstance();
     private int SELECTED = -1;
@@ -127,6 +124,9 @@ public class MainViewController implements Initializable{
     private static Session s;
     private RestClient rest = new RestClient();
     private LoginController lc;
+    private DrawerController dc;
+    private int mode = Mode.LOCAL;
+    private static Status st;
     
     {
         System.out.println("Does working dir exist: "+ConfigController.checkFolders());
@@ -144,91 +144,8 @@ public class MainViewController implements Initializable{
     
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        LOGIN_BUTTON.setOnAction(event ->{
-            if(!IS_LOGGED_IN){
-                if(loginType != null && LOGIN.getText() != null){
-                    progressIndicator.setVisible(true);
-                    
-                    if(loginType.equals("LD")){
-                        lc = new LoginController(rest);
-                        try {
-                            if(lc.loginWithLD(LOGIN.getText(), PASS.getText())){
-                                s = lc.getSession();
-                                viewConfirmationDialog(LOGIN.getText());
-                                setProfileImage();
-                                LOGIN_BUTTON.setText("Log out");
-                                TODO_BUTTON.setDisable(false);
-                                progressIndicator.setVisible(false);
-                            }else{
-                                ac.prepareViewable(new Object[]{"No user like "+LOGIN.getText()});
-                                ac.viewAlert(AlertMethod.ERROR);
-                            }
-                        } catch (ClassNotFoundException | IOException ex) {
-                            Logger.getLogger(MainViewController.class.getName()).log(Level.SEVERE, null, ex);
-                        }
-                    }
-
-                    if(loginType.equals("GM")){
-                        GoogleService g = new GoogleService();
-                        g.setNickName(LOGIN.getText());
-                        g.setOnSucceeded( listener ->{
-                            viewConfirmationDialog(LOGIN.getText());
-                            setProfileImage();
-                            progressIndicator.setVisible(false);
-                        });
-                        lc = new LoginController(g);
-                        lc.loginWithGoogleAccount();
-                        LOGIN_BUTTON.setText("Log out");
-                    }
-                }
-            }else{
-                LOGGED_IN = null;
-                transitToDisconnectedMode();
-                IS_LOGGED_IN = false;
-                CONNECT.setDisable(true);
-                DISCONNECT.setDisable(true);
-                SETTINGS.setDisable(true);
-                LOGIN_BUTTON.setText("Log in");
-                USER_IMG.setGraphic(null);
-                USERNAME_LOGIN.setText(null);
-                TODO_BUTTON.setDisable(true);
-                LOGIN.setDisable(true);
-                PASS.setDisable(true);
-            }
-        });
-
-        REGISTER_BUTTON.setOnAction(event ->{
-            if(LOGIN_REG.getText() != null && PASS_REG.getText() != null && EMAIL.getText() != null){
-                if(LoginController.validLoginDataFormat(PASS_REG.getText(), EMAIL.getText(), PASS_REG.getText())){
-                    rest.init();
-                    progressIndicator.setVisible(true);
-                        if(rest.registerUser(LOGIN_REG.getText(), PASS_REG.getText(),EMAIL.getText())){
-                            ac.prepareViewable(new Object[]{"Register","Registering Last Days' account","Registering to Last Days successful!",AlertType.INFORMATION});
-                            ac.viewAlert(AlertMethod.INFO);
-                            PASS_REG.setText(null);
-                            LOGIN_REG.setText(null);
-                            EMAIL.setText(null);
-                            progressIndicator.setVisible(false);
-                        }else{
-                            ac.prepareViewable(new Object[]{"Error. Couldn't register account "+LOGIN_REG.getText()});
-                            ac.viewAlert(AlertMethod.ERROR);
-                        }
-                    
-                }
-            }
-        });
-        
-        SETTINGS.setOnAction(event ->{
-            SettingsForm settings = new SettingsForm();
-            try {
-                settings.start(new Stage());
-            } catch (Exception ex) {
-                Logger.getLogger(MainViewController.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        });
-        
         MENU_LABEL.setOnMouseClicked( listener ->{
-            animateDrawerMove();
+            DrawerController.animateDrawerMove();
         });
         
         CONNECT.setOnAction(event ->{
@@ -239,17 +156,7 @@ public class MainViewController implements Initializable{
             transitToDisconnectedMode();
         });
         
-        ABOUT.setOnAction(listener ->{
-            AboutFormController about;
-            try {
-                about = new AboutFormController(FXMLLoader.load(getClass().getResource("/fxml/AboutForm.fxml")));
-                about.showAbout();
-            } catch (IOException ex) {
-                Logger.getLogger(MainViewController.class.getName()).log(Level.SEVERE, null, ex);
-            }
-            
-        });
-        
+       
         VIEWER_PANEL.setOnMouseClicked(listener ->{
             if(SELECTED > -1){
                 DESKTOP_BUTTON.setDisable(false);
@@ -294,20 +201,7 @@ public class MainViewController implements Initializable{
             }
         });
 
-        Image gac_img = new Image(SettingsFormsController.class.getResourceAsStream("/images/gac.png"),32,32,true,true);
-        GM_LABEL.setGraphic(new ImageView(gac_img));
-        GM_LABEL.setOnMouseClicked(clicked ->{
-            loginType = "GM";
-            LOGIN_TYPE_LABEL.setText("Log in with Google account.");
-            LOGIN.setDisable(false);
-        });
         
-        LD_LABEL.setOnMouseClicked( listener->{
-            loginType = "LD";
-            LOGIN_TYPE_LABEL.setText("Log in with Last Days account");
-            PASS.setDisable(false);
-            LOGIN.setDisable(false);
-        });
 
         ADD_ITEM.setOnAction( listener ->{
             animateActionPanelMove();
@@ -337,21 +231,46 @@ public class MainViewController implements Initializable{
             }
         });
         
-        DRAWER.setOnMouseClicked(event ->{
-            animateDrawerMove();
+        Drawer d = DrawerController.getDrawerInstance();
+        dc = DrawerFactory.getInstance().getDrawerController();
+        MAIN_PANE.getChildren().add(d);
+        d.setStyle("-fx-background-color: #FFFFFF");
+        AnchorPane.setBottomAnchor(d, 0d);
+        AnchorPane.setTopAnchor(d, 0d);
+        d.setLayoutX(-d.getPrefWidth());
+        
+        d.setOnMouseClicked(event ->{
+            DrawerController.animateDrawerMove();
         });
         
-        DRAWER.setOnKeyPressed(event ->{
+        d.setOnKeyPressed(event ->{
             if(event.getCode() == KeyCode.ESCAPE){
-                animateDrawerMove();
+                DrawerController.animateDrawerMove();
             }
+        });
+        
+        SWITCH_MODE.setOnAction(event ->{
+            if(mode == Mode.LOCAL){
+                mode = Mode.REMOTE;
+                SWITCH_MODE.setText("Local");
+            }else{
+                mode = Mode.LOCAL;
+                SWITCH_MODE.setText("Remote");
+            }
+            
         });
         
         MENU_LABEL.setGraphic(new ImageView(this.getClass().getResource("/images/menu.png").toString()));
         VIEWER_PANEL.setCellFactory(new CallbackImpl());
         INFO_VIEW.setCellFactory(new ViewCallbackImpl(new PlainTextAdapter()));
         TODO_VIEW.setCellFactory(new ViewCallbackImpl(new TodoAdapter()));
-        
+        progressIndicator.setProgress(-1);
+        progressIndicator.setStyle("-fx-progress-color: #FFFFFF;");
+        progressIndicator.setPrefSize(48, 48);
+        progressIndicator.setVisible(false);
+        topPanel.getChildren().add(2,progressIndicator);
+        StatusThread stt = new StatusThread();
+        stt.start();
     }  
     
     private void setUpConfiguration() throws SAXException, IOException, ParserConfigurationException, ClassNotFoundException, SQLException{
@@ -370,6 +289,10 @@ public class MainViewController implements Initializable{
     }
 
     private void transitToConnectedMode() {
+        if(mode == Mode.REMOTE){
+            CDH.setPort(Mode.getPort(mode));
+        }
+        
         System.out.println("ConnectionManager.State -> "+c.getState().toString());
         if(c.getState() == Service.State.CANCELLED || c.getState() == Service.State.SUCCEEDED){
             Platform.runLater(() ->{
@@ -422,28 +345,15 @@ public class MainViewController implements Initializable{
         mgr.start();
     }
 
-    private void animateDrawerMove() {
-        TranslateTransition openNav = new TranslateTransition(new Duration(350), DRAWER);
-        openNav.setToX(DRAWER.getWidth());
-        TranslateTransition closeNav = new TranslateTransition(new Duration(350), DRAWER);
-        
-        if(DRAWER.getTranslateX() < DRAWER.getWidth()){
-            openNav.play();
-        }else{
-            closeNav.setToX(-(DRAWER.getWidth()));
-            closeNav.play();
-        }
-    }
-
     private void animateActionPanelMove(){
         TranslateTransition openNav = new TranslateTransition(new Duration(400), ADD_PANEL);
-        openNav.setToY(71 + 50 + ADD_PANEL.getHeight());
+        openNav.setToY(136 + ADD_PANEL.getHeight());
         TranslateTransition closeNav = new TranslateTransition(new Duration(400), ADD_PANEL);
         
         if(ADD_PANEL.getTranslateY() < ADD_PANEL.getHeight()){
             openNav.play();
         }else{
-            closeNav.setToY(-(71 + 50 + ADD_PANEL.getHeight()));
+            closeNav.setToY(-(136 + ADD_PANEL.getHeight()));
             closeNav.play();
         }
     }
@@ -465,39 +375,16 @@ public class MainViewController implements Initializable{
         stage.show();
     }
 
-    private void viewConfirmationDialog(String text) {
-        ac.prepareViewable(new Object[]{"Login","Logged in as "+text,10, Pos.BASELINE_RIGHT});
-        ac.viewAlert(AlertMethod.NOTIFICATION);
-        IS_LOGGED_IN = true;
-        CONNECT.setDisable(false);
-        SETTINGS.setDisable(false);
-        LOGIN.setText(null);
-        PASS.setText(null);
-        USERNAME_LOGIN.setText(text);
-        ACTUAL_NAME = text; 
-        animateDrawerMove();
-    }
-
-    private void setProfileImage() {
-        System.out.println(ACTUAL_NAME.toLowerCase());
-        File file = new File(LocalEnvironment.getLocalVar(Local.TMP)+File.separator+ACTUAL_NAME.toLowerCase()+".png");
-        Image i;
-        if(!file.exists()){
-           i = new Image(this.getClass().getResource("/images/user.png").toString(), 32,32, true,true);
-        }else{
-           i = new Image("file:///"+file.getAbsolutePath(), 48,48, true,true);
-        }
-        ImageView userProfile = new ImageView(i);
-        
-        USER_IMG.setGraphic(userProfile);
-    }
-
-
     private void setTodoData(List<TodoTicket> todoTickets) {
         Platform.runLater(() ->{
             TODO_VIEW.setItems(FXCollections.observableArrayList(todoTickets));
         });
         progressIndicator.setVisible(false);
+    }
+    
+    void changeFrontButtonsState(){
+        DISCONNECT.setDisable(!DISCONNECT.isDisabled());
+        CONNECT.setDisable(!CONNECT.isDisabled());
     }
     
     private class CallbackImpl implements Callback<ListView<String>, ListCell<String>> {
@@ -553,8 +440,8 @@ public class MainViewController implements Initializable{
                         setPrefHeight(155);
                         setPrefWidth(VIEWER_PANEL.getPrefWidth() - 5);
                         backgroundProperty().bind(Bindings.when(this.selectedProperty())
-                        .then(new Background(new BackgroundFill(Color.valueOf("#616161"), new CornerRadii(2d), Insets.EMPTY)))
-                        .otherwise(new Background(new BackgroundFill(Color.valueOf("#222222"), new CornerRadii(2d), Insets.EMPTY))));
+                        .then(new Background(new BackgroundFill(Color.valueOf("#1E90FF"), new CornerRadii(2d), Insets.EMPTY)))
+                        .otherwise(new Background(new BackgroundFill(Color.valueOf("#FFFFFF"), new CornerRadii(2d), Insets.EMPTY))));
                         setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
                     }
                 }
@@ -634,4 +521,56 @@ public class MainViewController implements Initializable{
             ac.viewAlert(AlertMethod.NOTIFICATION);
         }
     }
+   
+   static class MainObserver implements Observer{
+        @Override
+        public void update(Observable o, Object arg) {
+            st = (Status)arg;
+            Log.log("MainOb", String.valueOf(st.unlockAnyButtons()));
+        }
+   }
+   
+   class StatusThread extends Thread implements Runnable{
+       private Thread th;
+
+       
+       @Override
+       public void start(){
+           if(th == null){
+               th = new Thread(this,"StatusThread");
+               th.start();
+           }
+       }
+       
+       @Override
+       public void run(){
+           while(!th.isInterrupted()){
+               if(st != null){
+                   progressIndicator.setVisible(st.shouldShowIndicator());
+                   String[] buttons = st.getButtonNames();
+                   if(buttons != null){
+                       System.out.println("Button status changed...");
+                       
+                       for(String button : buttons){
+                           switch(button){
+                               case "CONNECT":
+                                   CONNECT.setDisable(!st.unlockAnyButtons());
+                                   break;
+                               case "DISCONNECT":
+                                   DISCONNECT.setDisable(!st.unlockAnyButtons());
+                                   break;
+                           }
+                           
+                       }
+                       st.setButtonNames(null);
+                   }
+               }
+               try {
+                   Thread.sleep(500);
+               } catch (InterruptedException ex) {
+                   Logger.getLogger(MainViewController.class.getName()).log(Level.SEVERE, null, ex);
+               }
+           }
+       }
+   }
 }

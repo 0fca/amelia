@@ -181,7 +181,6 @@ public class AlertController{
                     .text(content)
                     .graphic(null)
                     .hideAfter(Duration.seconds(hideAfter))
-                    .darkStyle()
                     .position(p);
             notificationBuilder.show();
         }

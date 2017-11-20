@@ -14,33 +14,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.neology.views;
+package com.neology.views.adapters;
 
-import javafx.scene.control.ListCell;
 
 /**
  *
  * @author obsidiam
  */
- public class DefaultInfoViewListCell<T> extends ListCell<T>  {
-     private ContentAdapter ca;
-    @Override 
-    public void updateItem(T item, boolean empty) {
-        super.updateItem(item, empty);
-        if (empty) {
-            setText(null);
-        } else {
-            ca.setContent(item);
-            setText(ca.getAdaptedContent().toString());
-
-            if(ca.getContentType().contains("PlainTextAdapter")){
-                setPrefHeight(this.getFont().getSize() * Constants.PLAIN_TEXT_CELL_HEIGHT);
-            }
-            
-        }
-    }
-    
-    public void setContentAdapter(ContentAdapter ca){
-        this.ca = ca;
-    }
+public interface ContentAdapter<T> {
+    public String getContentType();
+    public void setContent(Object content);
+    public Object getContent();
+    public Object getAdaptedContent();
+    public void setCellHeight(int height);
+    public int getHeight();
 }

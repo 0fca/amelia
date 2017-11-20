@@ -1,57 +1,77 @@
 
 .button,.toggle-button{
-    -fx-background-color:  #616161;
-    -fx-text-fill:  #FFFFFF;
+    -fx-background-color:  #FFFFFF;
+    -fx-text-fill:  #1E90FF;
     -fx-font-family: Ubuntu Light;
+    -fx-effect: dropshadow(one-pass-box, #000000, 10, 0, 0, 0);
+}
+
+.button:disabled{
+   -fx-effect: dropshadow(one-pass-box, #000000, 0, 0, 0, 0);
+   -fx-background-color: #FFFFFF;
 }
 
 .label{
-    -fx-text-fill:  #FFFFFF;
+    -fx-text-fill:  #1E90FF;
     -fx-font-family: Ubuntu Light;
 }
 
 .button:hover,.toggle-button:hover{
-    -fx-background-color: #9E9E9E;
+    -fx-background-color: #FFFFFF;
     -fx-font-family: Ubuntu Light;
+    -fx-cursor: hand;
 }
-.text-field,.combo-box{
-    -fx-background-color:  #616161;
-    -fx-text-fill:  #212121;
+.text-field,.combo-box, .text-field:focused{
+    -fx-opacity: 0.7;
+    -fx-text-fill:  #1E90FF;
     -fx-font-family: Ubuntu Light;
+    -fx-display-caret : true;
+    -fx-border-color:  #1E90FF;
+    -fx-border-top-style: none;
+    -fx-border-width: 2px;
+    
 }
 .text-field:hover,.combo-box:hover,.text-field:focused,.combo-box:focused{
-    -fx-text-fill:  #212121;
+    -fx-text-fill:  #1E90FF;
     -fx-font-family: Ubuntu Light;
 }
 .list-cell,.text-area{
-    -fx-background-color:  #222222;
-    -fx-text-fill:  #9E9E9E;
+    -fx-background-color:  #FFFFFF;
+    -fx-text-fill:  #1E90FF;
     -fx-font-family: Ubuntu Light;
 }
 .list-view,.border-pane,.dialog-pane{
-    -fx-border-color: #222222;
-    -fx-background-color: #222222;
+    -fx-border-color: #FFFFFF;
+    -fx-background-color: #FFFFFF;
 }
 .scroll-bar, .stack-pane{
-    -fx-background-color: #222222;
+    -fx-background-color: #FFFFFF;
 }
 #GM_LABEL:hover{
-    -fx-effect: dropshadow(three-pass-box, #536DFE, 10, 0, 0, 0);
+    -fx-effect: dropshadow(three-pass-box,  #1E90FF, 10, 0, 0, 0);
+}
+
+#TIME_STARTED_LABEL,#TIME_STOPPED_LABEL, #TIME_PASSAGE_LABEL{
+    -fx-text-fill: #FFFFFF;
 }
 
 .menu-item{
     -fx-cursor:hand;
-    -fx-background-color: #222222;
+    -fx-background-color: #FFFFFF;
     
 }
 
 .grid-pane{
-    -fx-background-color: #222222;
+    -fx-background-color: #FFFFFF;
 }
 
 
 .context-menu{
-    -fx-background-color: #222222;
-    -fx-border-color: #616161;
+    -fx-background-color: #FFFFFF;
+    -fx-border-color: #1E90FF;
     -fx-border-width: 2px;
+}
+
+#TITLE_LBL{
+    -fx-text-fill: #FFFFFF;
 }

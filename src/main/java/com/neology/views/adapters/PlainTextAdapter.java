@@ -16,8 +16,6 @@
  */
 package com.neology.views.adapters;
 
-import com.neology.views.ContentAdapter;
-
 /**
  *
  * @author obsidiam

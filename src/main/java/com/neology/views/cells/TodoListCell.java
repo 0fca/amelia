@@ -14,10 +14,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.neology.views;
+package com.neology.views.cells;
 
 import com.neology.views.adapters.TodoAdapter;
 import com.neology.lastdays.TodoTicket;
+import com.neology.views.Constants;
 import javafx.beans.binding.Bindings;
 import javafx.geometry.Insets;
 import javafx.scene.control.ListCell;
