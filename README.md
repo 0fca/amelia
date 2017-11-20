@@ -91,3 +91,4 @@ Amelia working on the loopback on Mint 18.1
 ![settings](http://i.imgur.com/ZCJGvvv.png)
 
 Amelia's server settings window. (In progress)
+
