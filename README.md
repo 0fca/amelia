@@ -3,8 +3,9 @@ Amelia is a simple monitoring system.
 
 # Structure
 Amelia has classical server-client scheme. It uses java.net API to transfer data via TCP.
-Amelia system is built from 2 parts: Amelia Server GUI app and <a href="https://github.com/Obsidiam/ameliaclient">Amelia Client CLI app</a>.
-Server app uses multithreading, however there are only 4 threads(os services) that are taking care of view updates, transmission etc. This design is new, the design looked like: one connection = one thread. It caused the memory&CPU usage to be high.
+Amelia system is built from 2 parts: Alice app and <a href="https://github.com/Obsidiam/ameliaclient">Amelia Client CLI app</a>.
+Server app uses multithreading, however there are only 5 threads(os services) that are taking care of view updates, transmission etc. This design is new, the design looked like: one connection = one thread. It caused the memory&CPU usage to be high.
+User system was built using RetroFit and ReactiveX for Java. Classical MVC architeconic pattern was implemented. 
 
 App transfers images in JFIF format, resolution is 250x150. App loads all data(image and metadata) to an array which
 length is 8192.
@@ -27,7 +28,7 @@ XML_PATH - the absolute path to other .xml files.
 
 Actually server is unable to send settings to clients due to its settings panel is in development at the moment.
 
-## Amelia Client
+## Alice
 
 Client app is able to load settings from plain text file called: settings. It must be located in working directory of client app.
 The file is supposed to load IP address and port number. 
