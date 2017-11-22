@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.neology.controllers;
+package com.neology.net;
 
 import com.neology.Hasher;
 import com.neology.RestClient;
@@ -27,20 +27,20 @@ import java.io.IOException;
  *
  * @author obsidiam
  */
-public class LoginController {
+public class LoginExecutor {
     private static Session s;
     private RestClient rest;
     private GoogleService gs;
     
-    LoginController(RestClient rest){
+    public LoginExecutor(RestClient rest){
         this.rest = rest;
     }
     
-    LoginController(GoogleService gs){
+    public LoginExecutor(GoogleService gs){
         this.gs = gs;
     }
     
-    boolean loginWithLD(String login, String pass) throws ClassNotFoundException, IOException {
+    public boolean loginWithLD(String login, String pass) throws ClassNotFoundException, IOException {
         if(login != null && pass != null){
             if((login).equals("root") && Hasher.sha(pass).equals(">:��ܰb-���ᦦ�sض5�Z��kxK")){
                 return true;
@@ -58,15 +58,15 @@ public class LoginController {
         return false;
     }
     
-    void loginWithGoogleAccount() {
+    public void loginWithGoogleAccount() {
         gs.start();
     }
     
-    Session getSession(){
+    public Session getSession(){
         return s;
     }
     
-    static boolean validLoginDataFormat(String password, String email, String login) {
+    public static boolean validLoginDataFormat(String password, String email, String login) {
         return password.matches("[a-zA-Z_0-9]{3,30}+") && (password.length() >= 3 && password.length() <= 30) && login.length() >= 3 && login.length() <= 30 && email.contains("@");
     }
 }

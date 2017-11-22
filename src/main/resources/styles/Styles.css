@@ -3,7 +3,8 @@
     -fx-background-color:  #FFFFFF;
     -fx-text-fill:  #1E90FF;
     -fx-font-family: Ubuntu Light;
-    -fx-effect: dropshadow(one-pass-box, #000000, 10, 0, 0, 0);
+    -fx-effect: dropshadow(one-pass-box, #808080, 2, 0, 2, 2);
+    
 }
 
 .button:disabled{
@@ -49,10 +50,6 @@
 }
 #GM_LABEL:hover{
     -fx-effect: dropshadow(three-pass-box,  #1E90FF, 10, 0, 0, 0);
-}
-
-#TIME_STARTED_LABEL,#TIME_STOPPED_LABEL, #TIME_PASSAGE_LABEL{
-    -fx-text-fill: #FFFFFF;
 }
 
 .menu-item{

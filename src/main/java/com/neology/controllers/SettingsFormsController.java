@@ -5,7 +5,6 @@
  */
 package com.neology.controllers;
 
-import com.neology.controllers.alert.AlertController;
 import com.neology.environment.LocalEnvironment;
 import com.neology.environment.Local;
 import java.io.File;

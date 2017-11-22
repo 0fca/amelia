@@ -14,8 +14,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.neology.controllers.alert;
+package com.neology.controllers;
 
+import com.neology.controllers.alert.AlertMethod;
+import com.neology.controllers.alert.Viewable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;

@@ -20,9 +20,9 @@
 
 <AnchorPane id="AnchorPane" fx:id="MAIN_PANE" minHeight="-Infinity" minWidth="-Infinity" style="-fx-background-color: #1E90FF;" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.neology.controllers.MainViewController">
     <children>
-      <FlowPane alignment="CENTER_LEFT" columnHalignment="RIGHT" hgap="25.0" prefHeight="71.0" prefWidth="996.0" rowValignment="BOTTOM" style="-fx-background-color: #1E90FF;" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+      <FlowPane alignment="CENTER_LEFT" columnHalignment="RIGHT" hgap="25.0" prefHeight="121.0" prefWidth="996.0" prefWrapLength="1700.0" rowValignment="BOTTOM" style="-fx-background-color: #1E90FF;" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
          <children>
-            <Label fx:id="MENU_LABEL" contentDisplay="GRAPHIC_ONLY" prefHeight="32.0" prefWidth="32.0" text="Label">
+            <Label fx:id="MENU_LABEL" contentDisplay="GRAPHIC_ONLY" prefHeight="46.0" prefWidth="32.0" text="Label">
                <cursor>
                   <Cursor fx:constant="HAND" />
                </cursor>
@@ -30,11 +30,26 @@
                   <Insets left="25.0" />
                </FlowPane.margin>
             </Label>
-            <Label fx:id="TITLE_LBL" accessibleRole="HYPERLINK" text="Amelia Server" textFill="WHITE">
+            <Label fx:id="TITLE_LBL" accessibleRole="HYPERLINK" alignment="TOP_CENTER" prefHeight="36.0" prefWidth="169.0" text="Amelia Server" textFill="WHITE">
                <font>
                   <Font size="24.0" />
                </font>
             </Label>
+            <HBox fx:id="topPanel" alignment="CENTER_LEFT" prefHeight="48.0" prefWidth="996.0" spacing="15.0" style="-fx-background-color: #1E90FF;">
+               <children>
+                  <Button fx:id="CONNECT" disable="true" mnemonicParsing="false" prefHeight="38.0" prefWidth="97.0" text="Connect" />
+                  <Button fx:id="DISCONNECT" disable="true" mnemonicParsing="false" prefHeight="38.0" prefWidth="97.0" text="Disconnect" />
+                  <Label fx:id="TIME_STARTED_LABEL" alignment="CENTER" prefHeight="17.0" prefWidth="165.0" style="-fx-text-fill: #FFFFFF;" />
+                  <Label fx:id="TIME_STOPPED_LABEL" alignment="CENTER" prefHeight="17.0" prefWidth="165.0" style="-fx-text-fill: #FFFFFF;" />
+                  <Label fx:id="TIME_PASSAGE_LABEL" alignment="CENTER" prefWidth="165.0" style="-fx-text-fill: #FFFFFF;" />
+               </children>
+               <opaqueInsets>
+                  <Insets />
+               </opaqueInsets>
+               <padding>
+                  <Insets left="20.0" />
+               </padding>
+            </HBox>
          </children>
       </FlowPane>
       <BorderPane layoutY="119.0" prefHeight="543.0" prefWidth="996.0" AnchorPane.bottomAnchor="-3.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="119.0">
@@ -91,20 +106,5 @@
             </ButtonBar>
          </children>
       </VBox>
-      <HBox fx:id="topPanel" alignment="CENTER_LEFT" layoutY="72.0" prefHeight="43.0" prefWidth="996.0" spacing="15.0" style="-fx-background-color: #1E90FF;" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="72.0">
-         <children>
-            <Button fx:id="CONNECT" disable="true" mnemonicParsing="false" prefHeight="38.0" prefWidth="97.0" text="Connect" />
-            <Button fx:id="DISCONNECT" disable="true" mnemonicParsing="false" prefHeight="38.0" prefWidth="97.0" text="Disconnect" />
-            <Label fx:id="TIME_STARTED_LABEL" alignment="CENTER" prefHeight="17.0" prefWidth="165.0" style="-fx-text-fill: #9E9E9E;" />
-            <Label fx:id="TIME_STOPPED_LABEL" alignment="CENTER" prefHeight="17.0" prefWidth="165.0" style="-fx-text-fill: #9E9E9E;" />
-            <Label fx:id="TIME_PASSAGE_LABEL" alignment="CENTER" prefWidth="165.0" style="-fx-text-fill: #9E9E9E;" />
-         </children>
-         <opaqueInsets>
-            <Insets />
-         </opaqueInsets>
-         <padding>
-            <Insets left="20.0" />
-         </padding>
-      </HBox>
     </children>
 </AnchorPane>

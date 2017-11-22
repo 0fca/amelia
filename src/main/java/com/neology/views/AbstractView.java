@@ -16,16 +16,15 @@
  */
 package com.neology.views;
 
+import javafx.scene.layout.Pane;
+
 /**
  *
  * @author obsidiam
  */
-public final class Constants {
-    public static final int PLAIN_TEXT_CELL_HEIGHT = 2;
-    public static final int TODO_TICKET_CELL_HEIGHT = 5;
-    public static final String LOGIN = "/fxml/LoginView.fxml";
-    public static final String REGISTER = "/fxml/RegisterView.fxml";
-    public static final String ABOUT_FORM = "/fxml/AboutForm.fxml";
-    public static final String USER_IMG = "/images/user.png";
-    public static final String DRAWER = "/fxml/Drawer.fxml";
+public abstract class AbstractView<T> extends Pane{
+    public abstract T getController();
+    public abstract String getLayout();
+    public abstract ViewFactory getFactory();
+    protected abstract void loadView();
 }

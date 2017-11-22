@@ -14,43 +14,31 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.neology.views.drawer;
+package com.neology.views;
 
-import com.neology.controllers.DrawerController;
-import com.neology.views.AbstractView;
-import com.neology.views.ViewFactory;
+import com.neology.controllers.LoginViewController;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.Pane;
 
 /**
  *
  * @author obsidiam
  */
-public class Drawer extends AbstractView{
-    private Parent contentPane;
-    private FXMLLoader fxml = new FXMLLoader();
+public class LoginView extends AbstractView {
+    private Parent parent;
+    private FXMLLoader loader = new FXMLLoader();
 
-    public Drawer(String layout){
-        fxml.setLocation(this.getClass().getResource(layout));
+    public LoginView(String layout){
+        loader.setLocation(this.getClass().getResource(layout));
     }
     
-    public Pane getDrawerContent(){
-        return (Pane)this.contentPane;
-    }
-    
-    @Override
-    public DrawerController getController(){
-        return fxml.getController();
-    }
-
     @Override
     public String getLayout() {
-        return fxml.getLocation().toString();
+        return loader.getLocation().toString();
     }
 
     @Override
@@ -61,15 +49,19 @@ public class Drawer extends AbstractView{
     @Override
     public void loadView() {
         try {
-            this.contentPane = fxml.load();
-            this.setPrefWidth(((Pane)((Pane)(contentPane)).getChildren().get(0)).getPrefWidth());
-            AnchorPane.setTopAnchor(contentPane, 0d);
-            AnchorPane.setBottomAnchor(contentPane, 0d);
-            AnchorPane.setRightAnchor(contentPane, 0d);
-            this.getChildren().add(contentPane);
+            parent = loader.load();
+            this.getChildren().add(parent);
+            this.setStyle("-fx-background-color: #FFFFFF");
+            AnchorPane.setTopAnchor(this, 0d);
+            AnchorPane.setBottomAnchor(this, 0d);
+            this.setPrefSize(((AnchorPane)parent).getPrefWidth(), ((AnchorPane)parent).getPrefHeight());
         } catch (IOException ex) {
-            Logger.getLogger(Drawer.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(RegisterView.class.getName()).log(Level.SEVERE, null, ex);
         }
-       
+    }
+    
+    @Override
+    public LoginViewController getController(){
+        return loader.getController();
     }
 }

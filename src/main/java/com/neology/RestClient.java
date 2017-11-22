@@ -23,7 +23,6 @@ import com.neology.lastdays.TodoResult;
 import com.neology.lastdays.TodoTicket;
 import io.reactivex.Observable;
 import io.reactivex.Single;
-import java.io.IOException;
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;

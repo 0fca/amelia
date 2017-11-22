@@ -16,16 +16,32 @@
  */
 package com.neology.views;
 
+import com.neology.views.drawer.Drawer;
+
 /**
  *
  * @author obsidiam
  */
-public final class Constants {
-    public static final int PLAIN_TEXT_CELL_HEIGHT = 2;
-    public static final int TODO_TICKET_CELL_HEIGHT = 5;
-    public static final String LOGIN = "/fxml/LoginView.fxml";
-    public static final String REGISTER = "/fxml/RegisterView.fxml";
-    public static final String ABOUT_FORM = "/fxml/AboutForm.fxml";
-    public static final String USER_IMG = "/images/user.png";
-    public static final String DRAWER = "/fxml/Drawer.fxml";
+public class ViewFactory {
+    private static volatile ViewFactory viewFactory = new ViewFactory();
+    
+    private ViewFactory(){}
+    
+    public static synchronized ViewFactory getInstance(){
+        return viewFactory;
+    }
+    
+    @SuppressWarnings("unsafe")
+    public AbstractView getConcreteView(String type){
+        switch(type){
+            case Constants.LOGIN:
+                return new LoginView(type);
+            case Constants.REGISTER:
+                return new RegisterView(type);
+            case Constants.DRAWER:
+                return new Drawer(type);
+            default:
+                return null;
+        }
+    }
 }

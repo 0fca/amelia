@@ -31,7 +31,7 @@ public class AboutFormController extends Dialog implements Initializable{
 
     private Parent root = null; 
     @FXML
-    private Hyperlink AMELIA_WEBSITE_LINK,GH_LINK;
+    private Hyperlink AMELIA_WEBSITE_LINK,GH_LINK, lorowLink,reksetoLink, bartozzzLink;
     
     public AboutFormController(){}
     
@@ -41,16 +41,17 @@ public class AboutFormController extends Dialog implements Initializable{
     }
     
     public void showAbout(){
-        root.getStylesheets().add("/styles/Styles.css");
+        //root.getStylesheets().add("/styles/Styles.css");
         DialogPane p = new DialogPane();
         p.getStylesheets().add("/styles/Styles.css");
         p.setContent(root);
         this.setDialogPane(p);
         this.setTitle("About");
         this.setResizable(false);
+        
         p.getButtonTypes().add(ButtonType.OK);
         this.initModality(Modality.APPLICATION_MODAL);
-        this.initStyle(StageStyle.UTILITY);
+        this.initStyle(StageStyle.UNIFIED);
         this.show(); 
     }
     
@@ -58,28 +59,36 @@ public class AboutFormController extends Dialog implements Initializable{
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         GH_LINK.setOnAction(event ->{
-            try {
-                if(System.getProperty("os.name").equals("Linux")){
-                    Runtime.getRuntime().exec("xdg-open http://www.github.com/Obsidiam");
-                }else{
-                    Desktop.getDesktop().browse(URI.create("http://www.github.com/Obsidiam"));
-                }
-            } catch (IOException ex) {
-                Logger.getLogger(AboutFormController.class.getName()).log(Level.SEVERE, null, ex);
-            }
+            search("http://www.github.com/Obsidiam");
         });
         
         
         AMELIA_WEBSITE_LINK.setOnAction(event ->{
-            try {
+            search("http://obsidiam.github.io/amelia");
+        });
+        
+        lorowLink.setOnAction(event ->{
+            search("https://github.com/lorow");
+        });
+        
+        reksetoLink.setOnAction(event ->{
+            search("https://github.com/Rekseto");
+        });
+        
+        bartozzzLink.setOnAction(event ->{
+            search("https://github.com/bartozzz");
+        });
+    }
+    
+    void search(String url){
+        try {
                 if(System.getProperty("os.name").equals("Linux")){
-                    Runtime.getRuntime().exec("xdg-open http://obsidiam.github.io/amelia");
+                    Runtime.getRuntime().exec("xdg-open "+url);
                 }else{
-                    Desktop.getDesktop().browse(URI.create("http://obsidiam.github.io/amelia"));
+                    Desktop.getDesktop().browse(URI.create(url));
                 }
             } catch (IOException ex) {
                 Logger.getLogger(AboutFormController.class.getName()).log(Level.SEVERE, null, ex);
             }
-        });
     }
 }

@@ -16,6 +16,7 @@
  */
 package com.neology.views.drawer;
 
+
 /**
  *
  * @author obsidiam
@@ -23,6 +24,7 @@ package com.neology.views.drawer;
 public class Status {
     private boolean showIndicator = false;
     private boolean unlockAnyButtons = false;
+    private boolean bp = false;
     
     private String[] buttonNames;
     
@@ -48,5 +50,13 @@ public class Status {
     
     public String[] getButtonNames(){
         return buttonNames;
+    }
+    
+    public void setShouldDisconnect(boolean b){
+        bp = b;
+    }
+    
+    public boolean getShouldDisconnect(){
+        return bp;
     }
 }

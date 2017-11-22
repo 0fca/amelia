@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.Cursor?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+
+<AnchorPane fx:id="LoginPane" focusTraversable="true" prefWidth="245.0" style="-fx-background-color: #FFFFFF;" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.neology.controllers.LoginViewController">
+   <children>
+      <VBox fx:id="LoginBox" alignment="CENTER" prefHeight="503.0" prefWidth="235.0" spacing="13.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+         <children>
+            <Label fx:id="LOGIN_TYPE_LABEL" alignment="CENTER" prefHeight="16.0" prefWidth="251.0" text="Choose how to log in" />
+            <HBox alignment="CENTER" spacing="25.0">
+               <VBox.margin>
+                  <Insets />
+               </VBox.margin>
+               <children>
+                  <Label fx:id="GM_LABEL" contentDisplay="GRAPHIC_ONLY" prefHeight="32.0" prefWidth="32.0" text="GM" textFill="WHITE">
+                     <cursor>
+                        <Cursor fx:constant="HAND" />
+                     </cursor>
+                  </Label>
+                  <Label fx:id="LD_LABEL" prefHeight="32.0" prefWidth="32.0" text="LD" textFill="WHITE">
+                     <cursor>
+                        <Cursor fx:constant="HAND" />
+                     </cursor>
+                  </Label>
+               </children>
+            </HBox>
+            <TextField fx:id="LOGIN" disable="true" prefHeight="37.0" prefWidth="170.0" promptText="Login" />
+            <PasswordField fx:id="PASS" disable="true" prefHeight="37.0" prefWidth="170.0" promptText="Pass" />
+            <Button fx:id="LOGIN_BUTTON" disable="true" mnemonicParsing="false" prefHeight="37.0" prefWidth="199.0" text="Log in" />
+            <Button fx:id="SETTINGS" disable="true" mnemonicParsing="false" prefHeight="37.0" prefWidth="203.0" text="Settings" />
+         </children>
+         <padding>
+            <Insets left="25.0" right="25.0" top="-5.0" />
+         </padding>
+      </VBox>
+   </children>
+</AnchorPane>

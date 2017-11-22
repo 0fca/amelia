@@ -1,7 +1,7 @@
 package com.neology.controllers;
 
+import com.neology.net.LoginExecutor;
 import com.neology.RestClient;
-import com.neology.controllers.alert.AlertController;
 import com.neology.controllers.alert.AlertMethod;
 import com.neology.views.adapters.ContentAdapter;
 import com.neology.views.cells.DefaultInfoViewListCell;
@@ -20,8 +20,11 @@ import com.neology.lastdays.TodoTicket;
 import com.neology.log.Log;
 import com.neology.net.Mode;
 import com.neology.net.UDPConnector;
+import com.neology.views.Constants;
+import com.neology.views.LoginView;
+import com.neology.views.RegisterView;
+import com.neology.views.ViewFactory;
 import com.neology.views.drawer.Drawer;
-import com.neology.views.drawer.DrawerFactory;
 import com.neology.views.drawer.Status;
 import io.reactivex.schedulers.Schedulers;
 import javafx.scene.image.Image;
@@ -73,7 +76,6 @@ import javafx.util.Duration;
 import javax.xml.parsers.ParserConfigurationException;
 import org.xml.sax.SAXException;
 import io.reactivex.disposables.CompositeDisposable;
-import java.lang.reflect.Field;
 import java.util.Observable;
 import java.util.Observer;
 import javafx.scene.control.ProgressIndicator;
@@ -123,10 +125,10 @@ public class MainViewController implements Initializable{
     private AlertController ac = new AlertController();
     private static Session s;
     private RestClient rest = new RestClient();
-    private LoginController lc;
-    private DrawerController dc;
+    private LoginExecutor lc;
     private int mode = Mode.LOCAL;
     private static Status st;
+    private LoginView lv;
     
     {
         System.out.println("Does working dir exist: "+ConfigController.checkFolders());
@@ -153,7 +155,7 @@ public class MainViewController implements Initializable{
         });
         
         DISCONNECT.setOnAction(event ->{
-            transitToDisconnectedMode();
+            transitToDisconnectedMode(true,false);
         });
         
        
@@ -201,7 +203,6 @@ public class MainViewController implements Initializable{
             }
         });
 
-        
 
         ADD_ITEM.setOnAction( listener ->{
             animateActionPanelMove();
@@ -231,21 +232,35 @@ public class MainViewController implements Initializable{
             }
         });
         
-        Drawer d = DrawerController.getDrawerInstance();
-        dc = DrawerFactory.getInstance().getDrawerController();
+        Drawer d = DrawerController.getViewInstance();
         MAIN_PANE.getChildren().add(d);
         d.setStyle("-fx-background-color: #FFFFFF");
         AnchorPane.setBottomAnchor(d, 0d);
         AnchorPane.setTopAnchor(d, 0d);
         d.setLayoutX(-d.getPrefWidth());
+
+        RegisterView rv = RegisterViewController.getViewInstance();
+        AnchorPane.setBottomAnchor(rv, 0d);
+        AnchorPane.setTopAnchor(rv, 0d);
+        rv.setLayoutX(-rv.getPrefWidth());
+        MAIN_PANE.getChildren().add(rv);
         
-        d.setOnMouseClicked(event ->{
-            DrawerController.animateDrawerMove();
+        rv.setOnKeyPressed(event ->{
+            if(event.getCode() == KeyCode.ESCAPE){
+                RegisterViewController.animateViewMove();
+            }
         });
         
-        d.setOnKeyPressed(event ->{
+        lv = LoginViewController.getViewInstance();
+       
+        AnchorPane.setBottomAnchor(lv, 0d);
+        AnchorPane.setTopAnchor(lv, 0d);
+        lv.setLayoutX(-lv.getPrefWidth());
+        MAIN_PANE.getChildren().add(lv);
+        
+        lv.setOnKeyPressed(event ->{
             if(event.getCode() == KeyCode.ESCAPE){
-                DrawerController.animateDrawerMove();
+                LoginViewController.animateViewMove();
             }
         });
         
@@ -257,7 +272,6 @@ public class MainViewController implements Initializable{
                 mode = Mode.LOCAL;
                 SWITCH_MODE.setText("Remote");
             }
-            
         });
         
         MENU_LABEL.setGraphic(new ImageView(this.getClass().getResource("/images/menu.png").toString()));
@@ -310,25 +324,26 @@ public class MainViewController implements Initializable{
         DISCONNECT.setDisable(false);
     }
     
-    private void transitToDisconnectedMode() {
-        if(c.isRunning()){
-            IDH.getImagesMap().clear();
-
-            c.cancel();
-            tcp.interrupt();
-            mgr.interruptThread();
-            CDH.getData().clear();
-            TIME_STOPPED_LABEL.setText("Time stopped: "+new SimpleDateFormat("HH:mm:ss").format(new Date()));
-            
-        }
+    private void transitToDisconnectedMode(boolean con, boolean discon) {
         Platform.runLater(() ->{
+            if(c.isRunning()){
+                IDH.getImagesMap().clear();
+
+                c.cancel();
+                tcp.interrupt();
+                mgr.interruptThread();
+                CDH.getData().clear();
+                TIME_STOPPED_LABEL.setText("Time stopped: "+new SimpleDateFormat("HH:mm:ss").format(new Date()));
+
+            }
             VIEWER_PANEL.getItems().clear(); 
+
+
+            DISCONNECT.setDisable(con);
+            CONNECT.setDisable(discon);
+            SELECTED = -1;
+            System.gc();
         });
-        
-        DISCONNECT.setDisable(true);
-        CONNECT.setDisable(false);
-        SELECTED = -1;
-        System.gc();
     }
     
     private void setInfoViewData(String line) {
@@ -382,11 +397,6 @@ public class MainViewController implements Initializable{
         progressIndicator.setVisible(false);
     }
     
-    void changeFrontButtonsState(){
-        DISCONNECT.setDisable(!DISCONNECT.isDisabled());
-        CONNECT.setDisable(!CONNECT.isDisabled());
-    }
-    
     private class CallbackImpl implements Callback<ListView<String>, ListCell<String>> {
         @Override
         public ListCell<String> call(ListView<String> list) {
@@ -400,7 +410,6 @@ public class MainViewController implements Initializable{
         ViewCallbackImpl(ContentAdapter c){
             this.c = c;
         }
-        
         
         @Override
         public ListCell<String> call(ListView<String> list) {
@@ -526,7 +535,6 @@ public class MainViewController implements Initializable{
         @Override
         public void update(Observable o, Object arg) {
             st = (Status)arg;
-            Log.log("MainOb", String.valueOf(st.unlockAnyButtons()));
         }
    }
    
@@ -564,6 +572,12 @@ public class MainViewController implements Initializable{
                        }
                        st.setButtonNames(null);
                    }
+                   
+                   if(st.getShouldDisconnect()){
+                        IS_LOGGED_IN = false;
+                        transitToDisconnectedMode(!IS_LOGGED_IN,!IS_LOGGED_IN);
+                        st.setShouldDisconnect(false);
+                    }
                }
                try {
                    Thread.sleep(500);
@@ -572,5 +586,5 @@ public class MainViewController implements Initializable{
                }
            }
        }
-   }
+    }
 }
