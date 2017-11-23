@@ -3,7 +3,7 @@ Amelia is a simple monitoring system.
 
 # Structure
 Amelia has classical server-client scheme. It uses java.net API to transfer data via TCP.
-Amelia system is built from 2 parts: Alice app and <a href="https://github.com/Obsidiam/ameliaclient">Amelia Client CLI app</a>.
+Amelia system is built from 2 parts: Amelia Server app and <a href="https://github.com/Obsidiam/ameliaclient">Alice Client CLI app</a>.
 Server app uses multithreading, however there are only 5 threads(os services) that are taking care of view updates, transmission etc. This design is new, the design looked like: one connection = one thread. It caused the memory&CPU usage to be high.
 User system was built using RetroFit and ReactiveX for Java. Classical MVC architeconic pattern was implemented. 
 
@@ -81,13 +81,13 @@ I want to add following features:
 * remote desktop(using UDP).
 
 # Quick glance
-![W10&WinXP connection](https://i.imgur.com/Hn54nZH.png)
+[!Anelia working on Mint 18.1](https://i.imgur.com/t6zYIBT.png)
 
-Amelia Server's drawer menu.
+Amelia Server's main view.
 
-![suse to XP connection](https://i.imgur.com/w6qxYdg.png)
+![RAM usage serving 4 clients](https://i.imgur.com/k8GYjbs.png)
 
-Amelia working on the loopback on Mint 18.1
+Amelia working on the loopback on Mint 18.1 with 4 clients connected.
 
 ![settings](http://i.imgur.com/ZCJGvvv.png)
 
