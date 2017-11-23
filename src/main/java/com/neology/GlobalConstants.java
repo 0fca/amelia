@@ -16,24 +16,12 @@
  */
 package com.neology;
 
-import com.neology.controllers.MainViewController;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 /**
  *
  * @author obsidiam
  */
-final public class Hasher {
-    public static String sha(String msg){
-        MessageDigest md = null;
-        try {
-            md = MessageDigest.getInstance("SHA-256");
-        } catch (NoSuchAlgorithmException ex) {
-            Logger.getLogger(MainViewController.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        return new String(md.digest(msg.getBytes()));
-    }
+public final class GlobalConstants {
+    public static final String CSS = "/styles/Styles.css";
+    public static final String MAIN_VIEW = "/fxml/Scene.fxml";
+    public static final String TITLE = "Amelia Server";
 }

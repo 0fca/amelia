@@ -36,6 +36,7 @@ public class TCPThread extends Thread implements Runnable{
     private BaudrateMeter mtr;
     private final ImageDataHandler idh = ImageDataHandler.getInstance();
     private String ext = "JPG";
+    private boolean wasInterrupted = false;
     
     @Override
     public void start(){
@@ -47,7 +48,7 @@ public class TCPThread extends Thread implements Runnable{
     
     @Override
     public void run(){
-        while(th != null){
+        while(th != null && !wasInterrupted){
             List<Connection> connections = cdh.getConnectionList();
             synchronized(connections){
                 if(connections.size() > 0){
@@ -119,6 +120,7 @@ public class TCPThread extends Thread implements Runnable{
                         Log.log("TCPThread#run()","releasing cdh monitor.");
                         connections.notifyAll();
                     }else{
+                        interrupt();
                         break;
                     }
                 }
@@ -133,6 +135,8 @@ public class TCPThread extends Thread implements Runnable{
                 th.interrupt();
                 th = null;
                 cdh.setFree(false);
+            }else{
+                wasInterrupted = true;
             }
         }
     }
@@ -155,7 +159,6 @@ public class TCPThread extends Thread implements Runnable{
             Image out = new Image("file:///"+LocalEnvironment.getLocalVar(Local.TMP)+File.separator+name+"."+ext,250,150,true,true);
             Log.log("Is error",String.valueOf(out.isError()));
             Log.log("Image loader state", String.valueOf(out.getProgress()));
-            Log.signAsLast();
             mtr.count(buffer.length);
             
             return out;

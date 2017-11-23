@@ -30,12 +30,15 @@ import java.util.logging.Logger;
 public final class Log {
     private Log(){}
     
-    private static void cleanSystemStdout() throws IOException{
+    private static void cleanSystemStdout() throws IOException, InterruptedException{
         if(LocalEnvironment.getLocalVar(Local.OS).contains("Windows")){
-            Runtime.getRuntime().exec("cls");
+            //Runtime.getRuntime().exec(new String[]{"cmd","/c","cls"});
+            new ProcessBuilder("cmd", "/c", "cls").inheritIO().start().waitFor();
         }else{
-            Runtime.getRuntime().exec("clear");
+            //Runtime.getRuntime().exec(new String[]{"bash","-c","clear"});
+            new ProcessBuilder("bash", "-c", "clear").inheritIO().start().waitFor();
         }
+        System.out.println();
     }
     
     public static void log(String tag, String msg){
@@ -50,10 +53,11 @@ public final class Log {
         System.out.printf(format, tag);
     }
     
+    @SuppressWarnings("unused")
     public static void signAsLast(){
         try {
             cleanSystemStdout();
-        } catch (IOException ex) {
+        } catch (IOException | InterruptedException ex) {
             Logger.getLogger(Log.class.getName()).log(Level.SEVERE, null, ex);
         }
     }

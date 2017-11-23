@@ -17,7 +17,7 @@
 package com.neology.controllers;
 
 import com.neology.net.LoginExecutor;
-import com.neology.RestClient;
+import com.neology.net.RestClient;
 import com.neology.controllers.alert.AlertMethod;
 import com.neology.views.Constants;
 import com.neology.views.LoginView;

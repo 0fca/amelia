@@ -1,6 +1,7 @@
 package com.neology.main;
 
-import com.neology.Hasher;
+import com.neology.GlobalConstants;
+import com.neology.crypto.Hasher;
 import com.neology.environment.Local;
 import com.neology.environment.LocalEnvironment;
 import java.awt.Toolkit;
@@ -36,11 +37,11 @@ public class MainApp extends Application{
         double x = Toolkit.getDefaultToolkit().getScreenSize().width * 0.75;
         double y = Toolkit.getDefaultToolkit().getScreenSize().height * 0.75;
         
-        Parent root = FXMLLoader.load(getClass().getResource("/fxml/Scene.fxml"));
+        Parent root = FXMLLoader.load(getClass().getResource(GlobalConstants.MAIN_VIEW));
         
         Scene scene = new Scene(root,x,y);
         
-        scene.getStylesheets().add("/styles/Styles.css");
+        scene.getStylesheets().add(GlobalConstants.CSS);
         stage.setOnCloseRequest(event ->{
             File img = new File(LocalEnvironment.getLocalVar(Local.TMP));
             File[] files = img.listFiles();
@@ -56,32 +57,17 @@ public class MainApp extends Application{
                     }
                 }
             }
-
-            Thread[] tarray = new Thread[Thread.activeCount()];
-            Thread.enumerate(tarray);
-            for(Thread t : tarray){
-                if(t.getName().equals("TCPThread")){
-                    openLoginDialog(event);
-                }
-            }
+            System.exit(0);
         });
         
         stage.setMinWidth(x);
         stage.setMinHeight(y);
-        stage.setTitle("Amelia Server");
+        stage.setTitle(GlobalConstants.TITLE);
         stage.setScene(scene);
         stage.show();
         stage.centerOnScreen();
     }
 
-    /**
-     * The main() method is ignored in correctly deployed JavaFX application.
-     * main() serves only as fallback in case the application can not be
-     * launched through deployment artifacts, e.g., in IDEs with limited FX
-     * support. NetBeans ignores main().
-     *
-     * @param args the command line arguments
-     */
     public static void main(String[] args) {
         launch(args);
     }

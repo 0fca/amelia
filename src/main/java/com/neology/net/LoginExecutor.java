@@ -16,8 +16,7 @@
  */
 package com.neology.net;
 
-import com.neology.Hasher;
-import com.neology.RestClient;
+import com.neology.crypto.Hasher;
 import com.neology.data.model.LoginData;
 import com.neology.data.model.Session;
 import com.neology.google.GoogleService;

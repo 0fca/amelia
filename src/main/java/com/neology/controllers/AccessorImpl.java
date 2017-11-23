@@ -48,16 +48,17 @@ final public class AccessorImpl implements Accessible{
 
     @Override
     public boolean checkViewUpdaterAccess(Thread t) throws AccessDeniedException{
+        boolean result = false;
         try{
-         instance.checkAccess();
-         hasAccess = true;
+            instance.checkAccess();
+            hasAccess = true;
         }finally{
             if(hasAccess){
                 this.th = t;
-                return true;
+                result = true;
             }
         }
-        return false;
+        return result;
     }
 
     @Override

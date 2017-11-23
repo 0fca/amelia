@@ -1,7 +1,7 @@
 package com.neology.controllers;
 
 import com.neology.net.LoginExecutor;
-import com.neology.RestClient;
+import com.neology.net.RestClient;
 import com.neology.controllers.alert.AlertMethod;
 import com.neology.views.adapters.ContentAdapter;
 import com.neology.views.cells.DefaultInfoViewListCell;
@@ -20,10 +20,8 @@ import com.neology.lastdays.TodoTicket;
 import com.neology.log.Log;
 import com.neology.net.Mode;
 import com.neology.net.UDPConnector;
-import com.neology.views.Constants;
 import com.neology.views.LoginView;
 import com.neology.views.RegisterView;
-import com.neology.views.ViewFactory;
 import com.neology.views.drawer.Drawer;
 import com.neology.views.drawer.Status;
 import io.reactivex.schedulers.Schedulers;
@@ -338,12 +336,12 @@ public class MainViewController implements Initializable{
             }
             VIEWER_PANEL.getItems().clear(); 
 
-
             DISCONNECT.setDisable(con);
             CONNECT.setDisable(discon);
             SELECTED = -1;
-            System.gc();
+            
         });
+        System.gc();
     }
     
     private void setInfoViewData(String line) {
@@ -508,7 +506,6 @@ public class MainViewController implements Initializable{
                     }
                     try {
                         Thread.sleep(1000);
-                        System.gc();
                     } catch (InterruptedException ex) {
                         Logger.getLogger(MainViewController.class.getName()).log(Level.SEVERE, null, ex);
                     }

@@ -45,14 +45,17 @@ public class ConnectionManager extends Thread implements Runnable{
         cons.addListener(clcli);
         
         while(mgr != null){
-            if(!mgr.isInterrupted() && !wasInterrupted){
                 try {
                     synchronized(cons){
                         while(cdh.isFree()){
                             Log.log("ConnectionManager#run()","Waiting on cdh.");
                             cons.wait();
                         }
-
+                        
+                        if(wasInterrupted && !cdh.isFree()){
+                            interruptThread();
+                        }
+                        
                         if(cons.size() > 0){
                             for(int i = 0; i < cons.size(); i++){
                                 Connection con = cons.get(i);
@@ -60,7 +63,6 @@ public class ConnectionManager extends Thread implements Runnable{
                                     if( con.getState() == com.neology.net.states.State.CLOSED){
                                         con.close();
                                         cons.remove(i);
-                                        System.out.println(i);
                                     }else{
                                         if( con.getState() == com.neology.net.states.State.OPENED){
                                             Established e = new Established();
@@ -71,38 +73,29 @@ public class ConnectionManager extends Thread implements Runnable{
                                     }
                                 }
                             }
-                            
                         }
                         cdh.setFree(true);
                         cons.notifyAll();
                     }
                 } catch (InterruptedException ex) {
                     Logger.getLogger(ConnectionManager.class.getName()).log(Level.SEVERE, null, ex);
-                }
-
-                if(wasInterrupted){
-                    interruptThread();
-                    break;
-                }
-            }
+                }  
         }
-        cons.removeListener(clcli);
-        cons.clear();
-        wasInterrupted = false;
+       cons.removeListener(clcli);
+       mgr = null;
     }
     
     public void interruptThread(){
         if(mgr != null){
             if(mgr.getState() != State.WAITING){
-                mgr.interrupt();
-                mgr = null;
+                //mgr.interrupt();
+                if(cdh.getConnectionList().size() > 0){
+                    disconnectAll();
+                }
+                wasInterrupted = false;
             }else{
                 wasInterrupted = true;
             }
-        }
-        
-        if(cdh.getConnectionList().size() > 0){
-            disconnectAll();
         }
         
         cdh.setFree(true);
@@ -116,6 +109,7 @@ public class ConnectionManager extends Thread implements Runnable{
                 con.changeState(c);
             }
         });  
+        cdh.clearAllConnections();
     }
     
     public void setAccessorInstance(AccessorImpl a){
@@ -141,8 +135,8 @@ public class ConnectionManager extends Thread implements Runnable{
                     local = (Connection)c.getRemoved().get(last - 1);
                     Log.log("IP ",local.getTranportInstance().getIp());
                     idh.getImagesMap().remove(local.getTranportInstance().getIp().split(":")[0]);
-                    sendNotificationSignal();
                 }
+                sendNotificationSignal();
             }
         }
 
@@ -151,11 +145,9 @@ public class ConnectionManager extends Thread implements Runnable{
             if(mgr != null){
                 if(acc.checkViewUpdaterAccess(mgr)){
                     acc.sendNotificationSignal(SignalType.WARNING);
-                    acc.commitSignalData("Connection with "+local.getConnectionName()+" is "+local.getState().toString().toLowerCase());
+                    acc.commitSignalData("Connection with "+(local.isNameSet() ? local.getConnectionName() : local.getTranportInstance().getIp())+" is "+local.getState().toString().toLowerCase());
+                    Log.log("ConnectionManager#sendNotifSignal", "Sent notif signal");
                 }
-            }else{
-                acc.sendNotificationSignal(SignalType.WARNING);
-                acc.commitSignalData("Connection with "+local.getConnectionName()+" is "+local.getState().toString().toLowerCase());
             }
         }
     }

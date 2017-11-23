@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.neology;
+package com.neology.net;
 
 import com.neology.data.model.Frame;
 import com.neology.data.model.LoginData;
