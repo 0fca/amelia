@@ -81,7 +81,7 @@ I want to add following features:
 * remote desktop(using UDP).
 
 # Quick glance
-[!Amelia working on Mint 18.1](https://i.imgur.com/t6zYIBT.png)
+![Amelia working on Mint 18.1](https://i.imgur.com/t6zYIBT.png)
 
 Amelia Server's main view.
 
