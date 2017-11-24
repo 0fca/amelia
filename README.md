@@ -1,5 +1,5 @@
 # Amelia
-Amelia is a simple monitoring system.
+Amelia is a simple system which monitors state of desktops of all hosts in LAN.
 
 # Structure
 Amelia has classical server-client scheme. It uses java.net API to transfer data via TCP.
