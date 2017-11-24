@@ -64,7 +64,7 @@ Amelia should be compatible with all Linux OS's, but I am not sure.
 * openSUSE 42.2 Leap,
 * Mint 18.1.
 
-**Amelia Client** was tested on:
+**Alice** was tested on:
 * Windows 10,
 * Windows 7,
 * Windows XP,
@@ -81,14 +81,19 @@ I want to add following features:
 * remote desktop(using UDP).
 
 # Quick glance
+All screens were done while running in environmental conditions, used JRE version is 1.8.144.
+
 ![Amelia working on Mint 18.1](https://i.imgur.com/t6zYIBT.png)
 
 Amelia Server's main view.
 
 ![RAM usage serving 4 clients](https://i.imgur.com/k8GYjbs.png)
 
-Amelia working on the loopback on Mint 18.1 with 4 clients connected.
+Amelia working on the loopback on Mint 18.1 with 4 clients connected. Image shows its RAM usage.
 
+![1 client RAM usage](https://i.imgur.com/4Fjmj1E.png)
+
+Amelia working on Mint 18.1 x64 with client connected from localhost. RAM usage is what thr images shows.
 ![settings](http://i.imgur.com/ZCJGvvv.png)
 
 Amelia's server settings window. (In progress)
