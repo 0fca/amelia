@@ -12,7 +12,7 @@ length is 8192.
 
 **_Important_**: Integer value of first byte in data packet sent by server tells how many bytes counting from index 1 contains 
 bytes of client's machhine name.
-![Amelia Frame](https://imgur.com/c7dQK9G)
+![Amelia's Frame](https://imgur.com/c7dQK9G)
 
 ## Amelia Server
 
