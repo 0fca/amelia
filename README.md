@@ -10,9 +10,9 @@ User system was built using RetroFit and ReactiveX for Java. Classical MVC archi
 App transfers images in JFIF format, resolution is 250x150. App loads all data(image and metadata) to an array which
 length is 8192.
 
-**_Important_**: Integer value of first byte in data packet sent by server tells how many bytes counting from index 1 contains 
-bytes of client's machhine name.
-![Amelia's Frame](https://imgur.com/c7dQK9G)
+**_Important_**: Integer value of first byte in data packet sent by server tells how many bytes counting from index 1 contains bytes of client's machine name.
+
+![Amelia's Frame](https://i.imgur.com/c7dQK9G.png)
 
 ## Amelia Server
 
